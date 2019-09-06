@@ -9,6 +9,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.fs.RemoteIterator;
 import org.apache.hadoop.hbase.Cell;
+import org.apache.hadoop.hbase.CellUtil;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HTableDescriptor;
@@ -105,9 +106,18 @@ public class HbaseDemo {
             for (Result result : scanner) {
                 for (Cell cell : result.rawCells()) {
                     System.out.println("rowkey："+Bytes.toString(cell.getRowArray(),cell.getRowOffset(),cell.getRowLength()));
+                    System.out.println("rowkey："+Bytes.toString(CellUtil.cloneRow(cell)));
+//                    cell.getRow()
+                    CellUtil.cloneRow(cell);
                     System.out.println("列名："+Bytes.toString(cell.getQualifierArray(),cell.getQualifierOffset(),cell.getQualifierLength()));
+//                    cell.getQualifier();
+                    CellUtil.cloneQualifier(cell);
                     System.out.println("列值："+Bytes.toString(cell.getValueArray(),cell.getValueOffset(),cell.getValueLength()));
+//                    cell.getValue();
+                    CellUtil.cloneValue(cell);
                     System.out.println("列族："+Bytes.toString(cell.getFamilyArray(),cell.getFamilyOffset(),cell.getFamilyLength()));
+//                    cell.getFamily();
+                    CellUtil.cloneFamily(cell);
                     System.out.println("stamp："+cell.getTimestamp());
                 }
             }
