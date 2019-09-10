@@ -5,3 +5,4 @@ target
 *.iml
 .settings
 logs
+dist
