@@ -1,0 +1,144 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.xc</groupId>
+  <artifactId>KafkaService</artifactId>
+  <version>1.0.0</version>
+  <packaging>war</packaging>
+
+  <name>KafkaService</name>
+  <url>http://maven.apache.org</url>
+
+  <parent>  
+        <groupId>org.springframework.boot</groupId>  
+        <artifactId>spring-boot-starter-parent</artifactId>  
+        <version>1.4.1.RELEASE</version>  
+    </parent>  
+  
+  <properties>  
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>  
+  </properties>  
+
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+    
+    		 <dependency>  
+            <groupId>org.springframework.boot</groupId>  
+            <artifactId>spring-boot-starter-web</artifactId> 
+            <exclusions>
+				<exclusion>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-tomcat</artifactId>
+				</exclusion>
+			</exclusions> 
+        </dependency>  
+        
+    
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+		</dependency>
+		
+  <!-- 热部署  依赖 start-->  
+    <dependency>  
+            <groupId>org.springframework.boot</groupId>  
+            <artifactId>spring-boot-devtools</artifactId>  
+            <optional>true</optional>  
+           <scope>true</scope>  
+  </dependency>  
+   <!-- 热部署  依赖 end-->  
+   
+          <!-- kafka -->
+			<dependency>
+			    <groupId>org.springframework.kafka</groupId>
+			    <artifactId>spring-kafka</artifactId>
+				<version>1.2.2.RELEASE</version>
+			</dependency>
+          <!--kafka  -->
+          
+          <!-- 发邮件 start-->
+          
+	        <dependency>
+			    <groupId>org.springframework.boot</groupId>
+			    <artifactId>spring-boot-starter-mail</artifactId>
+			</dependency>
+			
+          <!--发邮件 end  -->
+    
+    
+    
+  </dependencies>
+  
+  
+  <build>
+		
+		<plugins>
+		
+		
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>default-compile</id>
+						<phase>compile</phase>
+						<goals>
+							<goal>compile</goal>
+						</goals>
+						<configuration>
+							<source>1.7</source>
+							<target>1.7</target>
+						</configuration>
+					</execution>
+					<execution>
+						<id>default-testCompile</id>
+						<phase>test-compile</phase>
+						<goals>
+							<goal>testCompile</goal>
+						</goals>
+						<configuration>
+							<source>1.7</source>
+							<target>1.7</target>
+						</configuration>
+					</execution>
+				</executions>
+				<configuration>
+					<source>1.7</source>
+					<target>1.7</target>
+				</configuration>
+			</plugin>
+			<!--<plugin>
+				<artifactId>maven-war-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>default-war</id>
+						<phase>package</phase>
+						<goals>
+							<goal>war</goal>
+						</goals>
+						<configuration>
+							<includeEmptyDirectories>true</includeEmptyDirectories>
+							<warName>kafkaServer</warName>
+							
+							<failOnMissingWebXml>false</failOnMissingWebXml>
+							<archive>
+								<manifest>
+									<mainClass>com.xc.KafkaApplication</mainClass>
+								</manifest>
+							</archive>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>-->
+		</plugins>
+	</build>
+  
+  
+  
+  
+  
+</project>
