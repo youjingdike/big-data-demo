@@ -13,6 +13,7 @@
         <module>hbasedemo</module>
         <module>hivedemo</module>
         <module>hiveexportdata</module>
+        <module>kafkademo</module>
     </modules>
 
 
