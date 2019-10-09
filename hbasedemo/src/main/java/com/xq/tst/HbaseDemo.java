@@ -17,23 +17,30 @@ import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.Admin;
 import org.apache.hadoop.hbase.client.Connection;
 import org.apache.hadoop.hbase.client.ConnectionFactory;
+import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.client.Table;
+import org.apache.hadoop.hbase.client.coprocessor.AggregationClient;
+import org.apache.hadoop.hbase.client.coprocessor.LongColumnInterpreter;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.hbase.util.RegionSplitter;
 
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class HbaseDemo {
     private static final String HEXSTRINGSPLIT = "HexStringSplit";
     private static final String UNIFORMSPLIT = "UniformSplit";
     private static Connection connection;
     private static Admin admin;
+    private static Configuration conf;
 
     static {
-        Configuration conf = HBaseConfiguration.create();
+        conf = HBaseConfiguration.create();
         conf.set("hbase.zookeeper.property.clientPort","2181");
         conf.set("hbase.zookeeper.quorum",",,,");
         System.setProperty("HADOOP_USER_NAME","xq");
@@ -47,7 +54,17 @@ public class HbaseDemo {
     }
 
     public static void main(String[] args) {
-        new HbaseDemo().excute();
+        Map<String, String> map = new ConcurrentHashMap<String, String>();
+        for (int i = 0; i < 100; i++) {
+            map.put("" + i, "test"+i);
+        }
+        for(Iterator<Map.Entry<String, String>> iterator=map.entrySet().iterator();iterator.hasNext();){
+            Map.Entry<String, String> next = iterator.next();
+            System.out.println(next.getValue());
+
+        }
+
+//        new HbaseDemo().excute();
     }
 
     private void excute() {
@@ -155,4 +172,23 @@ public class HbaseDemo {
         return  split;
     }
 
+    private Long scan1() {
+        Table hTable = null;
+        try {
+            hTable = connection.getTable(TableName.valueOf("T_REVIEW_MODULE"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        LongColumnInterpreter columnInterpreter = new LongColumnInterpreter();
+        AggregationClient aggregationClient = new AggregationClient(conf);
+
+        Scan scan = new Scan( Bytes.toBytes("2018-07-01 12:12:12"), Bytes.toBytes("2018-07-27 12:12:12"));
+        Long count = null;
+        try {
+            count = aggregationClient.rowCount(hTable, columnInterpreter, scan);
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+        }
+        return count;
+    }
 }
