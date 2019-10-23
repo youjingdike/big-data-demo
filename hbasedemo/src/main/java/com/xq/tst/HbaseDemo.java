@@ -24,11 +24,17 @@ import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.client.coprocessor.AggregationClient;
 import org.apache.hadoop.hbase.client.coprocessor.LongColumnInterpreter;
+import org.apache.hadoop.hbase.filter.CompareFilter;
+import org.apache.hadoop.hbase.filter.Filter;
+import org.apache.hadoop.hbase.filter.FilterList;
+import org.apache.hadoop.hbase.filter.SingleColumnValueFilter;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.hbase.util.RegionSplitter;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -91,6 +97,43 @@ public class HbaseDemo {
                     e.printStackTrace();
                 }
             }
+        }
+    }
+
+    /**
+     * 使用协处理器处理
+     */
+    private void getCount() {
+        try {
+            TableName tableName = TableName.valueOf("test");
+            admin.disableTable(tableName);
+            HTableDescriptor tableDescriptor = admin.getTableDescriptor(tableName);
+            //先disable表，添加协处理器后再enable表
+            admin.disableTable(tableName);
+            String coprocessorClass = "org.apache.hadoop.hbase.coprocessor.AggregateImplementation";
+            if (! tableDescriptor.hasCoprocessor(coprocessorClass)) {
+                tableDescriptor.addCoprocessor(coprocessorClass);
+            }
+            admin.modifyTable(tableName, tableDescriptor);
+            admin.enableTable(tableName);
+
+            AggregationClient aggregationClient = new AggregationClient(conf);
+
+            Scan scan = new Scan();
+            SingleColumnValueFilter singleColumnValueFilter = new SingleColumnValueFilter(Bytes.toBytes("cf"), Bytes.toBytes("cf"), CompareFilter.CompareOp.GREATER_OR_EQUAL, Bytes.toBytes("value"));
+            SingleColumnValueFilter singleColumnValueFilter1 = new SingleColumnValueFilter(Bytes.toBytes("cf"), Bytes.toBytes("cf"), CompareFilter.CompareOp.LESS_OR_EQUAL, Bytes.toBytes("value"));
+
+            List<Filter> filters = new ArrayList<>();
+            filters.add(singleColumnValueFilter);
+            filters.add(singleColumnValueFilter1);
+            FilterList filterList = new FilterList(filters);
+            scan.setFilter(filterList);
+
+            System.out.println("RowCount: " + aggregationClient.rowCount(tableName, new LongColumnInterpreter(), scan));
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
         }
     }
 
