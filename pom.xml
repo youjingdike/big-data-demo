@@ -15,6 +15,7 @@
         <module>hiveexportdata</module>
         <module>kafkademo</module>
         <module>KafkaService</module>
+        <module>nio-netty</module>
     </modules>
 
 

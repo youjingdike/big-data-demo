@@ -8,7 +8,6 @@
   <packaging>war</packaging>
 
   <name>KafkaService</name>
-  <url>http://maven.apache.org</url>
 
   <parent>  
         <groupId>org.springframework.boot</groupId>  
@@ -90,8 +89,8 @@
 							<goal>compile</goal>
 						</goals>
 						<configuration>
-							<source>1.7</source>
-							<target>1.7</target>
+							<source>1.8</source>
+							<target>1.8</target>
 						</configuration>
 					</execution>
 					<execution>
@@ -101,14 +100,14 @@
 							<goal>testCompile</goal>
 						</goals>
 						<configuration>
-							<source>1.7</source>
-							<target>1.7</target>
+							<source>1.8</source>
+							<target>1.8</target>
 						</configuration>
 					</execution>
 				</executions>
 				<configuration>
-					<source>1.7</source>
-					<target>1.7</target>
+					<source>1.8</source>
+					<target>1.8</target>
 				</configuration>
 			</plugin>
 			<!--<plugin>
