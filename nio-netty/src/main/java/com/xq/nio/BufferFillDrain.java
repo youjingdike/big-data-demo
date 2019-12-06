@@ -41,7 +41,7 @@ public class BufferFillDrain {
         }
         System.out.println("###########");
 
-        charBuffer.compact();//将缓冲区进行压缩,未读出的元素向前移动,位置指定到压缩后的最后的元素的位置,上界置为容量大小,缓存重新回到填充状态
+        charBuffer.compact();//将缓冲区进行压缩,未读出的元素向前移动,位置指定到压缩后的最后的元素的位置,上界置为容量大小,缓存重新回到填充状态,如果压缩后想继续读取元素还要调用flip()方法
         charBuffer.flip();
         while (charBuffer.hasRemaining()) {//该方法会告诉你释放缓存区时,是否已经打到缓冲区的上界limit
             System.out.println(charBuffer.get());
