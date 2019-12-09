@@ -12,7 +12,6 @@ import kafka.javaapi.TopicMetadata;
 import kafka.javaapi.TopicMetadataRequest;
 import kafka.javaapi.consumer.SimpleConsumer;
 import kafka.network.BlockingChannel;
-import org.apache.kafka.common.TopicPartition;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -35,7 +34,6 @@ public class KafkaOffsetTools {
                 BlockingChannel.UseDefaultBufferSize(),
                 5000 );
             channel.connect();
-
         List<String> seeds = new ArrayList<String>();
             seeds.add(broker);
         KafkaOffsetTools kot = new KafkaOffsetTools();
@@ -54,7 +52,7 @@ public class KafkaOffsetTools {
         OffsetFetchRequest fetchRequest = new OffsetFetchRequest(
                 group,
                 partitions,
-                (short) 0,// version 1 and above fetch from Kafka, version 0 fetches from ZooKeeper
+                (short) 0,// 注意：version 1 and above fetch from Kafka, version 0 fetches from ZooKeeper
                 correlationId,
                 clientId);
         for (Map.Entry<Integer,PartitionMetadata> entry : metadatas.entrySet()) {
