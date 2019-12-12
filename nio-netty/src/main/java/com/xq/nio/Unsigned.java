@@ -11,12 +11,12 @@ public class Unsigned {
         byteBuffer.put((byte) (value & 0xff));
     }
 
-    public static short getUnsignedByte(ByteBuffer byteBuffer,int postition) {
-        return (short)((byteBuffer.get(postition) & (short)0xff));
+    public static short getUnsignedByte(ByteBuffer byteBuffer,int position) {
+        return (short)((byteBuffer.get(position) & (short)0xff));
     }
 
-    public static void putUnsignedByte(ByteBuffer byteBuffer,int postition,int value) {
-        byteBuffer.put(postition,(byte) (value & 0xff));
+    public static void putUnsignedByte(ByteBuffer byteBuffer,int position,int value) {
+        byteBuffer.put(position,(byte) (value & 0xff));
     }
 
     //-------------------------------------------------------------------------
@@ -28,12 +28,12 @@ public class Unsigned {
         byteBuffer.putShort((short) (value & 0xffff));
     }
 
-    public static int getUnsignedShort(ByteBuffer byteBuffer,int postition) {
-        return byteBuffer.getShort(postition) & 0xffff;
+    public static int getUnsignedShort(ByteBuffer byteBuffer,int position) {
+        return byteBuffer.getShort(position) & 0xffff;
     }
 
-    public static void putUnsignedShort(ByteBuffer byteBuffer,int postition,int value) {
-        byteBuffer.putShort(postition,(short) (value & 0xffff));
+    public static void putUnsignedShort(ByteBuffer byteBuffer,int position,int value) {
+        byteBuffer.putShort(position,(short) (value & 0xffff));
     }
 
     //-------------------------------------------------------------------------
@@ -45,11 +45,11 @@ public class Unsigned {
         byteBuffer.putInt((int) (value & 0xffffffffL));
     }
 
-    public static long getUnsignedInt(ByteBuffer byteBuffer,int postition) {
-        return (long)byteBuffer.getInt(postition) & 0xffffffffL;
+    public static long getUnsignedInt(ByteBuffer byteBuffer,int position) {
+        return (long)byteBuffer.getInt(position) & 0xffffffffL;
     }
 
-    public static void putUnsignedInt(ByteBuffer byteBuffer,int postition,int value) {
-        byteBuffer.putInt(postition,(int) (value & 0xffffffffL));
+    public static void putUnsignedInt(ByteBuffer byteBuffer,int position,int value) {
+        byteBuffer.putInt(position,(int) (value & 0xffffffffL));
     }
 }
