@@ -197,13 +197,17 @@ public Map<TopicAndPartition, Long> getLastOffset(String brokerList, List<String
    * @return topicAndPartitions
    */
   private Map<TopicAndPartition, BrokerEndPoint> findLeader(String brokerList, List<String> topics) {
+    // create array list of TopicAndPartition
+    Map<TopicAndPartition, BrokerEndPoint> topicAndPartitionBrokerMap = new HashMap<>(32);
+    //为null会报错，为空会返回所有topic的信息
+    if (topics == null || topics.isEmpty()) {
+      return topicAndPartitionBrokerMap;
+    }
     // get broker's url array
     String[] brokerUrlArray = getBorkerUrlFromBrokerList(brokerList);
     // get broker's port map
     Map<String, Integer> brokerPortMap = getPortFromBrokerList(brokerList);
 
-    // create array list of TopicAndPartition
-    Map<TopicAndPartition, BrokerEndPoint> topicAndPartitionBrokerMap = new HashMap<>(32);
 
     for (String broker : brokerUrlArray) {
       SimpleConsumer consumer = null;
