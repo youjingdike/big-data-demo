@@ -35,6 +35,10 @@ public class HdfsDemo {
 
     }
 
+    /**
+     * 重命名
+     * @param fs
+     */
     private void remaneFile(FileSystem fs) {
         tmpPath = new Path(rootPathStr + tmpPathStr);
         try {
@@ -79,6 +83,10 @@ System.out.println("path:"+fPath.toString()+";name:"+name);
                             if (fileStatus.isFile()) {
                                 currentPath = new Path(rootPathStr + currentPathStr + "/" + fileStatus.getPath().getName());
 System.out.println("path:"+fileStatus.getPath().toString()+";name:"+fileStatus.getPath().getName());
+                                if (fs.exists(currentPath)) {
+                                    fs.delete(currentPath, true);
+                                }
+                                fs.rename(fileStatus.getPath(), currentPath);
                             }
                         }
                     }
