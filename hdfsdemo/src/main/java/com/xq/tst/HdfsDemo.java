@@ -98,6 +98,10 @@ System.out.println("path:"+fileStatus.getPath().toString()+";name:"+fileStatus.g
 
     }
 
+    /**
+     * 复制文件
+     * @param fs
+     */
     private void copyFile(FileSystem fs) {
         tmpPath = new Path(rootPathStr + tmpPathStr);
         try {
