@@ -33,5 +33,6 @@ public class ViewBuffer {
         System.out.println("pos="+buffer.position()+",limit="+buffer.limit()
             +",capacity="+buffer.capacity()
             +":'"+buffer.toString()+"'");
+
     }
 }
