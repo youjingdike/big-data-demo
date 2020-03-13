@@ -26,7 +26,7 @@ public class BufferFillDrain {
     }
 
     private static void compactBuffer(CharBuffer charBuffer) {
-        charBuffer.flip();//该发放把处在填充状态的缓存区转换成准备读出元素的释放状态
+        charBuffer.flip();//该方法把处在填充状态的缓存区转换成准备读出元素的释放状态
         int remaining = charBuffer.remaining();//该方法会告诉你从当前位置到上界还剩余的元素个数
         int num = remaining/2;
         for (int i=0;i<num-1;i++) {
