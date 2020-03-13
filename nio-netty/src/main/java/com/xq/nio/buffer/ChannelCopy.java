@@ -1,4 +1,4 @@
-package com.xq.nio;
+package com.xq.nio.buffer;
 
 import java.io.IOException;
 import java.nio.Buffer;

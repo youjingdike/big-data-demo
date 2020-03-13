@@ -1,4 +1,4 @@
-package com.xq.nio;
+package com.xq.nio.buffer;
 
 import java.nio.Buffer;
 import java.nio.ByteBuffer;

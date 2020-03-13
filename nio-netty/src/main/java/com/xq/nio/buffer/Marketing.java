@@ -1,4 +1,4 @@
-package com.xq.nio;
+package com.xq.nio.buffer;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
