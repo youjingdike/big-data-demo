@@ -38,8 +38,24 @@
                 <ThresholdFilter level="error" onMatch="DENY" onMismatch="NEUTRAL"/>
                 <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY"/>
             </Filters>
+
+            <!-- 删除策略配置 -->
+            <DefaultRolloverStrategy max="50">
+                <!-- 日志文件根目录 -->
+                <Delete basePath="logs/7z" maxDepth="10">
+                    <!-- 匹配其中任意一种文件名规则 -->
+                    <IfAny>
+                        <IfFileName glob="gc_*.log"/>
+                        <IfFileName glob="gamelog/gameserver.*.log.gz"/>
+                        <IfFileName glob="http/request.*.log"/>
+                    </IfAny>
+                    <!-- 只保留14天内日志，超过14天删除 -->
+                    <IfLastModified age="14D"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+
             <!-- 指定每天的最大压缩包个数，默认7个，超过了会覆盖之前的 -->
-            <DefaultRolloverStrategy max="50"/>
+            <!--<DefaultRolloverStrategy max="50"/>-->
         </RollingRandomAccessFile>
 
         <!-- 存储所有error信息 -->
