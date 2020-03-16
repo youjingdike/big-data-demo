@@ -1,4 +1,4 @@
-package com.xq.nio.socket;
+package com.xq.nio.selector;
 
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
