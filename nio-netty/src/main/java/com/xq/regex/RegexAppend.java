@@ -6,13 +6,15 @@ import java.util.regex.Pattern;
 public class RegexAppend {
     public static void main(String[] args) {
         String input = "Thanks,aaaa bbbb cccc thanks very much";
-        String regex = "([Tt])hanks";
+//        input = "TttttThanks,aaaa bbbb cccc thanks very much";
+//        input = "Tttttthanks,aaaa bbbb cccc thanks very much";
+        String regex = "([Tt])*hanks";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(input);
         StringBuffer sb = new StringBuffer();
         //循环直到遇到匹配
         while (matcher.find()) {
-            if (matcher.group(1).equals("T")) {
+            if (matcher.group(1).equals("T")) {//只取最后匹配到的分组
                 matcher.appendReplacement(sb, "Thank you");
             } else {
                 matcher.appendReplacement(sb, "thank you");
