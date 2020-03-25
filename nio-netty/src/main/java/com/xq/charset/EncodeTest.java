@@ -13,7 +13,8 @@ public class EncodeTest {
                 "UTF-8",
                 "UTF-16BE",
                 "UTF-16LE",
-                "UTF-16"
+                "UTF-16",
+                "X-ROT13"
         };
         for (int i = 0; i < charsetNames.length; i++) {
             doEncode(Charset.forName(charsetNames[i]),input);
