@@ -10,6 +10,9 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.LineBasedFrameDecoder;
 import io.netty.handler.codec.string.StringDecoder;
 
+/**
+ * 支持tcp粘包
+ **/
 public class TimeServer {
 
     public void bind(int port) {

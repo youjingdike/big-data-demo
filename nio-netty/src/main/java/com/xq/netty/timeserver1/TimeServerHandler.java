@@ -19,13 +19,8 @@ public class TimeServerHandler extends ChannelHandlerAdapter {
         curTime = curTime + System.getProperty("line.separator");
         System.out.println("curTime"+curTime);
         ByteBuf resp = Unpooled.copiedBuffer(curTime.getBytes());
-        ctx.write(resp);
+        ctx.writeAndFlush(resp);
 
-    }
-
-    @Override
-    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-        ctx.flush();
     }
 
     @Override
