@@ -11,7 +11,7 @@ import io.netty.handler.codec.LineBasedFrameDecoder;
 import io.netty.handler.codec.string.StringDecoder;
 
 /**
- * 支持tcp粘包
+ * 支持tcp粘包/拆包
  **/
 public class TimeClient {
     public void connect(int port,String host) {
