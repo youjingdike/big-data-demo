@@ -21,7 +21,7 @@ public class HttpXmlRequestDecoder extends AbstractHttpXmlDecoder<FullHttpReques
         this(clazz,false);
     }
 
-    protected HttpXmlRequestDecoder(Class<?> clazz, boolean isPrint) {
+    public HttpXmlRequestDecoder(Class<?> clazz, boolean isPrint) {
         super(clazz, isPrint);
     }
 
