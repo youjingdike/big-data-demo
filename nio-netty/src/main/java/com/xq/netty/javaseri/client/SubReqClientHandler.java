@@ -1,6 +1,6 @@
 package com.xq.netty.javaseri.client;
 
-import com.xq.netty.javaseri.vo.SubscribeReq;
+import com.xq.netty.javaseri.pojo.SubscribeReq;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
 import org.slf4j.Logger;

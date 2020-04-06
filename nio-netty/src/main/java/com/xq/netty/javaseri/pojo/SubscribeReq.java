@@ -1,4 +1,4 @@
-package com.xq.netty.javaseri.vo;
+package com.xq.netty.javaseri.pojo;
 
 import java.io.Serializable;
 

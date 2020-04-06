@@ -1,7 +1,7 @@
 package com.xq.netty.javaseri.server;
 
-import com.xq.netty.javaseri.vo.SubscribeReq;
-import com.xq.netty.javaseri.vo.SubscribeResp;
+import com.xq.netty.javaseri.pojo.SubscribeReq;
+import com.xq.netty.javaseri.pojo.SubscribeResp;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
 
