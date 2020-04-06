@@ -48,8 +48,10 @@ public class HttpFileServer {
                     }
                 });
             //绑定端口，同步等待成功
-            ChannelFuture future = b.bind("127.0.0.1",port).sync();
-            System.out.println("File server is start, url is: http://127.0.0.1:"+port+url);
+//            String host = "127.0.0.1";
+            String host = "192.168.1.11";
+            ChannelFuture future = b.bind(host,port).sync();
+            System.out.println("File server is start, url is: http://"+host+":"+port+url);
             //等待服务端监听端口关闭
             future.channel().closeFuture().sync();
         } catch (InterruptedException e) {
