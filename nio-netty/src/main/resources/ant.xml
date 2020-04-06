@@ -1,9 +1,0 @@
-<target name="bindgen">
-    <echo message="Running BindGen Tool" />
-    <java classpathref="classpath" fork="true" failonerror="true"
-            classname="org.jibx.binding.generator.BindGen">
-        <arg value="-s"/>
-        <arg value="${basedir}/src/main/java/com/xq/netty/httpxml/pojo/Address.java" />
-        <arg value="com.xq.netty.httpxml.pojo.Address" />
-    </java>
-</target>
