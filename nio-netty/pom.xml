@@ -30,7 +30,16 @@
       <artifactId>netty-all</artifactId>
       <version>5.0.0.Alpha1</version>
     </dependency>
-
+    <dependency>
+      <groupId>org.jibx</groupId>
+      <artifactId>jibx-bind</artifactId>
+      <version>1.2.6</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jibx</groupId>
+      <artifactId>jibx-tools</artifactId>
+      <version>1.2.6</version>
+    </dependency>
     <!-- log -->
     <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
     <dependency>

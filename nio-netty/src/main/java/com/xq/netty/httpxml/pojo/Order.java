@@ -55,4 +55,16 @@ public class Order {
     public void setShipping(Shipping shipping) {
         this.shipping = shipping;
     }
+
+    @Override
+    public String toString() {
+        return "Order{" +
+                "orderNumber=" + orderNumber +
+                ", customer=" + customer +
+                ", billTo=" + billTo +
+                ", shipping=" + shipping +
+                ", shipTo=" + shipTo +
+                ", total=" + total +
+                '}';
+    }
 }
