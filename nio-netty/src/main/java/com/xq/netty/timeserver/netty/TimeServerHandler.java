@@ -1,4 +1,4 @@
-package com.xq.netty.timeserver;
+package com.xq.netty.timeserver.netty;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
