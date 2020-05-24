@@ -3,7 +3,6 @@ package com.xq.netty.handler;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
-import jdk.nashorn.internal.objects.Global;
 
 public class MyOutboundHandler extends ChannelHandlerAdapter {
     @Override
