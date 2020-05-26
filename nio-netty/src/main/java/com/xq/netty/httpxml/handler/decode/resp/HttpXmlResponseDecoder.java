@@ -1,21 +1,11 @@
-package com.xq.netty.httpxml.response.decode;
+package com.xq.netty.httpxml.handler.decode.resp;
 
-import com.xq.netty.httpxml.request.HttpXmlRequest;
-import com.xq.netty.httpxml.request.decode.AbstractHttpXmlDecoder;
-import com.xq.netty.httpxml.response.HttpXmlResponse;
-import io.netty.buffer.Unpooled;
-import io.netty.channel.ChannelFutureListener;
+import com.xq.netty.httpxml.handler.decode.AbstractHttpXmlDecoder;
+import com.xq.netty.httpxml.vo.HttpXmlResponse;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
-import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.FullHttpResponse;
-import io.netty.handler.codec.http.HttpHeaders;
-import io.netty.handler.codec.http.HttpResponseStatus;
-import io.netty.util.CharsetUtil;
 
 import java.util.List;
-
-import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 public class HttpXmlResponseDecoder extends AbstractHttpXmlDecoder<DefaultFullHttpResponse> {
 

@@ -1,4 +1,4 @@
-package com.xq.netty.httpxml.request.encode;
+package com.xq.netty.httpxml.handler.encode;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;

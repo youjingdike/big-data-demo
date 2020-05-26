@@ -1,4 +1,4 @@
-package com.xq.netty.httpxml.request;
+package com.xq.netty.httpxml.vo;
 
 import io.netty.handler.codec.http.FullHttpRequest;
 

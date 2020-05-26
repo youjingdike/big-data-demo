@@ -1,10 +1,8 @@
 package com.xq.netty.httpxml.client;
 
-import com.xq.netty.http.HttpFileServerHandler;
 import com.xq.netty.httpxml.pojo.Order;
-import com.xq.netty.httpxml.request.decode.HttpXmlRequestDecoder;
-import com.xq.netty.httpxml.request.encode.HttpXmlRequestEncoder;
-import com.xq.netty.httpxml.response.decode.HttpXmlResponseDecoder;
+import com.xq.netty.httpxml.handler.encode.req.HttpXmlRequestEncoder;
+import com.xq.netty.httpxml.handler.decode.resp.HttpXmlResponseDecoder;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -12,16 +10,10 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.FixedLengthFrameDecoder;
 import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpRequestEncoder;
 import io.netty.handler.codec.http.HttpResponseDecoder;
-import io.netty.handler.codec.http.HttpResponseEncoder;
-import io.netty.handler.codec.string.StringDecoder;
-import io.netty.handler.stream.ChunkedWriteHandler;
 
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
 /**

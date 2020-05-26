@@ -1,13 +1,9 @@
 package com.xq.netty.httpxml.client;
 
-import com.xq.netty.httpxml.request.HttpXmlRequest;
-import com.xq.netty.httpxml.response.HttpXmlResponse;
-import io.netty.buffer.Unpooled;
-import io.netty.channel.ChannelHandlerAdapter;
+import com.xq.netty.httpxml.vo.HttpXmlRequest;
+import com.xq.netty.httpxml.vo.HttpXmlResponse;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class HttpXmlClientHandler extends SimpleChannelInboundHandler<HttpXmlResponse> {
 
