@@ -16,6 +16,7 @@ public class SelectSocketThreadPool extends SelectSocket{
     }
 
     @Override
+    /*覆写了父类的readDataFromSocket方法*/
     protected void readDataFromSocket(SelectionKey key) throws Exception {
         WorkerThread worker = pool.getWorker();
         if (worker == null) {
@@ -53,6 +54,7 @@ public class SelectSocketThreadPool extends SelectSocket{
         }
     }
 
+    /*WorkerThread  start*/
     private class WorkerThread extends Thread {
         private ByteBuffer buffer = ByteBuffer.allocate(1024);
         private ThreadPool pool;
@@ -119,5 +121,5 @@ public class SelectSocketThreadPool extends SelectSocket{
             key.selector().wakeup();
         }
     }
-
+    /*WorkerThread  end*/
 }
