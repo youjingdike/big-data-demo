@@ -1,6 +1,6 @@
 package com.xq.netty.marshalling.server;
 
-import com.xq.netty.propprotocol.MarshallingCodecFactory;
+import com.xq.netty.propprotocol.codec.MarshallingCodecFactory;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
