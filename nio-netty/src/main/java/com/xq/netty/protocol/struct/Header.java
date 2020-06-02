@@ -1,4 +1,4 @@
-package com.xq.netty.propprotocol.struct;
+package com.xq.netty.protocol.struct;
 
 import java.util.HashMap;
 import java.util.Map;

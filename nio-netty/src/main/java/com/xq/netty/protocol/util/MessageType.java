@@ -1,4 +1,4 @@
-package com.xq.netty.propprotocol.util;
+package com.xq.netty.protocol.util;
 
 public enum  MessageType {
     SERVICE_REQ((byte) 0),

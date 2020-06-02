@@ -1,8 +1,8 @@
-package com.xq.netty.propprotocol.server;
+package com.xq.netty.protocol.server;
 
-import com.xq.netty.propprotocol.util.NettyConstant;
-import com.xq.netty.propprotocol.codec.NettyMessageDecoder;
-import com.xq.netty.propprotocol.codec.NettyMessageEncoder;
+import com.xq.netty.protocol.util.NettyConstant;
+import com.xq.netty.protocol.codec.NettyMessageDecoder;
+import com.xq.netty.protocol.codec.NettyMessageEncoder;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;

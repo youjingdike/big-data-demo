@@ -1,8 +1,8 @@
-package com.xq.netty.propprotocol.client;
+package com.xq.netty.protocol.client;
 
-import com.xq.netty.propprotocol.util.MessageType;
-import com.xq.netty.propprotocol.struct.Header;
-import com.xq.netty.propprotocol.struct.NettyMessage;
+import com.xq.netty.protocol.util.MessageType;
+import com.xq.netty.protocol.struct.Header;
+import com.xq.netty.protocol.struct.NettyMessage;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.concurrent.ScheduledFuture;

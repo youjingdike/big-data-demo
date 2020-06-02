@@ -1,4 +1,4 @@
-package com.xq.netty.propprotocol.codec;
+package com.xq.netty.protocol.codec;
 
 import io.netty.handler.codec.marshalling.DefaultMarshallerProvider;
 import io.netty.handler.codec.marshalling.DefaultUnmarshallerProvider;

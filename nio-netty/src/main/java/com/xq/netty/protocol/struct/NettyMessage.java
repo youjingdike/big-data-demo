@@ -1,6 +1,4 @@
-package com.xq.netty.propprotocol.struct;
-
-import com.xq.netty.propprotocol.struct.Header;
+package com.xq.netty.protocol.struct;
 
 public final class NettyMessage {
 

@@ -1,7 +1,7 @@
-package com.xq.netty.propprotocol.codec;
+package com.xq.netty.protocol.codec;
 
-import com.xq.netty.propprotocol.struct.Header;
-import com.xq.netty.propprotocol.struct.NettyMessage;
+import com.xq.netty.protocol.struct.Header;
+import com.xq.netty.protocol.struct.NettyMessage;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;

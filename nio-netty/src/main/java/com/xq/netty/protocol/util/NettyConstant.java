@@ -1,4 +1,4 @@
-package com.xq.netty.propprotocol.util;
+package com.xq.netty.protocol.util;
 
 public class NettyConstant {
     public static final String REMOTEIP = "127.0.0.1";

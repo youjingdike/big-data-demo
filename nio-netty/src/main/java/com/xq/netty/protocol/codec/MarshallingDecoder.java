@@ -1,8 +1,7 @@
-package com.xq.netty.propprotocol.codec;
+package com.xq.netty.protocol.codec;
 
 import io.netty.buffer.ByteBuf;
 import org.jboss.marshalling.ByteInput;
-import org.jboss.marshalling.Marshaller;
 import org.jboss.marshalling.Unmarshaller;
 
 import java.io.IOException;
