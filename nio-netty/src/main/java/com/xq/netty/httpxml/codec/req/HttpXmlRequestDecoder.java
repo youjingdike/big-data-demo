@@ -1,6 +1,6 @@
-package com.xq.netty.httpxml.handler.decode.req;
+package com.xq.netty.httpxml.codec.req;
 
-import com.xq.netty.httpxml.handler.decode.AbstractHttpXmlDecoder;
+import com.xq.netty.httpxml.codec.AbstractHttpXmlDecoder;
 import com.xq.netty.httpxml.vo.HttpXmlRequest;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;

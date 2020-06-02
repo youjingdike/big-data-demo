@@ -1,9 +1,8 @@
-package com.xq.netty.httpxml.handler.encode;
+package com.xq.netty.httpxml.codec;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.MessageToMessageDecoder;
 import io.netty.handler.codec.MessageToMessageEncoder;
 import org.jibx.runtime.BindingDirectory;
 import org.jibx.runtime.IBindingFactory;

@@ -1,8 +1,8 @@
 package com.xq.netty.httpxml.client;
 
 import com.xq.netty.httpxml.pojo.Order;
-import com.xq.netty.httpxml.handler.encode.req.HttpXmlRequestEncoder;
-import com.xq.netty.httpxml.handler.decode.resp.HttpXmlResponseDecoder;
+import com.xq.netty.httpxml.codec.req.HttpXmlRequestEncoder;
+import com.xq.netty.httpxml.codec.resp.HttpXmlResponseDecoder;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;

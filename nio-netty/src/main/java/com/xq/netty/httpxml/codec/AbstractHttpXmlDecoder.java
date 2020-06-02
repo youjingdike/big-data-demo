@@ -1,4 +1,4 @@
-package com.xq.netty.httpxml.handler.decode;
+package com.xq.netty.httpxml.codec;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;

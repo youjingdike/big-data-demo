@@ -1,6 +1,6 @@
-package com.xq.netty.httpxml.handler.decode.resp;
+package com.xq.netty.httpxml.codec.resp;
 
-import com.xq.netty.httpxml.handler.decode.AbstractHttpXmlDecoder;
+import com.xq.netty.httpxml.codec.AbstractHttpXmlDecoder;
 import com.xq.netty.httpxml.vo.HttpXmlResponse;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;

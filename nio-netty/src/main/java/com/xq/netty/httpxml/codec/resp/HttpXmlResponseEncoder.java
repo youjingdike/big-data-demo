@@ -1,6 +1,6 @@
-package com.xq.netty.httpxml.handler.encode.resp;
+package com.xq.netty.httpxml.codec.resp;
 
-import com.xq.netty.httpxml.handler.encode.AbstractHttpXmlEncoder;
+import com.xq.netty.httpxml.codec.AbstractHttpXmlEncoder;
 import com.xq.netty.httpxml.vo.HttpXmlResponse;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
