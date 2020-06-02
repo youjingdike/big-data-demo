@@ -81,7 +81,7 @@ public class TimeClientHandle implements Runnable{
             SocketChannel sc = (SocketChannel) key.channel();
             if (key.isConnectable()) {
                 if (sc.finishConnect()) {
-                    sc.register(selector, SelectionKey.OP_READ);
+                    sc.register(selector, SelectionKey.OP_READ);//连接成功，注册read操作
                     doWrite(sc);
                 } else {
                     System.exit(1);
@@ -108,6 +108,10 @@ public class TimeClientHandle implements Runnable{
         }
     }
 
+    /**
+     * 注意如果没有连接成功，要注册连接操作
+     * @throws IOException
+     */
     private void doConnect() throws IOException {
         if (sh.connect(new InetSocketAddress(host, port))) {
             sh.register(selector, SelectionKey.OP_READ);
@@ -117,6 +121,11 @@ public class TimeClientHandle implements Runnable{
         }
     }
 
+    /**
+     * 注意"写半包"问题
+     * @param channel
+     * @throws IOException
+     */
     private void doWrite(SocketChannel channel) throws IOException {
         byte[] req = "QUERY TIME ORDER".getBytes();
         ByteBuffer writeBuffer = ByteBuffer.allocate(req.length);

@@ -47,7 +47,7 @@ public class SelectSocket {
                 if (key.isReadable()) {
                     readDataFromSocket(key);
                 }
-                it.remove();
+                it.remove();//注意这里要执行remove方法
             }
         }
     }
