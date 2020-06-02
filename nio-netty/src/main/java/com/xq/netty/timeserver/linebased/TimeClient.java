@@ -1,21 +1,19 @@
-package com.xq.netty.delimiter;
+package com.xq.netty.timeserver.linebased;
 
 import io.netty.bootstrap.Bootstrap;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.DelimiterBasedFrameDecoder;
+import io.netty.handler.codec.LineBasedFrameDecoder;
 import io.netty.handler.codec.string.StringDecoder;
 
 /**
  * 支持tcp粘包/拆包
  **/
-public class EchoClient {
+public class TimeClient {
     public void connect(int port,String host) {
         NioEventLoopGroup group = new NioEventLoopGroup();
         try {
@@ -26,10 +24,9 @@ public class EchoClient {
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel socketChannel) throws Exception {
-                        ByteBuf delimiter = Unpooled.copiedBuffer("$_".getBytes());
-                        socketChannel.pipeline().addLast(new DelimiterBasedFrameDecoder(1024, delimiter));
+                        socketChannel.pipeline().addLast(new LineBasedFrameDecoder(1024));
                         socketChannel.pipeline().addLast(new StringDecoder());
-                        socketChannel.pipeline().addLast(new EchoClientHandler());
+                        socketChannel.pipeline().addLast(new TimeClientHandler());
                     }
                 });
 
@@ -46,6 +43,6 @@ public class EchoClient {
     }
 
     public static void main(String[] args) {
-        new EchoClient().connect(8080,"127.0.0.1");
+        new TimeClient().connect(8080,"127.0.0.1");
     }
 }

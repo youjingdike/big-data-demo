@@ -1,11 +1,9 @@
-package com.xq.netty.delimiter;
+package com.xq.netty.delimiterbased;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
-
-import java.util.Date;
 
 public class EchoServerHandler extends ChannelHandlerAdapter {
     private int counter;

@@ -1,6 +1,5 @@
-package com.xq.netty.delimiter;
+package com.xq.netty.delimiterbased;
 
-import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;

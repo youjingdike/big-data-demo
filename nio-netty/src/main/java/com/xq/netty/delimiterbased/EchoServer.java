@@ -1,4 +1,4 @@
-package com.xq.netty.delimiter;
+package com.xq.netty.delimiterbased;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;

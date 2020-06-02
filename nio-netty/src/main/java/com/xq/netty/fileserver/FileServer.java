@@ -1,6 +1,5 @@
 package com.xq.netty.fileserver;
 
-import com.xq.netty.timeserver.netty1.TimeServerHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;

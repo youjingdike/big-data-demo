@@ -1,4 +1,4 @@
-package com.xq.netty.timeserver.netty1;
+package com.xq.netty.timeserver.linebased;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
