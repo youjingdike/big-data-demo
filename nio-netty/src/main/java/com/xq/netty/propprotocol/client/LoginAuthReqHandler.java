@@ -1,6 +1,6 @@
 package com.xq.netty.propprotocol.client;
 
-import com.xq.netty.propprotocol.MessageType;
+import com.xq.netty.propprotocol.util.MessageType;
 import com.xq.netty.propprotocol.struct.Header;
 import com.xq.netty.propprotocol.struct.NettyMessage;
 import io.netty.channel.ChannelHandler;

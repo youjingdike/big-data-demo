@@ -1,6 +1,6 @@
 package com.xq.netty.propprotocol.client;
 
-import com.xq.netty.propprotocol.NettyConstant;
+import com.xq.netty.propprotocol.util.NettyConstant;
 import com.xq.netty.propprotocol.codec.NettyMessageDecoder;
 import com.xq.netty.propprotocol.codec.NettyMessageEncoder;
 import io.netty.bootstrap.Bootstrap;
