@@ -41,7 +41,7 @@ public class AsyncTimeClientHandler implements CompletionHandler<Void,AsyncTimeC
                     ByteBuffer readBuffer = ByteBuffer.allocate(1024);
                     client.read(readBuffer, readBuffer, new CompletionHandler<Integer, ByteBuffer>() {
                         @Override
-                        public void completed(Integer result, ByteBuffer attachment) {
+                        public void completed(Integer result, ByteBuffer attachment) {//attachment就是readBuffer
                             attachment.flip();
                             byte[] bytes = new byte[attachment.remaining()];
                             attachment.get(bytes);
