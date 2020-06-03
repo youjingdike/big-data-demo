@@ -14,6 +14,7 @@ public class AsyncTimeClientHandler implements CompletionHandler<Void,AsyncTimeC
     private String host;
     private int port;
     private CountDownLatch latch;
+    private int reConn = 0;
 
     public AsyncTimeClientHandler(String host, int port) {
         this.host = host;
@@ -75,10 +76,20 @@ public class AsyncTimeClientHandler implements CompletionHandler<Void,AsyncTimeC
     @Override
     public void failed(Throwable exc, AsyncTimeClientHandler attachment) {
         exc.printStackTrace();
+        reConn++;
         try {
-            client.close();
-            latch.countDown();
-        } catch (IOException e) {
+            int reConnMax = 10;
+            if (reConn <= reConnMax) {
+                Thread.sleep(5000);
+                System.out.println("重试次数:"+ reConn);
+                client.close();
+                client = AsynchronousSocketChannel.open();
+                client.connect(new InetSocketAddress(host, port), this, this);
+            } else {
+                client.close();
+                latch.countDown();
+            }
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
     }

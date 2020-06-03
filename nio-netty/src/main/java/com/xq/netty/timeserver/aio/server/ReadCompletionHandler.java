@@ -42,7 +42,7 @@ public class ReadCompletionHandler implements CompletionHandler<Integer, ByteBuf
             writeBuffer.flip();
             channel.write(writeBuffer, writeBuffer, new CompletionHandler<Integer, ByteBuffer>() {
                 @Override
-                public void completed(Integer result, ByteBuffer attachment) {
+                public void completed(Integer result, ByteBuffer attachment) {//attachment就是writeBuffer
                     //如果没有发生完成，继续发送
                     if (attachment.hasRemaining()) {
                         channel.write(writeBuffer,writeBuffer,this);
