@@ -5,10 +5,10 @@ import java.nio.channels.AsynchronousServerSocketChannel;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
 
-public class AcceptCompletionHandler implements CompletionHandler<AsynchronousSocketChannel, TimeServer1> {
+public class AcceptCompletionHandler implements CompletionHandler<AsynchronousSocketChannel, TimeServerHandler> {
 
     @Override
-    public void completed(AsynchronousSocketChannel result, TimeServer1 attachment) {
+    public void completed(AsynchronousSocketChannel result, TimeServerHandler attachment) {
         attachment.asynchronousServerSocketChannel.accept(attachment,this);
         ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
         /*
@@ -21,7 +21,7 @@ public class AcceptCompletionHandler implements CompletionHandler<AsynchronousSo
     }
 
     @Override
-    public void failed(Throwable exc, TimeServer1 attachment) {
+    public void failed(Throwable exc, TimeServerHandler attachment) {
         exc.printStackTrace();
         attachment.latch.countDown();
     }
