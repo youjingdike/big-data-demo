@@ -62,10 +62,20 @@ public class ReadCompletionHandler implements CompletionHandler<Integer, ByteBuf
 
     }
 
+    /**
+     * @param exc
+     * @param attachment
+     * 这里可以对异常进行判断，如果是I/O异常，就关闭连接，释放资源，如果是其他异常，就按自己的业务逻辑处理
+     */
     @Override
     public void failed(Throwable exc, ByteBuffer attachment) {
+
         try {
-            this.channel.close();
+            if (exc instanceof IOException) {
+                this.channel.close();
+            } else {
+                //业务处理
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
