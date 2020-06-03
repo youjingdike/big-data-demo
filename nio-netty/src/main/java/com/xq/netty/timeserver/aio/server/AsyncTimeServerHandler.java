@@ -28,8 +28,7 @@ public class AsyncTimeServerHandler implements Runnable {
         latch = new CountDownLatch(1);
         doAccept();
         try {
-            /*阻塞线程，防止服务端执行完成退出，实际项目中，不需要启动独立的线程来处理AsynchronousServerSocketChannel，
-            * 这里只是demo
+            /*阻塞线程，防止服务端执行完成退出
             */
             latch.await();
         } catch (InterruptedException e) {
