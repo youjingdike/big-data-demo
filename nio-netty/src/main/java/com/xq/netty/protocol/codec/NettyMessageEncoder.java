@@ -50,6 +50,7 @@ public class NettyMessageEncoder extends MessageToByteEncoder<NettyMessage> {
         } else {
             sendBuf.writeInt(0);
         }
+//        sendBuf.setInt(4, sendBuf.readableBytes());//修改消息长度，没弄明白为什么-8？
         sendBuf.setInt(4, sendBuf.readableBytes() - 8);//修改消息长度，没弄明白为什么-8？
     }
 
