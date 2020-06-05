@@ -26,7 +26,7 @@ public class NettyMessageEncoder extends MessageToByteEncoder<NettyMessage> {
         }
 
         sendBuf.writeInt(msg.getHeader().getCrcCode());
-        sendBuf.writeInt(msg.getHeader().getLength());
+        sendBuf.writeInt(msg.getHeader().getLength());//最后对其进行了修改
         sendBuf.writeLong(msg.getHeader().getSessionID());
         sendBuf.writeByte(msg.getHeader().getType());
         sendBuf.writeByte(msg.getHeader().getPriority());
