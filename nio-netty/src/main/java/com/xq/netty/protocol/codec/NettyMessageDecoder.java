@@ -37,16 +37,16 @@ public class NettyMessageDecoder extends LengthFieldBasedFrameDecoder {
         header.setType(frame.readByte());
         header.setPriority(frame.readByte());
 
-        int size = frame.readInt();
+        int size = frame.readInt();//附件的个数
         if (size > 0) {
             Map<String, Object> attch = new HashMap<String, Object>(size);
             int keySize = 0;
             byte[] keyArray = null;
             String key = null;
             for (int i = 0; i < size; i++) {
-                keySize = frame.readInt();
+                keySize = frame.readInt();//key的长度
                 keyArray = new byte[keySize];
-                frame.readBytes(keyArray);
+                frame.readBytes(keyArray);//key的内容
                 key = new String(keyArray, "UTF-8");
                 attch.put(key, marshallingDecoder.decode(frame));
             }
@@ -54,7 +54,7 @@ public class NettyMessageDecoder extends LengthFieldBasedFrameDecoder {
             key = null;
             header.setAttachment(attch);
         }
-        if (frame.readableBytes() > 4) {
+        if (frame.readableBytes() > 4) {//上面解码后如果还有大于4个的可读字节,说明有body的内容
             message.setBody(marshallingDecoder.decode(frame));
         }
         message.setHeader(header);

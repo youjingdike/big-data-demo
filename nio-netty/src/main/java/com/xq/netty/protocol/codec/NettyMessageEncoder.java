@@ -30,17 +30,17 @@ public class NettyMessageEncoder extends MessageToByteEncoder<NettyMessage> {
         sendBuf.writeLong(msg.getHeader().getSessionID());
         sendBuf.writeByte(msg.getHeader().getType());
         sendBuf.writeByte(msg.getHeader().getPriority());
-        sendBuf.writeInt(msg.getHeader().getAttachment().size());
+        sendBuf.writeInt(msg.getHeader().getAttachment().size());//附件的个数
         String key = null;
         byte[] keyArray = null;
         Object value = null;
         for (Map.Entry<String, Object> param : msg.getHeader().getAttachment().entrySet()) {
             key = param.getKey();
             keyArray = key.getBytes(CharsetUtil.UTF_8);
-            sendBuf.writeInt(keyArray.length);
-            sendBuf.writeBytes(keyArray);
+            sendBuf.writeInt(keyArray.length);//key的长度
+            sendBuf.writeBytes(keyArray);//key的内容
             value = param.getValue();
-            marshallingEncoder.encode(value,sendBuf);
+            marshallingEncoder.encode(value,sendBuf);//附件的内容（encode也写入了附近的内容长度）
         }
         key = null;
         keyArray = null;
@@ -50,7 +50,7 @@ public class NettyMessageEncoder extends MessageToByteEncoder<NettyMessage> {
         } else {
             sendBuf.writeInt(0);
         }
-        sendBuf.setInt(4, sendBuf.readableBytes() - 8);
+        sendBuf.setInt(4, sendBuf.readableBytes() - 8);//修改消息长度，没弄明白为什么-8？
     }
 
 }

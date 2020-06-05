@@ -2,8 +2,8 @@ package com.xq.netty.protocol.struct;
 
 public final class NettyMessage {
 
-    private Header header;
-    private Object body;
+    private Header header;//消息头
+    private Object body;//消息体
 
     public Header getHeader() {
         return header;

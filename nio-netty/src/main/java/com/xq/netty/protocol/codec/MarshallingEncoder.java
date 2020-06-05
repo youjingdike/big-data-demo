@@ -6,7 +6,7 @@ import org.jboss.marshalling.Marshaller;
 import java.io.IOException;
 
 public class MarshallingEncoder {
-    private static final byte[] LENGTH_PLACEHOLDER = new byte[4];
+    private static final byte[] LENGTH_PLACEHOLDER = new byte[4];//长度占位符
     Marshaller marshaller;
 
     public MarshallingEncoder() throws IOException {
@@ -21,7 +21,7 @@ public class MarshallingEncoder {
             marshaller.start(output);
             marshaller.writeObject(msg);
             marshaller.finish();
-            out.setInt(lengthPos, out.writerIndex() - lengthPos - 4);
+            out.setInt(lengthPos, out.writerIndex() - lengthPos - 4);//设置内容的长度,即覆盖了LENGTH_PLACEHOLDER的值
         } finally {
             marshaller.close();
         }
