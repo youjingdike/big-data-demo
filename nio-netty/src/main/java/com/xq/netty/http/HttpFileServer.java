@@ -37,19 +37,19 @@ public class HttpFileServer {
                     protected void initChannel(SocketChannel sh) throws Exception {
                         //请求消息解码器
 //                        sh.pipeline().addLast(new HttpServerCodec());
-                        sh.pipeline().addLast(new HttpRequestDecoder());
+                        sh.pipeline().addLast("http-decoder",new HttpRequestDecoder());
                         //目的是将多个消息转换为单一的request或者response对象
-                        sh.pipeline().addLast(new HttpObjectAggregator(65536));
-                        sh.pipeline().addLast(new HttpResponseEncoder());
+                        sh.pipeline().addLast("http-aggregator",new HttpObjectAggregator(65536));
+                        sh.pipeline().addLast("http-encoder",new HttpResponseEncoder());
                         //目的是支持异步大文件传输
-                        sh.pipeline().addLast(new ChunkedWriteHandler());
+                        sh.pipeline().addLast("http-chunked",new ChunkedWriteHandler());
                         //业务逻辑
-                        sh.pipeline().addLast(new HttpFileServerHandler(url,root));
+                        sh.pipeline().addLast("fileServerHandler",new HttpFileServerHandler(url,root));
                     }
                 });
             //绑定端口，同步等待成功
-//            String host = "127.0.0.1";
-            String host = "192.168.1.11";
+            String host = "127.0.0.1";
+//            String host = "192.168.1.11";
             ChannelFuture future = b.bind(host,port).sync();
             System.out.println("File server is start, url is: http://"+host+":"+port+url);
             //等待服务端监听端口关闭
