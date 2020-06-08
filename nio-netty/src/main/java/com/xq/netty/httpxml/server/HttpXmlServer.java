@@ -1,6 +1,6 @@
 package com.xq.netty.httpxml.server;
 
-import com.xq.netty.httpxml.pojo.Order;
+import com.xq.netty.httpxml.bo.Order;
 import com.xq.netty.httpxml.codec.req.HttpXmlRequestDecoder;
 import com.xq.netty.httpxml.codec.resp.HttpXmlResponseEncoder;
 import io.netty.bootstrap.ServerBootstrap;

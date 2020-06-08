@@ -1,6 +1,6 @@
 package com.xq.netty.httpxml.client;
 
-import com.xq.netty.httpxml.pojo.Order;
+import com.xq.netty.httpxml.bo.Order;
 
 public class OrderFactory {
     public static Order create(long id) {

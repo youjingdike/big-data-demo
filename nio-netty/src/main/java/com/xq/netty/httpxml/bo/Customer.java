@@ -1,4 +1,4 @@
-package com.xq.netty.httpxml.pojo;
+package com.xq.netty.httpxml.bo;
 
 public class Customer {
     private long customerNum;

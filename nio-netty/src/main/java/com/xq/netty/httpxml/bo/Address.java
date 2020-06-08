@@ -1,4 +1,4 @@
-package com.xq.netty.httpxml.pojo;
+package com.xq.netty.httpxml.bo;
 
 public class Address {
     private String country;

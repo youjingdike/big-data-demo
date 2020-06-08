@@ -1,6 +1,6 @@
 package com.xq.netty.httpxml.server;
 
-import com.xq.netty.httpxml.pojo.Order;
+import com.xq.netty.httpxml.bo.Order;
 import com.xq.netty.httpxml.vo.HttpXmlRequest;
 import com.xq.netty.httpxml.vo.HttpXmlResponse;
 import io.netty.buffer.Unpooled;
