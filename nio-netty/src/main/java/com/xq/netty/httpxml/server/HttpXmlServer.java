@@ -10,7 +10,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.codec.http.HttpRequestEncoder;
+import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
 
 import java.net.InetSocketAddress;
@@ -33,7 +33,7 @@ public class HttpXmlServer {
                     @Override
                     protected void initChannel(SocketChannel sh) throws Exception {
                         //请求消息解码器
-                        sh.pipeline().addLast("http-decoder",new HttpRequestEncoder());
+                        sh.pipeline().addLast("http-decoder",new HttpRequestDecoder());
                         //目的是将多个消息转换为单一的request或者response对象
                         sh.pipeline().addLast("http-aggregator",new HttpObjectAggregator(65536));
                         sh.pipeline().addLast("xml-decoder",new HttpXmlRequestDecoder(Order.class,true));
