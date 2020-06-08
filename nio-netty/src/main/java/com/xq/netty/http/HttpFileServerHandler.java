@@ -10,6 +10,7 @@ import io.netty.channel.ChannelProgressiveFutureListener;
 import io.netty.channel.DefaultFileRegion;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
+import io.netty.handler.codec.http.DefaultHttpResponse;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpHeaders;
@@ -91,7 +92,7 @@ public class HttpFileServerHandler extends SimpleChannelInboundHandler<FullHttpR
             return;
         }
 
-        CharSequence ifModifiedSince = req.headers().get(HttpHeaders.Names.IF_MODIFIED_SINCE);
+        /*CharSequence ifModifiedSince = req.headers().get(HttpHeaders.Names.IF_MODIFIED_SINCE);
         if (ifModifiedSince != null && !ifModifiedSince.toString().isEmpty()) {
             SimpleDateFormat dateFormatter = new SimpleDateFormat(HTTP_DATE_FORMAT, Locale.US);
             Date ifModifiedSinceDate = dateFormatter.parse(ifModifiedSince.toString());
@@ -104,7 +105,7 @@ public class HttpFileServerHandler extends SimpleChannelInboundHandler<FullHttpR
                 sendNotModified(ctx,req);
                 return;
             }
-        }
+        }*/
 
         RandomAccessFile raf = null;
         try {
@@ -116,43 +117,27 @@ public class HttpFileServerHandler extends SimpleChannelInboundHandler<FullHttpR
         }
         long fileLength = raf.length();
 
-        FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, HttpResponseStatus.OK);
+        //一定要注意这个response对象不要用错了
+        HttpResponse response = new DefaultHttpResponse(HTTP_1_1, HttpResponseStatus.OK);
         setContentLength(response,fileLength);
         setContentTypeHander(response,file);
-        setDateAndCacheHeaders(response, file);
+//        setDateAndCacheHeaders(response, file);
         if (HttpHeaders.isKeepAlive(req)) {
-            System.out.println("1..");
             response.headers().set(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE);
         }
-        /*if (!HttpHeaderUtil.isKeepAlive(req)) {
-            System.out.println("1..");
-            response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.CLOSE);
-        } else if (req.protocolVersion().equals(HTTP_1_0)) {
-            System.out.println("2..");
-            response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
-        } else {
-            System.out.println("3..");
-            response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
-        }*/
         ctx.write(response);
 
         ChannelFuture sendFileFuture = null;
         ChannelFuture lastContentFuture = null;
 
-        /*if (ctx.pipeline().get(SslHandler.class) == null) {
-            System.out.println("DefaultFileRegion...");
-            sendFileFuture = ctx.write(new DefaultFileRegion(raf.getChannel(),0,fileLength),ctx.newProgressivePromise());
-        } else {*/
-//            System.out.println("HttpChunkedInput...");
-            sendFileFuture = ctx.write(new ChunkedFile(raf, 0, fileLength, 8192),ctx.newProgressivePromise());
-//        }
+        sendFileFuture = ctx.write(new ChunkedFile(raf, 0, fileLength, 8192),ctx.newProgressivePromise());
 
         sendFileFuture.addListener(new ChannelProgressiveFutureListener() {
             @Override
             public void operationProgressed(ChannelProgressiveFuture future, long progress, long total) throws Exception {
-                System.out.println("operationProgressed...");
+                //progress累积传输的字节,total总共要传输的字节,如果没有传完total为-1
                 if (total < 0) {
-                    System.err.println(future.channel() + ",Transfer progress-1:" + progress);
+                    System.err.println(future.channel() + ",Transfer progress-1:" + progress+"/"+total);
                 } else {
                     System.err.println(future.channel() + ",Transfer progress-2:" + progress+"/"+total);
                 }
