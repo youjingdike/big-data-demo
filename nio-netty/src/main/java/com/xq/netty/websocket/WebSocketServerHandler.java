@@ -74,7 +74,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
         if (handshaker == null) {
             WebSocketServerHandshakerFactory.sendUnsupportedWebSocketVersionResponse(ctx.channel());
         } else {
-            handshaker.handshake(ctx.channel(), req);
+            handshaker.handshake(ctx.channel(), req);//将webSocket的相关版本的编码类和解码类动态的添加到channelPipeline中
         }
     }
 
