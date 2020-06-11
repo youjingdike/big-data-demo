@@ -15,7 +15,7 @@ import javax.net.ssl.SSLException;
 import java.security.cert.CertificateException;
 
 /**
- * java序列化
+ * websocket
  **/
 public class WebSocketServer {
 
