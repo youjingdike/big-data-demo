@@ -50,8 +50,8 @@ public class NettyMessageEncoder extends MessageToByteEncoder<NettyMessage> {
         } else {
             sendBuf.writeInt(0);
         }
-//        sendBuf.setInt(4, sendBuf.readableBytes());//修改消息长度，没弄明白为什么-8？
-        sendBuf.setInt(4, sendBuf.readableBytes() - 8);//修改消息长度，没弄明白为什么-8？
+        sendBuf.setInt(4, sendBuf.readableBytes());//修改消息长度，如果不减去crcCode与length两个字段的长度8,这样长度就是整个消息的总长度,解码的时候要进行长度的调整.
+//        sendBuf.setInt(4, sendBuf.readableBytes() - 8);//修改消息长度，要减去crcCode与length两个字段的长度8,这样长度只包含length后面字段的总长度.
     }
 
 }
