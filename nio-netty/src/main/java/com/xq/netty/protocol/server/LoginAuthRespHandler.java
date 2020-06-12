@@ -13,7 +13,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class LoginAuthRespHandler extends ChannelHandlerAdapter {
+    /**缓存已登录的IP*/
     private Map<String, Boolean> nodeCheck = new ConcurrentHashMap<String, Boolean>();
+    /**IP白名单*/
     private String[] whitekList = { "127.0.0.1", "192.168.1.104" };
 
     /**
@@ -26,7 +28,7 @@ public class LoginAuthRespHandler extends ChannelHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         NettyMessage message = (NettyMessage) msg;
 
-        // 如果是握手请求消息，处理，其它消息透传
+        // 如果是握手请求消息就进行处理，其它消息透传
         if (message.getHeader()!=null && message.getHeader().getType()==MessageType.LOGIN_REQ.value()) {
             String nodeIndex = ctx.channel().remoteAddress().toString();
             NettyMessage loginResp = null;
