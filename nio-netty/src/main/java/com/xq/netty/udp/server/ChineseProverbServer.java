@@ -11,7 +11,7 @@ public class ChineseProverbServer {
         try {
             Bootstrap b = new Bootstrap();
             b.group(group).channel(NioDatagramChannel.class)
-                    .option(ChannelOption.SO_BROADCAST, true)
+                    .option(ChannelOption.SO_BROADCAST, true)//设置参数支持广播
                     .handler(new ChineseProverbServerHandler());
 
             b.bind(port).sync().channel().closeFuture().await();

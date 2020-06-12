@@ -17,7 +17,7 @@ public class ChineseProverbClient {
         try {
             Bootstrap b = new Bootstrap();
             b.group(group).channel(NioDatagramChannel.class)
-                    .option(ChannelOption.SO_BROADCAST, true)
+                    .option(ChannelOption.SO_BROADCAST, true)//设置参数支持广播
                     .handler(new ChineseProverbClientHandler());
 
             Channel ch = b.bind(0).sync().channel();
