@@ -26,6 +26,7 @@ public class SourceTest {
         DataStreamSource<String> s2 = env.fromElements("3a","5dd");
 
         DataStreamSource<SensorReading> s3 = env.addSource(new RichSourceFunction<SensorReading>() {
+            private static final long serialVersionUID = -5851350892235751957L;
             private boolean isCancel = false;
 
             public void run(SourceContext<SensorReading> sourceContext) throws Exception {
