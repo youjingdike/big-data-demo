@@ -12,10 +12,11 @@
         <module>hdfsdemo</module>
         <module>hbasedemo</module>
         <module>hivedemo</module>
-        <module>hiveexportdata</module>
+        <module>hive-export-data</module>
         <module>kafkademo</module>
         <module>KafkaService</module>
         <module>nio-netty</module>
+        <module>flinkdemo</module>
     </modules>
 
 
