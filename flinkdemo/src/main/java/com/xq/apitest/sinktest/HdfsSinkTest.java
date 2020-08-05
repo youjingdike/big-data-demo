@@ -5,6 +5,7 @@ import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.serialization.SimpleStringEncoder;
 import org.apache.flink.configuration.ConfigConstants;
 import org.apache.flink.configuration.Configuration;
+import org.apache.flink.core.fs.FileSystem;
 import org.apache.flink.core.fs.Path;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
@@ -15,9 +16,11 @@ import java.util.Properties;
 
 public class HdfsSinkTest {
     public static void main(String[] args) throws Exception {
+        System.setProperty("HADOOP_USER_NAME", "root");
 //        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         Configuration conf = new Configuration();
         conf.setBoolean(ConfigConstants.LOCAL_START_WEBSERVER,true);
+//        conf.setBoolean("fs.output.always-create-directory",true);
         StreamExecutionEnvironment env = StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(conf);
         env.setParallelism(1);
 
@@ -38,11 +41,16 @@ public class HdfsSinkTest {
 
         // 直接写入文件
 //        dataStream.writeAsText("D:\\code\\FlinkTutorial_1.10\\src\\main\\resources\\out");
+//        dataStream.writeAsText("hdfs://node101:9000/flink/", FileSystem.WriteMode.OVERWRITE);
 
-        dataStream.addSink( StreamingFileSink.forRowFormat(
-                new Path("/flink/hdfsSink"),
+        /*dataStream.addSink( StreamingFileSink.forRowFormat(
+                new Path("hdfs://node101:9000/flink/hdfsSink/"),
                 new SimpleStringEncoder<String>("UTF-8")
-        ).build());
+        ).build());*/
+        /*dataStream.addSink( StreamingFileSink.BulkFormatBuilder(
+                new Path("hdfs://node101:9000/flink/hdfsSink/"),
+                new SimpleStringEncoder<String>("UTF-8")
+        ).build());*/
         env.execute("test kafka source and sink job");
     }
 }

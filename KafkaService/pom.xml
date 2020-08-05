@@ -1,19 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<parent>
+		<artifactId>big-data-demo</artifactId>
+		<groupId>com.xq.tst</groupId>
+		<version>1.0-SNAPSHOT</version>
+	</parent>
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.xc</groupId>
+  <groupId>com.xq</groupId>
   <artifactId>KafkaService</artifactId>
   <version>1.0.0</version>
   <packaging>war</packaging>
 
   <name>KafkaService</name>
 
-  <parent>  
+  <!--<parent>
         <groupId>org.springframework.boot</groupId>  
         <artifactId>spring-boot-starter-parent</artifactId>  
         <version>1.4.1.RELEASE</version>  
-    </parent>  
+    </parent> -->
   
   <properties>  
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>  
@@ -23,12 +29,18 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
+		<version>4.12</version>
       <scope>test</scope>
     </dependency>
-    
-    		 <dependency>  
+	  <dependency>
+		  <groupId>org.springframework.boot</groupId>
+		  <artifactId>spring-boot-starter</artifactId>
+		  <version>1.4.1.RELEASE</version>
+	  </dependency>
+    		 <dependency>
             <groupId>org.springframework.boot</groupId>  
-            <artifactId>spring-boot-starter-web</artifactId> 
+            <artifactId>spring-boot-starter-web</artifactId>
+			 <version>1.4.1.RELEASE</version>
             <exclusions>
 				<exclusion>
 					<groupId>org.springframework.boot</groupId>
@@ -41,6 +53,7 @@
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
+			<version>3.1.0</version>
 		</dependency>
 		
   <!-- 热部署  依赖 start-->  
@@ -48,7 +61,8 @@
             <groupId>org.springframework.boot</groupId>  
             <artifactId>spring-boot-devtools</artifactId>  
             <optional>true</optional>  
-           <scope>true</scope>  
+           <scope>true</scope>
+		<version>1.4.1.RELEASE</version>
   </dependency>  
    <!-- 热部署  依赖 end-->  
    
@@ -65,6 +79,7 @@
 	        <dependency>
 			    <groupId>org.springframework.boot</groupId>
 			    <artifactId>spring-boot-starter-mail</artifactId>
+				<version>1.4.1.RELEASE</version>
 			</dependency>
 			
           <!--发邮件 end  -->
@@ -75,7 +90,7 @@
   
   
   <build>
-		
+	  <pluginManagement>
 		<plugins>
 		
 		
@@ -134,10 +149,6 @@
 				</executions>
 			</plugin>-->
 		</plugins>
+	  </pluginManagement>
 	</build>
-  
-  
-  
-  
-  
 </project>
