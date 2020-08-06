@@ -5,9 +5,12 @@ import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.source.RichSourceFunction;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -22,6 +25,13 @@ public class SourceTest {
                 new SensorReading("sensor_7", 1547718202L, 6.7D),
                 new SensorReading("sensor_10", 1547718205L, 38.1D)
         }));
+
+        List<SensorReading> list = new ArrayList<>();
+        list.add(new SensorReading("sensor_1", 1547718199L, 35.8D));
+        list.add(new SensorReading("sensor_6", 1547718201L, 15.4D));
+        list.add(new SensorReading("sensor_7", 1547718202L, 6.7D));
+        list.add(new SensorReading("sensor_10", 1547718205L, 38.1D));
+        DataStreamSource<SensorReading> s4 = env.fromCollection(list);
 
         DataStreamSource<String> s2 = env.fromElements("3a","5dd");
 
