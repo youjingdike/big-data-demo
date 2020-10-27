@@ -17,6 +17,7 @@
         <module>KafkaService</module>
         <module>nio-netty</module>
         <module>flinkdemo</module>
+        <module>netty-demo</module>
     </modules>
 
 

@@ -8,7 +8,7 @@ import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.connectors.elasticsearch.ElasticsearchSinkFunction;
 import org.apache.flink.streaming.connectors.elasticsearch.RequestIndexer;
-import org.apache.flink.streaming.connectors.elasticsearch6.ElasticsearchSink;
+import org.apache.flink.streaming.connectors.elasticsearch5.ElasticsearchSink;
 import org.apache.http.HttpHost;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.client.Requests;
@@ -57,8 +57,10 @@ public class EsSinkTest {
             }
         };
 
-
-        ElasticsearchSink<SensorReading> esSinkBuilder = new ElasticsearchSink.Builder<>(hostList, esFun).build();
+        Map<String,String> userConfig = new HashMap();
+        userConfig.put("username","");
+        userConfig.put("password","");
+        ElasticsearchSink esSink = new ElasticsearchSink(null, hostList, esFun);
         /*esSinkBuilder.setBulkFlushMaxActions(1);
 
 // provide a RestClientFactory for custom configuration on the internally created REST client
@@ -70,7 +72,7 @@ public class EsSinkTest {
                     restClientBuilder.setHttpClientConfigCallback(...)
                 }
         );*/
-        dataStream.addSink(esSinkBuilder);
+        dataStream.addSink(esSink);
 
         env.execute("test es sink job");
     }
