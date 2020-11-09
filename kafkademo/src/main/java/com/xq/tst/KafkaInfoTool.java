@@ -49,6 +49,44 @@ public class KafkaInfoTool {
  * @param clientId
  * @return
  */
+public Map<TopicAndPartition, Long> getOffsetWithTime(String brokerList, List<String> topics,
+                                                  String clientId,long time) {
+
+    Map<TopicAndPartition, Long> topicAndPartitionLongMap = new HashMap<>(32);
+
+    Map<TopicAndPartition, BrokerEndPoint > topicAndPartitionBrokerMap =
+        KafkaInfoTool.getInstance().findLeader(brokerList, topics);
+    for (Map.Entry<TopicAndPartition, BrokerEndPoint> topicAndPartitionBrokerEntry : topicAndPartitionBrokerMap
+        .entrySet()) {
+      // get leader broker
+      BrokerEndPoint  leaderBroker = topicAndPartitionBrokerEntry.getValue();
+      if (leaderBroker!=null) {
+
+        SimpleConsumer simpleConsumer = new SimpleConsumer(leaderBroker.host(), leaderBroker.port(),
+                timeOut, bufferSize, clientId);
+
+        long readOffset = getTopicAndPartitionOffset(simpleConsumer,
+            topicAndPartitionBrokerEntry.getKey(), clientId,time);
+
+        topicAndPartitionLongMap.put(topicAndPartitionBrokerEntry.getKey(), readOffset);
+        if (simpleConsumer!=null) {
+            simpleConsumer.close();
+        }
+      } else {
+        logger.error("topic:{},partition:{},do not have leader.",topicAndPartitionBrokerEntry.getKey().topic(),topicAndPartitionBrokerEntry.getKey().partition());
+      }
+    }
+    return topicAndPartitionLongMap;
+
+  }
+
+  /**
+ * 获取topic最后的偏移量(与分组无关)
+ * @param brokerList
+ * @param topics
+ * @param clientId
+ * @return
+ */
 public Map<TopicAndPartition, Long> getLastOffset(String brokerList, List<String> topics,
                                                   String clientId) {
 
@@ -65,8 +103,8 @@ public Map<TopicAndPartition, Long> getLastOffset(String brokerList, List<String
         SimpleConsumer simpleConsumer = new SimpleConsumer(leaderBroker.host(), leaderBroker.port(),
                 timeOut, bufferSize, clientId);
 
-        long readOffset = getTopicAndPartitionLastOffset(simpleConsumer,
-            topicAndPartitionBrokerEntry.getKey(), clientId);
+        long readOffset = getTopicAndPartitionOffset(simpleConsumer,
+            topicAndPartitionBrokerEntry.getKey(), clientId,kafka.api.OffsetRequest.LatestTime());
 
         topicAndPartitionLongMap.put(topicAndPartitionBrokerEntry.getKey(), readOffset);
         if (simpleConsumer!=null) {
@@ -103,8 +141,8 @@ public Map<TopicAndPartition, Long> getLastOffset(String brokerList, List<String
       SimpleConsumer simpleConsumer = new SimpleConsumer(leaderBroker.host(), leaderBroker.port(),
               timeOut, bufferSize, clientId);
 
-      long readOffset = getTopicAndPartitionEarliestOffset(simpleConsumer,
-          topicAndPartitionBrokerEntry.getKey(), clientId);
+      long readOffset = getTopicAndPartitionOffset(simpleConsumer,
+          topicAndPartitionBrokerEntry.getKey(), clientId,kafka.api.OffsetRequest.EarliestTime());
 
       topicAndPartitionLongMap.put(topicAndPartitionBrokerEntry.getKey(), readOffset);
       if (simpleConsumer!=null) {
@@ -242,49 +280,21 @@ public Map<TopicAndPartition, Long> getLastOffset(String brokerList, List<String
   }
 
   /**
-   * get last offset
-   * @param consumer
-   * @param topicAndPartition
-   * @param clientId
-   * @return
-   */
-  private long getTopicAndPartitionLastOffset(SimpleConsumer consumer,
-      TopicAndPartition topicAndPartition, String clientId) {
-    Map<TopicAndPartition, PartitionOffsetRequestInfo> requestInfo =
-        new HashMap<TopicAndPartition, PartitionOffsetRequestInfo>(32);
-
-    requestInfo.put(topicAndPartition, new PartitionOffsetRequestInfo(
-        kafka.api.OffsetRequest.LatestTime(), 1));
-
-    OffsetRequest request = new OffsetRequest(
-        requestInfo, kafka.api.OffsetRequest.CurrentVersion(),
-        clientId);
-
-    OffsetResponse response = consumer.getOffsetsBefore(request);
-
-    if (response.hasError()) {
-      logger.error("Error fetching data Offset Data the Broker.topic:{},partition:{}, Reason: {}"
-              ,topicAndPartition.topic(), topicAndPartition.partition(), response.errorCode(topicAndPartition.topic(), topicAndPartition.partition()));
-      return 0;
-    }
-    long[] offsets = response.offsets(topicAndPartition.topic(), topicAndPartition.partition());
-    return offsets[0];
-  }
-
-  /**
    * get earliest offset
    * @param consumer
    * @param topicAndPartition
    * @param clientId
+   * @param time
    * @return
    */
-  private long getTopicAndPartitionEarliestOffset(SimpleConsumer consumer,
-      TopicAndPartition topicAndPartition, String clientId) {
+  private long getTopicAndPartitionOffset(SimpleConsumer consumer,
+                                          TopicAndPartition topicAndPartition, String clientId, long time) {
     Map<TopicAndPartition, PartitionOffsetRequestInfo> requestInfo =
         new HashMap<TopicAndPartition, PartitionOffsetRequestInfo>(32);
 
+    //参数time：可以指定一个时间，但是实际找到的是 “最近修改时间早于目标timestamp的最近修改的segment file的起始offset”
     requestInfo.put(topicAndPartition, new PartitionOffsetRequestInfo(
-        kafka.api.OffsetRequest.EarliestTime(), 1));
+            time, 1));
 
     OffsetRequest request = new OffsetRequest(
         requestInfo, kafka.api.OffsetRequest.CurrentVersion(),
@@ -296,6 +306,7 @@ public Map<TopicAndPartition, Long> getLastOffset(String brokerList, List<String
       logger.error("Error fetching data Offset Data the Broker. Reason: {}",response.errorCode(topicAndPartition.topic(), topicAndPartition.partition()));
       return 0;
     }
+    //注意通过timeStamp查询的时候，这里面可能会返回空
     long[] offsets = response.offsets(topicAndPartition.topic(), topicAndPartition.partition());
     return offsets[0];
   }
