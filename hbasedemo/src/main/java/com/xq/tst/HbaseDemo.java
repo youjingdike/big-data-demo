@@ -15,14 +15,19 @@ import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.Admin;
+import org.apache.hadoop.hbase.client.BufferedMutator;
+import org.apache.hadoop.hbase.client.BufferedMutatorParams;
 import org.apache.hadoop.hbase.client.Connection;
 import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.client.Mutation;
+import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.client.coprocessor.AggregationClient;
+import org.apache.hadoop.hbase.client.coprocessor.Batch;
 import org.apache.hadoop.hbase.client.coprocessor.LongColumnInterpreter;
 import org.apache.hadoop.hbase.filter.CompareFilter;
 import org.apache.hadoop.hbase.filter.Filter;
@@ -233,5 +238,26 @@ public class HbaseDemo {
             throwable.printStackTrace();
         }
         return count;
+    }
+
+    public void insertBatch() throws IOException {
+        BufferedMutator bufferedMutator = connection.getBufferedMutator(new BufferedMutatorParams(TableName.valueOf("test"))
+                .pool(HTable.getDefaultExecutor(conf)).writeBufferSize(500));
+        bufferedMutator.mutate(new Put(Bytes.toBytes("ddd")));
+        bufferedMutator.flush();
+    }
+
+    public void insertBatch1() throws IOException, InterruptedException {
+        Table table = connection.getTable(TableName.valueOf("test"));
+        List<Mutation> list = new ArrayList<>();
+        list.add(new Put(Bytes.toBytes("www")));
+        table.batch(list,new Object[list.size()]);
+
+        /*table.batchCallback(list, new Object[list.size()], new Batch.Callback<Object>() {
+            @Override
+            public void update(byte[] region, byte[] row, Object result) {
+
+            }
+        });*/
     }
 }

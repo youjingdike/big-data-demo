@@ -17,6 +17,7 @@ import kafka.javaapi.TopicMetadataRequest;
 import kafka.javaapi.TopicMetadataResponse;
 import kafka.javaapi.consumer.SimpleConsumer;
 import kafka.network.BlockingChannel;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -343,4 +344,8 @@ public Map<TopicAndPartition, Long> getLastOffset(String brokerList, List<String
     return map;
   }
 
+  public static void main(String[] args) {
+    KafkaConsumer kafkaConsumer = new KafkaConsumer(null);
+//    kafkaConsumer.
+  }
 }

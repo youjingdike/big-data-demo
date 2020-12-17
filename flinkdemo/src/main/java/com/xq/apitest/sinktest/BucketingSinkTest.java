@@ -11,7 +11,7 @@ import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer010;
 
 import java.util.Properties;
 
-public class HdfsSinkTest1 {
+public class BucketingSinkTest {
     public static void main(String[] args) throws Exception {
         System.setProperty("HADOOP_USER_NAME", "root");
 // set up the streaming execution environment

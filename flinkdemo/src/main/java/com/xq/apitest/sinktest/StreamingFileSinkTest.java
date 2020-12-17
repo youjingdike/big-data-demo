@@ -14,7 +14,7 @@ import org.apache.flink.streaming.api.functions.sink.filesystem.StreamingFileSin
 
 import java.util.Properties;
 
-public class HdfsSinkTest {
+public class StreamingFileSinkTest {
     public static void main(String[] args) throws Exception {
         System.setProperty("HADOOP_USER_NAME", "root");
 //        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -43,14 +43,13 @@ public class HdfsSinkTest {
 //        dataStream.writeAsText("D:\\code\\FlinkTutorial_1.10\\src\\main\\resources\\out");
 //        dataStream.writeAsText("hdfs://node101:9000/flink/", FileSystem.WriteMode.OVERWRITE);
 
-        /*dataStream.addSink( StreamingFileSink.forRowFormat(
+        /**
+         * 可以看FlinkTutorial_1.10_New项目里的案例
+         */
+        dataStream.addSink(StreamingFileSink.forRowFormat(
                 new Path("hdfs://node101:9000/flink/hdfsSink/"),
                 new SimpleStringEncoder<String>("UTF-8")
-        ).build());*/
-        /*dataStream.addSink( StreamingFileSink.BulkFormatBuilder(
-                new Path("hdfs://node101:9000/flink/hdfsSink/"),
-                new SimpleStringEncoder<String>("UTF-8")
-        ).build());*/
+        ).build());
         env.execute("test kafka source and sink job");
     }
 }
