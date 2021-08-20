@@ -4,11 +4,18 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
 import java.util.Properties;
+import java.util.concurrent.ExecutionException;
 
 public class ProducerDemo {
     public static void putData() {
         KafkaProducer<String, String> kafkaProducer = new KafkaProducer<String, String>(getProps());
-        kafkaProducer.send(new ProducerRecord<String,String>("testTopic",null,"test"));
+        try {
+            kafkaProducer.send(new ProducerRecord<String,String>("testTopic",null,"test")).get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
     }
     private static Properties getProps() {
         Properties properties = new Properties();
