@@ -39,6 +39,7 @@ public class PgCDCApiTst {
 
         env.setParallelism(8);
         env.addSource(sourceFunction)
+//                .setParallelism(8)
                 .print("@@@@:").setParallelism(1); // use parallelism 1 for sink to keep message ordering
 
         env.execute();

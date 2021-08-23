@@ -37,7 +37,7 @@ public class MysqlCDCSqlTst {
         conf.setBoolean(ConfigConstants.LOCAL_START_WEBSERVER,true);
         StreamExecutionEnvironment env = StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(conf);
 
-        env.enableCheckpointing(3000, CheckpointingMode.EXACTLY_ONCE); // checkpoint every 3000 milliseconds
+        env.enableCheckpointing(6000, CheckpointingMode.EXACTLY_ONCE); // checkpoint every 3000 milliseconds
         env.setStateBackend(new HashMapStateBackend());
         env.getCheckpointConfig().setCheckpointStorage(new JobManagerCheckpointStorage());
         env.setParallelism(8);
@@ -58,6 +58,7 @@ public class MysqlCDCSqlTst {
                 "     'database-name' = 'test',\n" +
 //                "     'scan.startup.mode' = 'latest-offset',\n" +
                 "     'scan.startup.mode' = 'initial',\n" +
+                "     'scan.snapshot.fetch.size' = '10',\n" +
                 "     'table-name' = 'cdc')";
         tableEvn.executeSql(sql);
         Table table = tableEvn.sqlQuery("select * from cdc");
