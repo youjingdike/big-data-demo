@@ -45,6 +45,7 @@ public class MysqlCDCSqlTst {
                 .useBlinkPlanner().inStreamingMode().build();
         StreamTableEnvironment tableEvn = StreamTableEnvironment.create(env, blinkBatchSetting);
         String sql = "CREATE TABLE cdc (\n" +
+                "     id INT,\n" +
                 "     name STRING,\n" +
                 "     age INT,\n" +
                 "     PRIMARY KEY(name) NOT ENFORCED\n" +
@@ -55,7 +56,9 @@ public class MysqlCDCSqlTst {
                 "     'username' = 'cdc',\n" +
                 "     'password' = 'cdc',\n" +
                 "     'database-name' = 'test',\n" +
-                "     'table-name' = 'tst1')";
+//                "     'scan.startup.mode' = 'latest-offset',\n" +
+                "     'scan.startup.mode' = 'initial',\n" +
+                "     'table-name' = 'cdc')";
         tableEvn.executeSql(sql);
         Table table = tableEvn.sqlQuery("select * from cdc");
 //        DataStream<Tuple2<Boolean, Tuple3<Integer, String, Integer>>> tuple2DataStream = tableEvn.toRetractStream(table, TypeInformation.of(new TypeHint<Tuple3<Integer, String, Integer>>() {
@@ -73,7 +76,7 @@ public class MysqlCDCSqlTst {
 //            str += row.getField("name");
 //            return str;
 //        });
-        SingleOutputStreamOperator<Row> map1 = filter.map((MapFunction<Tuple2<Boolean, Row>, Row>) value -> {
+        SingleOutputStreamOperator<Row> resStream = filter.map((MapFunction<Tuple2<Boolean, Row>, Row>) value -> {
             Row row = value.f1;
             int arity = row.getArity();
             Object[] objects = new Object[arity + 1];
@@ -83,16 +86,16 @@ public class MysqlCDCSqlTst {
             objects[arity]=row.getKind().toString();
             return Row.of(objects);
 //            return row;
-        }).returns(new RowTypeInfo(TypeInformation.of(String.class),TypeInformation.of(Integer.class),TypeInformation.of(String.class)));
+        }).returns(new RowTypeInfo(TypeInformation.of(Integer.class),TypeInformation.of(String.class),TypeInformation.of(Integer.class),TypeInformation.of(String.class)));
 //        Schema schema = Schema.newBuilder().column("name", DataTypes.STRING()).column("age", DataTypes.INT()).build();
-//        Table table2 = tableEvn.fromDataStream(map1).as("name","age");
-        tableEvn.createTemporaryView("dd",map1,$("name"), $("age"),$("cdc_op"));
+//        Table table2 = tableEvn.fromDataStream(resStream).as("name","age");
+        tableEvn.createTemporaryView("dd",resStream,$("id"),$("name"), $("age"),$("cdc_op"));
         Table table1 = tableEvn.sqlQuery("select * from dd");
         table1.printSchema();
         tableEvn.toAppendStream(table1,Row.class).print("tableinfo:");
 
 //        map.print("str:").setParallelism(1);
-        map1.print("row1:").setParallelism(1);
+        resStream.print("row1:").setParallelism(1);
         env.execute();
     }
 }
