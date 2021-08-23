@@ -75,7 +75,7 @@ public class PgCDCSqlTst {
 //            str += row.getField("name");
 //            return str;
 //        });
-        SingleOutputStreamOperator<Row> map1 = filter.map((MapFunction<Tuple2<Boolean, Row>, Row>) value -> {
+        SingleOutputStreamOperator<Row> resStream = filter.map((MapFunction<Tuple2<Boolean, Row>, Row>) value -> {
             Row row = value.f1;
             int arity = row.getArity();
             Object[] objects = new Object[arity + 1];
@@ -88,15 +88,15 @@ public class PgCDCSqlTst {
         }).returns(new RowTypeInfo(TypeInformation.of(Integer.class),TypeInformation.of(String.class),TypeInformation.of(Integer.class),TypeInformation.of(String.class)));
 
 //        Schema schema = Schema.newBuilder().column("name", DataTypes.STRING()).column("age", DataTypes.INT()).build();
-//        Table table2 = tableEvn.fromDataStream(map1).as("name","age");
+//        Table table2 = tableEvn.fromDataStream(resStream).as("name","age");
 
-        tableEvn.createTemporaryView("dd",map1,$("id"),$("name"), $("age"),$("cdc_op"));
-        Table table1 = tableEvn.sqlQuery("select * from dd");
-//        table1.printSchema();
-        tableEvn.toAppendStream(table1,Row.class).print("tableinfo:").setParallelism(1);
+//        tableEvn.createTemporaryView("dd",resStream,$("id"),$("name"), $("age"),$("cdc_op"));
+//        Table table1 = tableEvn.sqlQuery("select * from dd");
+////        table1.printSchema();
+//        tableEvn.toAppendStream(table1,Row.class).print("tableinfo:").setParallelism(1);
 
 //        map.print("str:").setParallelism(1);
-//        map1.print("row1:").setParallelism(1);
+        resStream.print("row:").setParallelism(1);
         env.execute();
     }
 }

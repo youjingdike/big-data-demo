@@ -89,10 +89,10 @@ public class MysqlCDCSqlTst {
         }).returns(new RowTypeInfo(TypeInformation.of(Integer.class),TypeInformation.of(String.class),TypeInformation.of(Integer.class),TypeInformation.of(String.class)));
 //        Schema schema = Schema.newBuilder().column("name", DataTypes.STRING()).column("age", DataTypes.INT()).build();
 //        Table table2 = tableEvn.fromDataStream(resStream).as("name","age");
-        tableEvn.createTemporaryView("dd",resStream,$("id"),$("name"), $("age"),$("cdc_op"));
-        Table table1 = tableEvn.sqlQuery("select * from dd");
-        table1.printSchema();
-        tableEvn.toAppendStream(table1,Row.class).print("tableinfo:");
+//        tableEvn.createTemporaryView("dd",resStream,$("id"),$("name"), $("age"),$("cdc_op"));
+//        Table table1 = tableEvn.sqlQuery("select * from dd");
+//        table1.printSchema();
+//        tableEvn.toAppendStream(table1,Row.class).print("tableinfo:");
 
 //        map.print("str:").setParallelism(1);
         resStream.print("row1:").setParallelism(1);
