@@ -24,6 +24,7 @@ public class PgCDCApiTst {
                 .username("postgres")
                 .password("xq198522")
                 .slotName("tst_xq")
+                .tableList("public.cdc")//要加上schema名称
                 .debeziumProperties(properties)
                 .deserializer(new StringDebeziumDeserializationSchema()) // converts SourceRecord to String
                 .build();
@@ -35,6 +36,7 @@ public class PgCDCApiTst {
         env.enableCheckpointing(3000, CheckpointingMode.EXACTLY_ONCE); // checkpoint every 3000 milliseconds
         env.setStateBackend(new HashMapStateBackend());
         env.getCheckpointConfig().setCheckpointStorage(new JobManagerCheckpointStorage());
+
         env.setParallelism(8);
         env.addSource(sourceFunction)
                 .print("@@@@:").setParallelism(1); // use parallelism 1 for sink to keep message ordering

@@ -16,6 +16,7 @@ public class MysqlCDCApiTst {
                 .hostname("localhost")
                 .port(3306)
                 .databaseList("test") // monitor all tables under inventory database
+                .tableList("test.cdc") //要加上数据库名称
                 .username("cdc")
                 .password("cdc")
                 .deserializer(new StringDebeziumDeserializationSchema()) // converts SourceRecord to String
@@ -29,7 +30,9 @@ public class MysqlCDCApiTst {
         env.setStateBackend(new HashMapStateBackend());
         env.getCheckpointConfig().setCheckpointStorage(new JobManagerCheckpointStorage());
 
+
         env.addSource(sourceFunction)
+//                .setParallelism(8) //source的并行度只能为1
                 .print("@@@@:").setParallelism(1); // use parallelism 1 for sink to keep message ordering
 
         env.execute();
