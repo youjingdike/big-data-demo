@@ -2,6 +2,7 @@ package com.xq.tst;
 
 import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.api.common.functions.MapFunction;
+import org.apache.flink.api.common.typeinfo.BasicTypeInfo;
 import org.apache.flink.api.common.typeinfo.TypeHint;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.tuple.Tuple2;
@@ -15,6 +16,7 @@ import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.functions.sink.SinkFunction;
 import org.apache.flink.table.api.*;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.table.data.GenericRowData;
@@ -37,10 +39,10 @@ public class MysqlCDCSqlTst {
         conf.setBoolean(ConfigConstants.LOCAL_START_WEBSERVER,true);
         StreamExecutionEnvironment env = StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(conf);
 
-        env.enableCheckpointing(6000, CheckpointingMode.EXACTLY_ONCE); // checkpoint every 3000 milliseconds
-        env.setStateBackend(new HashMapStateBackend());
-        env.getCheckpointConfig().setCheckpointStorage(new JobManagerCheckpointStorage());
-        env.setParallelism(8);
+//        env.enableCheckpointing(6000, CheckpointingMode.EXACTLY_ONCE); // checkpoint every 3000 milliseconds
+//        env.setStateBackend(new HashMapStateBackend());
+//        env.getCheckpointConfig().setCheckpointStorage(new JobManagerCheckpointStorage());
+        env.setParallelism(4);
         EnvironmentSettings blinkBatchSetting = EnvironmentSettings.newInstance()
                 .useBlinkPlanner().inStreamingMode().build();
         StreamTableEnvironment tableEvn = StreamTableEnvironment.create(env, blinkBatchSetting);
@@ -58,7 +60,8 @@ public class MysqlCDCSqlTst {
                 "     'database-name' = 'test',\n" +
 //                "     'scan.startup.mode' = 'latest-offset',\n" +
                 "     'scan.startup.mode' = 'initial',\n" +
-                "     'scan.snapshot.fetch.size' = '10',\n" +
+//                "     'scan.snapshot.fetch.size' = '10',\n" +
+//                "     'scan.incremental.snapshot.chunk.size' = '8096',\n" +
                 "     'table-name' = 'cdc')";
         tableEvn.executeSql(sql);
         Table table = tableEvn.sqlQuery("select * from cdc");
@@ -77,17 +80,33 @@ public class MysqlCDCSqlTst {
 //            str += row.getField("name");
 //            return str;
 //        });
+
+        String[] fieldNames = new String[3];
+        fieldNames[0] = "id";
+        fieldNames[1] = "name";
+        fieldNames[2] = "age";
+//        fieldNames[3] = "op";
+        TypeInformation[] types = new TypeInformation[3];
+        types[0] = BasicTypeInfo.INT_TYPE_INFO;
+        types[1] = BasicTypeInfo.STRING_TYPE_INFO;
+        types[2] = BasicTypeInfo.INT_TYPE_INFO;
+//        types[3] = BasicTypeInfo.STRING_TYPE_INFO;
+        RowTypeInfo typeInfo = new RowTypeInfo(types,fieldNames);
         SingleOutputStreamOperator<Row> resStream = filter.map((MapFunction<Tuple2<Boolean, Row>, Row>) value -> {
             Row row = value.f1;
-            int arity = row.getArity();
-            Object[] objects = new Object[arity + 1];
-            for (int i = 0; i < arity; i++) {
-                objects[i] = row.getField(i);
-            }
-            objects[arity]=row.getKind().toString();
-            return Row.of(objects);
-//            return row;
-        }).returns(new RowTypeInfo(TypeInformation.of(Integer.class),TypeInformation.of(String.class),TypeInformation.of(Integer.class),TypeInformation.of(String.class)));
+//            int arity = row.getArity();
+//            Object[] objects = new Object[arity];
+//            for (int i = 0; i < arity; i++) {
+//                objects[i] = row.getField(i);
+//            }
+//            objects[arity]=row.getKind().toString();
+//            Row of = Row.of(objects);
+//            of.setKind(row.getKind());
+            return row;
+//            return Row.copy(row);
+        }).returns(typeInfo);
+        TypeInformation<Row> type = resStream.getType();
+        System.out.println(type.toString());
 //        Schema schema = Schema.newBuilder().column("name", DataTypes.STRING()).column("age", DataTypes.INT()).build();
 //        Table table2 = tableEvn.fromDataStream(resStream).as("name","age");
 //        tableEvn.createTemporaryView("dd",resStream,$("id"),$("name"), $("age"),$("cdc_op"));
@@ -96,7 +115,23 @@ public class MysqlCDCSqlTst {
 //        tableEvn.toAppendStream(table1,Row.class).print("tableinfo:");
 
 //        map.print("str:").setParallelism(1);
-        resStream.print("row1:").setParallelism(1);
+       /* SingleOutputStreamOperator<String> map = resStream.map(new MapFunction<Row, String>() {
+            @Override
+            public String map(Row value) throws Exception {
+                String s = value.getField("id") + ":" + value.getField("name") + ":" + value.getField("op");
+                return s;
+            }
+        });*/
+//        map.print().setParallelism(1);
+        resStream.addSink(new SinkFunction<Row>() {
+            @Override
+            public void invoke(Row value, Context context) throws Exception {
+                System.out.println(value.getKind());
+                System.out.println(value.getField("id") + ":" + value.getField("name") + ":" + value.getField("age"));
+//                System.out.println(value.getField("op"));
+            }
+        });
+//        resStream.print("row:").setParallelism(1);
         env.execute();
     }
 }

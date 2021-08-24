@@ -2,6 +2,7 @@ package com.xq.tst;
 
 import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.api.common.functions.MapFunction;
+import org.apache.flink.api.common.typeinfo.BasicTypeInfo;
 import org.apache.flink.api.common.typeinfo.TypeHint;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.tuple.Tuple2;
@@ -75,6 +76,17 @@ public class PgCDCSqlTst {
 //            str += row.getField("name");
 //            return str;
 //        });
+        String[] fieldNames = new String[4];
+        fieldNames[0] = "id";
+        fieldNames[1] = "name";
+        fieldNames[2] = "age";
+        fieldNames[3] = "op";
+        TypeInformation[] types = new TypeInformation[4];
+        types[0] = BasicTypeInfo.INT_TYPE_INFO;
+        types[1] = BasicTypeInfo.STRING_TYPE_INFO;
+        types[2] = BasicTypeInfo.INT_TYPE_INFO;
+        types[3] = BasicTypeInfo.STRING_TYPE_INFO;
+        RowTypeInfo typeInfo = new RowTypeInfo(types,fieldNames);
         SingleOutputStreamOperator<Row> resStream = filter.map((MapFunction<Tuple2<Boolean, Row>, Row>) value -> {
             Row row = value.f1;
             int arity = row.getArity();
@@ -85,7 +97,7 @@ public class PgCDCSqlTst {
             objects[arity]=row.getKind().toString();
             return Row.of(objects);
 //            return row;
-        }).returns(new RowTypeInfo(TypeInformation.of(Integer.class),TypeInformation.of(String.class),TypeInformation.of(Integer.class),TypeInformation.of(String.class)));
+        }).returns(typeInfo);
 
 //        Schema schema = Schema.newBuilder().column("name", DataTypes.STRING()).column("age", DataTypes.INT()).build();
 //        Table table2 = tableEvn.fromDataStream(resStream).as("name","age");
