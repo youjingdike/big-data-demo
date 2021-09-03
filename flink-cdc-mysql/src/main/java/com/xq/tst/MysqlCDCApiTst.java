@@ -9,6 +9,8 @@ import org.apache.flink.runtime.state.storage.JobManagerCheckpointStorage;
 import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
+import org.apache.flink.table.data.GenericRowData;
+import org.apache.flink.table.data.RowData;
 
 public class MysqlCDCApiTst {
     public static void main(String[] args) throws Exception {
@@ -16,7 +18,7 @@ public class MysqlCDCApiTst {
                 .hostname("localhost")
                 .port(3306)
                 .databaseList("test") // monitor all tables under inventory database
-                .tableList("test.cdc") //要加上数据库名称
+//                .tableList("test.tst_no_p") //要加上数据库名称
                 .username("cdc")
                 .password("cdc")
                 .deserializer(new StringDebeziumDeserializationSchema()) // converts SourceRecord to String
@@ -25,7 +27,7 @@ public class MysqlCDCApiTst {
         Configuration conf = new Configuration();
         conf.setBoolean(ConfigConstants.LOCAL_START_WEBSERVER,true);
         StreamExecutionEnvironment env = StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(conf);
-
+       
         env.enableCheckpointing(3000, CheckpointingMode.EXACTLY_ONCE); // checkpoint every 3000 milliseconds
         env.setStateBackend(new HashMapStateBackend());
         env.getCheckpointConfig().setCheckpointStorage(new JobManagerCheckpointStorage());

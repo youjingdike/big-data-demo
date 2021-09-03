@@ -20,6 +20,8 @@
         <module>netty-demo</module>
         <module>flink-cdc-mysql</module>
         <module>flink-cdc-pg</module>
+        <module>flink-upsert-kafka</module>
+        <module>flink-hive-sink</module>
     </modules>
 
     <properties>

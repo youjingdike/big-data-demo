@@ -15,11 +15,15 @@ import java.util.Map;
 import java.util.Properties;
 
 public class ConsumerDemo {
+    public static void main(String[] args) {
+        ConsumerDemo consumerDemo = new ConsumerDemo();
+        consumerDemo.kafkaHandler();
+    }
     private void kafkaHandler() {
         Properties consumerConf = getConsumerConf();
         final Map<TopicPartition, OffsetAndMetadata> currentOffset = new HashMap<>(32);
         final KafkaConsumer<String,String> kafkaConsumer = new KafkaConsumer(consumerConf);
-        final ArrayList<String> topics = Lists.newArrayList("testTopic");
+        final ArrayList<String> topics = Lists.newArrayList("upsert-tst");
         String groupId = consumerConf.getProperty("group.id");
         String brokerList = consumerConf.getProperty("bootstrap.servers");
         String reSet = consumerConf.getProperty("auto.offset.reset");
@@ -67,7 +71,8 @@ public class ConsumerDemo {
         for (;;) {
             ConsumerRecords<String,String> records = kafkaConsumer.poll(3000);
             records.forEach(s->{
-                System.out.println(s.value());
+                System.out.println(s.toString());
+//                System.out.println(s.value());
                 currentOffset.put(new TopicPartition(s.topic(),s.partition()),new OffsetAndMetadata(s.offset()+1,"no metadata"));
             });
             kafkaConsumer.commitSync(currentOffset);
@@ -76,12 +81,12 @@ public class ConsumerDemo {
 
     private Properties getConsumerConf() {
         Properties properties = new Properties();
-        properties.put("bootstrap.servers", "xxx:9092");
-        properties.put("group.id", "client-dev");
+        properties.put("bootstrap.servers", "localhost:9092");
+        properties.put("group.id", "client-dev2");
         properties.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         properties.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         properties.put("enable.auto.commit", "false");
-        properties.put("auto.offset.reset", "latest");
+        properties.put("auto.offset.reset", "earliest");
         return properties;
     }
 }
