@@ -4,7 +4,6 @@ import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
 import org.apache.flink.configuration.ConfigConstants;
 import org.apache.flink.configuration.Configuration;
-import org.apache.flink.configuration.RestartStrategyOptions;
 import org.apache.flink.core.fs.Path;
 import org.apache.flink.encoder.SimpleRowEncoder;
 import org.apache.flink.runtime.state.hashmap.HashMapStateBackend;
@@ -85,13 +84,13 @@ public class App
         });
         List<StreamingFileMultiSink.BucketsBuilder> rowFormatBuilders = new ArrayList<>();
         rowFormatBuilders.add(StreamingFileMultiSink.forRowFormat(new Path("hdfs://localhost:9000/tst0"), new SimpleRowEncoder<Row>(","), "tst0")
-                        .withBucketAssigner(new DateTimeBucketAssigner()).withRollingPolicy(OnCheckpointRollingPolicy.build()));
+            .withBucketAssigner(new DateTimeBucketAssigner()).withRollingPolicy(OnCheckpointRollingPolicy.build()));
         rowFormatBuilders.add(StreamingFileMultiSink.forRowFormat(new Path("hdfs://localhost:9000/tst1"), new SimpleRowEncoder<Row>("@"), "tst1")
-                        .withBucketAssigner(new DateTimeBucketAssigner()).withRollingPolicy(OnCheckpointRollingPolicy.build()));
-                rowFormatBuilders.add(StreamingFileMultiSink.forRowFormat(new Path("hdfs://localhost:9000/tst2"), new SimpleRowEncoder<Row>(","), "tst2")
-                        .withBucketAssigner(new DateTimeBucketAssigner()).withRollingPolicy(OnCheckpointRollingPolicy.build()));
-                        rowFormatBuilders.add(StreamingFileMultiSink.forRowFormat(new Path("hdfs://localhost:9000/tst3"), new SimpleRowEncoder<Row>("\t"), "tst3")
-                        .withBucketAssigner(new DateTimeBucketAssigner()).withRollingPolicy(OnCheckpointRollingPolicy.build()));
+            .withBucketAssigner(new DateTimeBucketAssigner()).withRollingPolicy(OnCheckpointRollingPolicy.build()));
+        rowFormatBuilders.add(StreamingFileMultiSink.forRowFormat(new Path("hdfs://localhost:9000/tst2"), new SimpleRowEncoder<Row>(","), "tst2")
+            .withBucketAssigner(new DateTimeBucketAssigner()).withRollingPolicy(OnCheckpointRollingPolicy.build()));
+        rowFormatBuilders.add(StreamingFileMultiSink.forRowFormat(new Path("hdfs://localhost:9000/tst3"), new SimpleRowEncoder<Row>("\t"), "tst3")
+            .withBucketAssigner(new DateTimeBucketAssigner()).withRollingPolicy(OnCheckpointRollingPolicy.build()));
 
         map.addSink(new StreamingFileMultiSink(rowFormatBuilders, 3000L));
 

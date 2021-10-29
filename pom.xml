@@ -16,12 +16,13 @@
         <module>kafkademo</module>
         <module>KafkaService</module>
         <module>nio-netty</module>
-        <module>flinkdemo</module>
+        <module>flinkdemo_1.9.3</module>
         <module>netty-demo</module>
         <module>flink-cdc-mysql</module>
         <module>flink-cdc-pg</module>
         <module>flink-upsert-kafka</module>
         <module>flink-hive-sink</module>
+        <module>flinkdemo_1.11.31</module>
     </modules>
 
     <properties>

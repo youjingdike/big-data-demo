@@ -2,6 +2,9 @@ package com.xq.tst;
 
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
+import org.apache.flink.api.common.typeinfo.TypeInformation;
+import org.apache.flink.api.java.functions.KeySelector;
+import org.apache.flink.api.java.typeutils.RowTypeInfo;
 import org.apache.flink.configuration.ConfigConstants;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.core.fs.Path;
@@ -13,12 +16,14 @@ import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.functions.KeyedProcessFunction;
 import org.apache.flink.streaming.api.functions.sink.filesystem.StreamingFileSink;
 import org.apache.flink.streaming.api.functions.sink.xq.StreamingFileMultiSink;
 import org.apache.flink.streaming.api.functions.sink.xq.bucketassigners.DateTimeBucketAssigner;
 import org.apache.flink.streaming.api.functions.sink.xq.rollingpolicies.OnCheckpointRollingPolicy;
 import org.apache.flink.streaming.api.functions.source.RichSourceFunction;
 import org.apache.flink.types.Row;
+import org.apache.flink.util.Collector;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -38,7 +43,7 @@ public class App1
         env.enableCheckpointing(60000, CheckpointingMode.EXACTLY_ONCE); // checkpoint every 3000 milliseconds
         env.setStateBackend(new HashMapStateBackend());
         env.getCheckpointConfig().setCheckpointStorage(new JobManagerCheckpointStorage());
-        env.getCheckpointConfig().setCheckpointStorage(new FileSystemCheckpointStorage("hdfs://localhost:9000/flink/ckp"));
+//        env.getCheckpointConfig().setCheckpointStorage(new FileSystemCheckpointStorage("hdfs://localhost:9000/flink/ckp"));
         env.setRestartStrategy(RestartStrategies.noRestart());
 
         DataStreamSource<Row> rowDataStreamSource = env.addSource(new RichSourceFunction<Row>() {
@@ -79,7 +84,22 @@ public class App1
             }
         });
 //        rowDataStreamSource.print();
-        SingleOutputStreamOperator<Row> map = rowDataStreamSource.map((MapFunction<Row, Row>) value -> {
+        SingleOutputStreamOperator<Row> process = rowDataStreamSource.keyBy(new KeySelector<Row, String>() {
+            @Override
+            public String getKey(Row value) throws Exception {
+                return ((Map)value.getField(0)).get("tableName").toString();
+            }
+        }).process(new KeyedProcessFunction<String, Row, Row>() {
+            @Override
+            public void processElement(Row value, KeyedProcessFunction<String, Row, Row>.Context ctx, Collector<Row> out) throws Exception {
+                System.out.println(value.getField(0));
+                out.collect(value);
+            }
+        }, new RowTypeInfo(TypeInformation.of(Map.class)));
+        TypeInformation<Row> type = process.getType();
+        System.out.println("@@@@@@@@"+type.toString());
+        process.print();
+        /*SingleOutputStreamOperator<Row> map = rowDataStreamSource.map((MapFunction<Row, Row>) value -> {
             System.out.println(value);
             return value;
         });
@@ -88,7 +108,7 @@ public class App1
         //如果正式文件含有同名的文件，不会覆盖文件，临时文件一直不会更改状态
         StreamingFileSink sink = StreamingFileSink.forRowFormat(new Path("hdfs://localhost:9000/tst0"), new SimpleRowEncoder<Row>("@"))
                 .withBucketAssigner(new DateTimeBucketAssigner()).withRollingPolicy(OnCheckpointRollingPolicy.build()).build();
-        map.addSink(sink);
+        map.addSink(sink);*/
 
         env.execute();
     }
