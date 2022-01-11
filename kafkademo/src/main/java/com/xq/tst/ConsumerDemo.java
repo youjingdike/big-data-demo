@@ -1,3 +1,4 @@
+/*
 package com.xq.tst;
 
 import com.google.common.collect.Lists;
@@ -81,7 +82,7 @@ public class ConsumerDemo {
 
     private Properties getConsumerConf() {
         Properties properties = new Properties();
-        properties.put("bootstrap.servers", "localhost:9092");
+        properties.put("bootstrap.servers", "192.168.80.101:9092,192.168.80.102:9092,192.168.80.103:9092");
         properties.put("group.id", "client-dev2");
         properties.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         properties.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
@@ -90,3 +91,4 @@ public class ConsumerDemo {
         return properties;
     }
 }
+*/

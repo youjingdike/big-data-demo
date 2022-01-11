@@ -22,8 +22,9 @@
         <module>flink-cdc-pg</module>
         <module>flink-upsert-kafka</module>
         <module>flink-hive-sink</module>
-        <module>flinkdemo_1.11.31</module>
         <module>flinkdemo_1.14.0</module>
+        <module>kafka_kerberos</module>
+        <module>flinkdemo_1.11.3</module>
     </modules>
 
     <properties>

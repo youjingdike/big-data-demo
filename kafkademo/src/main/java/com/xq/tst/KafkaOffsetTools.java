@@ -1,3 +1,4 @@
+/*
 package com.xq.tst;
 
 import kafka.api.PartitionOffsetRequestInfo;
@@ -139,3 +140,4 @@ public class KafkaOffsetTools {
         return map;
     }
 }
+*/

@@ -1,3 +1,4 @@
+/*
 package com.xq.tst;
 
 import kafka.api.GroupCoordinatorRequest;
@@ -26,11 +27,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+*/
 /**
  * @author : tyhy_xingqian
  * @Date  : Create in 14:35 2019/7/15
  * @Version : 1.0
- */
+ *//*
+
 public class KafkaInfoTool {
   private Logger logger = LoggerFactory.getLogger(KafkaInfoTool.class);
   final int timeOut = 100000;
@@ -43,13 +46,15 @@ public class KafkaInfoTool {
     return KAFKAINFOTOOL;
   }
 
+*/
 /**
  * 获取topic最后的偏移量(与分组无关)
  * @param brokerList
  * @param topics
  * @param clientId
  * @return
- */
+ *//*
+
 public Map<TopicAndPartition, Long> getOffsetWithTime(String brokerList, List<String> topics,
                                                   String clientId,long time) {
 
@@ -81,13 +86,15 @@ public Map<TopicAndPartition, Long> getOffsetWithTime(String brokerList, List<St
 
   }
 
-  /**
+  */
+/**
  * 获取topic最后的偏移量(与分组无关)
  * @param brokerList
  * @param topics
  * @param clientId
  * @return
- */
+ *//*
+
 public Map<TopicAndPartition, Long> getLastOffset(String brokerList, List<String> topics,
                                                   String clientId) {
 
@@ -119,13 +126,15 @@ public Map<TopicAndPartition, Long> getLastOffset(String brokerList, List<String
 
   }
 
-  /**
+  */
+/**
    * 获取topic最早的偏移量(与分组无关)
    * @param brokerList
    * @param topics
    * @param clientId
    * @return
-   */
+   *//*
+
   public Map<TopicAndPartition, Long> getEarliestOffset(String brokerList, List<String> topics,
       String clientId) {
 
@@ -155,13 +164,15 @@ public Map<TopicAndPartition, Long> getLastOffset(String brokerList, List<String
 
   }
 
-  /**
+  */
+/**
    * 获取某个消费者组的偏移量
    * @param brokerList
    * @param topics
    * @param clientId
    * @return
-   */
+   *//*
+
   public Map<TopicAndPartition, Long> getConsumerGroupOffset(String group,String brokerList, List<String> topics,
     String clientId) {
     Map<TopicAndPartition, Long> resultMap = new HashMap(16);
@@ -228,13 +239,15 @@ public Map<TopicAndPartition, Long> getLastOffset(String brokerList, List<String
   }
 
 
-  /**
+  */
+/**
    * 得到所有的 TopicAndPartition
    *
    * @param brokerList
    * @param topics
    * @return topicAndPartitions
-   */
+   *//*
+
   private Map<TopicAndPartition, BrokerEndPoint> findLeader(String brokerList, List<String> topics) {
     // create array list of TopicAndPartition
     Map<TopicAndPartition, BrokerEndPoint> topicAndPartitionBrokerMap = new HashMap<>(32);
@@ -280,14 +293,16 @@ public Map<TopicAndPartition, Long> getLastOffset(String brokerList, List<String
     return topicAndPartitionBrokerMap;
   }
 
-  /**
+  */
+/**
    * get earliest offset
    * @param consumer
    * @param topicAndPartition
    * @param clientId
    * @param time
    * @return
-   */
+   *//*
+
   private long getTopicAndPartitionOffset(SimpleConsumer consumer,
                                           TopicAndPartition topicAndPartition, String clientId, long time) {
     Map<TopicAndPartition, PartitionOffsetRequestInfo> requestInfo =
@@ -312,12 +327,14 @@ public Map<TopicAndPartition, Long> getLastOffset(String brokerList, List<String
     return offsets[0];
   }
   
-  /**
+  */
+/**
    * 得到所有的broker url,url之间用','隔开
    *
    * @param brokerlist
    * @return
-   */
+   *//*
+
   private String[] getBorkerUrlFromBrokerList(String brokerlist) {
     String[] brokers = brokerlist.split(",");
     for (int i = 0; i < brokers.length; i++) {
@@ -326,12 +343,14 @@ public Map<TopicAndPartition, Long> getLastOffset(String brokerList, List<String
     return brokers;
   }
 
-  /**
+  */
+/**
    * 得到broker url 与 其port 的映射关系
    *
    * @param brokerlist
    * @return
-   */
+   *//*
+
   private Map<String, Integer> getPortFromBrokerList(String brokerlist) {
     Map<String, Integer> map = new HashMap<String, Integer>(32);
     String[] brokers = brokerlist.split(",");
@@ -348,4 +367,4 @@ public Map<TopicAndPartition, Long> getLastOffset(String brokerList, List<String
     KafkaConsumer kafkaConsumer = new KafkaConsumer(null);
 //    kafkaConsumer.
   }
-}
+}*/

@@ -1,3 +1,4 @@
+/*
 package com.xq.tst;
 
 import com.ververica.cdc.connectors.mysql.debezium.EmbeddedFlinkDatabaseHistory;
@@ -30,15 +31,17 @@ public class MysqlCDCParaApiTst {
 
         StreamExecutionEnvironment env = StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(conf);
 
-//        env.enableCheckpointing(3000, CheckpointingMode.EXACTLY_ONCE); // checkpoint every 3000 milliseconds
-//        env.setStateBackend(new HashMapStateBackend());
-//        env.getCheckpointConfig().setCheckpointStorage(new JobManagerCheckpointStorage());
+        env.enableCheckpointing(3000, CheckpointingMode.EXACTLY_ONCE); // checkpoint every 3000 milliseconds
+        env.setStateBackend(new HashMapStateBackend());
+        env.getCheckpointConfig().setCheckpointStorage(new JobManagerCheckpointStorage());
         System.out.println("@@@@@@@@@@@@@@@");
 
         env.getConfig().setAutoWatermarkInterval(2000);
-        WatermarkStrategy.<Row>forBoundedOutOfOrderness(Duration.ofSeconds(5))
-                        .withTimestampAssigner((event,timestamp)-> (long) event.getField("timestamp"))
-                        .withIdleness(Duration.ofMinutes(1));
+
+        WatermarkStrategy<Row> rowWatermarkStrategy = WatermarkStrategy.<Row>forBoundedOutOfOrderness(Duration.ofSeconds(5))
+                .withTimestampAssigner((event, timestamp) -> (long) event.getField("timestamp"))
+                .withIdleness(Duration.ofMinutes(1));
+
         env.fromSource(parallelSource, WatermarkStrategy.noWatermarks(),"parallelSource")
 //                .setParallelism(2) //source的并行度只能为1
                 .print("@@@@:").setParallelism(1); // use parallelism 1 for sink to keep message ordering
@@ -57,23 +60,29 @@ public class MysqlCDCParaApiTst {
         properties.put("database.history.skip.unparseable.ddl", String.valueOf(true));
         properties.put("database.server.name", DATABASE_SERVER_NAME);
 
-        /**
+        */
+/**
          * The server id is required, it will be replaced to 'database.server.id' when build {@link
          * MySqlSplitReader}
-         */
-        /*if (serverId != null) {
+         *//*
+
+        */
+/*if (serverId != null) {
             properties.put(SERVER_ID.key(), serverId);
-        }*/
+        }*//*
+
 //        properties.put(SCAN_INCREMENTAL_SNAPSHOT_CHUNK_SIZE.key(), String.valueOf(1111));
 //        properties.put(SCAN_SNAPSHOT_FETCH_SIZE.key(), String.valueOf(122));
 //        properties.put("connect.timeout.ms", String.valueOf(connectTimeout.toMillis()));
 
         properties.put("database.whitelist", "test");
-//        properties.put("table.whitelist", "test.cdc");
+        properties.put("table.whitelist", "test.cdc");
 //        properties.put("table.whitelist", "test.tst_no_p");
-        /*if (serverTimeZone != null) {
+        */
+/*if (serverTimeZone != null) {
             properties.put("database.serverTimezone", serverTimeZone.toString());
-        }*/
+        }*//*
+
 
         // set mode
         properties.put("scan.startup.mode", "initial");
@@ -83,3 +92,4 @@ public class MysqlCDCParaApiTst {
         return Configuration.fromMap(properties);
     }
 }
+*/

@@ -18,8 +18,12 @@ public class StreamWordCount {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(conf);
         env.setParallelism(8);
         env.disableOperatorChaining();
-
-        DataStreamSource<String> streamSource = env.socketTextStream("localhost", 7777);
+        System.out.println(env.getConfig().getGlobalJobParameters());
+        env.getConfig().getGlobalJobParameters().toMap().forEach((k,v)->{
+            System.out.println(k+":"+v);
+        });
+        DataStreamSource<String> streamSource = env.fromElements("sdfsd,dfsdfd", "sdfsdc,dfsdf");
+//        DataStreamSource<String> streamSource = env.socketTextStream("localhost", 7777);
         SingleOutputStreamOperator<Tuple2<String, Integer>> sum = streamSource.flatMap(new FlatMapFunction<String, String>() {
             private static final long serialVersionUID = 7035522967585184429L;
 
