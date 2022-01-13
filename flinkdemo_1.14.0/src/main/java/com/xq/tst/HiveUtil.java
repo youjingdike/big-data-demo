@@ -1,13 +1,21 @@
-/*
 package com.xq.tst;
 
+import com.alibaba.fastjson.JSON;
+import org.apache.flink.api.common.typeinfo.TypeInformation;
+import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.api.java.hadoop.mapred.utils.HadoopUtils;
+import org.apache.flink.api.java.typeutils.RowTypeInfo;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.connectors.hive.util.JobConfUtils;
+import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.table.catalog.CatalogTable;
 import org.apache.flink.table.catalog.ObjectIdentifier;
 import org.apache.flink.table.catalog.exceptions.CatalogException;
+import org.apache.flink.table.data.RowData;
 import org.apache.flink.table.filesystem.FileSystemConnectorOptions;
+import org.apache.flink.table.types.DataType;
+import org.apache.flink.types.Row;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.mapred.JobConf;
@@ -30,18 +38,39 @@ public class HiveUtil {
     private static final Logger LOG = LoggerFactory.getLogger(HiveUtil.class);
     public static final String HIVE_SITE_FILE = "hive-site.xml";
 
-    public static HiveTableSinkNew getHiveTableSink(Configuration conf, Map<String,String> options) {
+    public static void getHiveTableSink(Configuration conf, Map<String,String> configs, DataStream<Row> dataStream) {
         Integer configuredParallelism =
-                Configuration.fromMap(options)
+                Configuration.fromMap(configs)
                         .get(FileSystemConnectorOptions.SINK_PARALLELISM);
-        HiveConf hiveConf = createHiveConf(options.get("hive-conf-dir"),options.get("hadoop-conf-dir"));
+        HiveConf hiveConf = createHiveConf(configs.get("hive-conf-dir"),configs.get("hadoop-conf-dir"));
         JobConf jobConf = JobConfUtils.createJobConfWithCredentials(hiveConf);
-        return new HiveTableSinkNew(
+
+        String partition = configs.get("assignerColumn");
+        String[] partitions = null;
+        if (!"".equals(partition)){
+            partitions = partition.split(",");
+        }
+        RowTypeInfo rowType = (RowTypeInfo)dataStream.getType();
+        //根据参数自行处理
+        /*RowTypeInfo rowType = new RowTypeInfo(new TypeInformation[]{Types.STRING, Types.STRING, new RowTypeInfo(sourceFieldsType, sourceFields), Types.STRING, Types.LONG},
+                new String[]{"after", "before", "source", "op", "ts_ms"});*/
+        CatalogTable catalogTable = new CatalogTableBuilder()
+                .setProps(configs)
+                .setDataTypes(DataTypeUtils.generateDataType(rowType, JSON.parseObject(configs.get("schema")).getJSONObject("properties"), JSON.parseObject(configs.get("notNullSchema"))))
+                .setFieldNames(rowType.getFieldNames())
+                .setPrimaryKeys(null)
+                .setPartitionKeys(partitions)
+                .setTypeIn(DataTypeUtils.en(rowType))
+                .builder();
+        HiveTableSinkNew hiveTableSinkNew = new HiveTableSinkNew(
                 conf,
                 jobConf,
                 ObjectIdentifier.of("catalogName", "databaseName", "objectName"),
-                new CatalogTable(),
+                catalogTable,
                 configuredParallelism);
+        DataType[] dataTypes = DataTypeUtils.ex(rowType);
+        SingleOutputStreamOperator<RowData> rowDataStream = dataStream.flatMap(new RowDataMapper(dataTypes));
+        hiveTableSinkNew.consume(rowDataStream);
     }
 
     static HiveConf createHiveConf(@Nullable String hiveConfDir, @Nullable String hadoopConfDir) {
@@ -111,4 +140,3 @@ public class HiveUtil {
     }
 
 }
-*/

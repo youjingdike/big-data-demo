@@ -103,7 +103,7 @@ public class HiveTableSinkNew {
     }
 
     public DataStreamSink<?> consume(
-            DataStream<RowData> dataStream, /*boolean isBounded,*/ DynamicTableSink.DataStructureConverter converter) {
+            DataStream<RowData> dataStream/*, boolean isBounded, DynamicTableSink.DataStructureConverter converter*/) {
         checkAcidTable(catalogTable.getOptions(), identifier.toObjectPath());
 
         try (HiveMetastoreClientWrapper client =
