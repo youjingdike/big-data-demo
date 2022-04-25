@@ -26,6 +26,7 @@ public class HdfsDemo {
         FileSystem fs = null;
         try {
             fs = FileSystem.get(conf);
+            FileSystem.get(new Path("").toUri(), conf);
         } catch (IOException e) {
             e.printStackTrace();
         }

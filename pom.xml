@@ -14,7 +14,7 @@
         <module>hivedemo</module>
         <module>hive-export-data</module>
         <module>kafkademo</module>
-        <module>KafkaService</module>
+        <!--<module>KafkaService</module>-->
         <module>nio-netty</module>
         <module>flinkdemo_1.9.3</module>
         <module>netty-demo</module>
@@ -25,6 +25,7 @@
         <module>flinkdemo_1.14.0</module>
         <module>kafka_kerberos</module>
         <module>flinkdemo_1.11.3</module>
+        <module>tst-project</module>
     </modules>
 
     <properties>
