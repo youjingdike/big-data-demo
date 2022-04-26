@@ -21,6 +21,12 @@ object Tst {
     //configMap2.put("5","5")
     configMap2.asScala.foreach(println(_))
 
+    println("@@@@@@@@")
+    //该方式不能对map做修改，可使用第一种方式转换
+    val configMap3 = mapAsJavaMapConverter(configs).asJava
+    //configMap3.put("6","6")
+    configMap3.asScala.foreach(println(_))
+
     val databaseList = new ArrayBuffer[String]
     /*def databaseList(databaseList: String*) = {
       this.configFactory.databaseList(databaseList)
