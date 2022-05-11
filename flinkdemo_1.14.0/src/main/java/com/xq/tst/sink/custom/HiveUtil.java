@@ -1,8 +1,8 @@
-package com.xq.tst;
+package com.xq.tst.sink.custom;
 
 import com.alibaba.fastjson.JSON;
-import org.apache.flink.api.common.typeinfo.TypeInformation;
-import org.apache.flink.api.common.typeinfo.Types;
+import com.xq.tst.sink.hive.CatalogTableBuilder;
+import com.xq.tst.sink.hive.HiveSink;
 import org.apache.flink.api.java.hadoop.mapred.utils.HadoopUtils;
 import org.apache.flink.api.java.typeutils.RowTypeInfo;
 import org.apache.flink.configuration.Configuration;
@@ -38,7 +38,8 @@ public class HiveUtil {
     private static final Logger LOG = LoggerFactory.getLogger(HiveUtil.class);
     public static final String HIVE_SITE_FILE = "hive-site.xml";
 
-    public static void getHiveTableSink(Configuration conf, Map<String,String> configs, DataStream<Row> dataStream) {
+    public static void addHiveSink(Configuration conf, Map<String,String> configs, DataStream<Row> dataStream) {
+
         Integer configuredParallelism =
                 Configuration.fromMap(configs)
                         .get(FileSystemConnectorOptions.SINK_PARALLELISM);
@@ -62,15 +63,26 @@ public class HiveUtil {
                 .setPartitionKeys(partitions)
                 .setTypeIn(DataTypeUtils.en(rowType))
                 .builder();
-        HiveTableSinkNew hiveTableSinkNew = new HiveTableSinkNew(
+        HiveSink hiveSink = new HiveSink(
                 conf,
                 jobConf,
                 ObjectIdentifier.of("catalogName", "databaseName", "objectName"),
                 catalogTable,
                 configuredParallelism);
         DataType[] dataTypes = DataTypeUtils.ex(rowType);
+        /*SingleOutputStreamOperator<RowData> rowDataStream = dataStream.flatMap(new FlatMapFunction<Row, RowData>() {
+            @Override
+            public void flatMap(Row value, Collector<RowData> out) throws Exception {
+                int arity = value.getArity();
+                GenericRowData rowData = new GenericRowData(arity);
+                for (int i = 0; i < arity; i++) {
+                    rowData.setField(i,value.getField(i));
+                }
+                out.collect(rowData);
+            }
+        });*/
         SingleOutputStreamOperator<RowData> rowDataStream = dataStream.flatMap(new RowDataMapper(dataTypes));
-        hiveTableSinkNew.consume(rowDataStream);
+        hiveSink.consume(rowDataStream);
     }
 
     static HiveConf createHiveConf(@Nullable String hiveConfDir, @Nullable String hadoopConfDir) {

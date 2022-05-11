@@ -1,4 +1,4 @@
-package com.xq.tst;
+package com.xq.tst.app;
 
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;

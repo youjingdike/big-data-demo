@@ -1,4 +1,4 @@
-package com.xq.tst;
+package com.xq.tst.app;
 
 import org.apache.flink.configuration.ConfigConstants;
 import org.apache.flink.configuration.Configuration;

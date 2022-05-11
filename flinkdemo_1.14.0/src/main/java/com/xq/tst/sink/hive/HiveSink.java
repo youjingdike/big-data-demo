@@ -1,4 +1,4 @@
-package com.xq.tst;
+package com.xq.tst.sink.hive;
 
 import org.apache.flink.api.common.serialization.BulkWriter;
 import org.apache.flink.configuration.ReadableConfig;
@@ -28,7 +28,6 @@ import org.apache.flink.table.catalog.hive.client.HiveShim;
 import org.apache.flink.table.catalog.hive.client.HiveShimLoader;
 import org.apache.flink.table.catalog.hive.factories.HiveCatalogFactoryOptions;
 import org.apache.flink.table.catalog.hive.util.HiveReflectionUtils;
-import org.apache.flink.table.connector.sink.DynamicTableSink;
 import org.apache.flink.table.data.RowData;
 import org.apache.flink.table.filesystem.FileSystemConnectorOptions;
 import org.apache.flink.table.filesystem.FileSystemTableSink;
@@ -38,7 +37,6 @@ import org.apache.flink.table.filesystem.stream.compact.CompactReader;
 import org.apache.flink.table.types.logical.LogicalType;
 import org.apache.flink.table.types.logical.RowType;
 import org.apache.flink.table.utils.TableSchemaUtils;
-import org.apache.flink.util.FlinkRuntimeException;
 import org.apache.flink.util.Preconditions;
 import org.apache.flink.util.StringUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -64,9 +62,9 @@ import static org.apache.flink.table.filesystem.FileSystemConnectorOptions.*;
 import static org.apache.flink.table.filesystem.FileSystemConnectorOptions.SINK_ROLLING_POLICY_FILE_SIZE;
 import static org.apache.flink.table.filesystem.stream.compact.CompactOperator.convertToUncompacted;
 
-public class HiveTableSinkNew {
+public class HiveSink {
 
-    private static final Logger LOG = LoggerFactory.getLogger(HiveTableSinkNew.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HiveSink.class);
 
     private final ReadableConfig flinkConf;
     private final JobConf jobConf;
@@ -83,7 +81,7 @@ public class HiveTableSinkNew {
     @Nullable private final Integer configuredParallelism;
 
 
-    public HiveTableSinkNew(
+    public HiveSink(
             ReadableConfig flinkConf,
             JobConf jobConf,
             ObjectIdentifier identifier,

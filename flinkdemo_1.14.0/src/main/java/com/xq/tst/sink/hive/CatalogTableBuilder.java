@@ -1,4 +1,4 @@
-package com.xq.tst;
+package com.xq.tst.sink.hive;
 
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.table.api.TableSchema;

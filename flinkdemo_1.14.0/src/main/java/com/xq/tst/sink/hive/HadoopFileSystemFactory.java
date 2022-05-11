@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.xq.tst;
+package com.xq.tst.sink.hive;
 
 import org.apache.flink.connectors.hive.JobConfWrapper;
 import org.apache.flink.core.fs.FileSystem;

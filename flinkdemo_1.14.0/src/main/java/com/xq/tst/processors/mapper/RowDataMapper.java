@@ -1,7 +1,8 @@
-package com.xq.tst;
+package com.xq.tst.processors.mapper;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.xq.tst.processors.rewrite.DataFormatConvertersRewrite;
 import org.apache.flink.api.common.functions.RichFlatMapFunction;
 import org.apache.flink.api.java.typeutils.RowTypeInfo;
 import org.apache.flink.configuration.Configuration;
@@ -18,22 +19,22 @@ public class RowDataMapper extends RichFlatMapFunction<Row, RowData> {
 
     private DataFormatConvertersRewrite.RowConverter rowConverter;
     private static final Logger LOG = LoggerFactory.getLogger(RowDataMapper.class);
-//    private boolean isStrictCheck;
-//
-//    private RowTypeInfo rowTypeInfo;
-//    private JSONObject schemaObject;
-//    private Map<Object, Object> configs;
+    private boolean isStrictCheck;
 
-    public RowDataMapper(DataType[] dataTypes/*, RowTypeInfo rowTypeInfo, Map<Object, Object>  configs*/) {
+    private RowTypeInfo rowTypeInfo;
+    private JSONObject schemaObject;
+    private Map<Object, Object> configs;
+
+    public RowDataMapper(DataType[] dataTypes, RowTypeInfo rowTypeInfo, Map<Object, Object>  configs) {
         this.rowConverter = new DataFormatConvertersRewrite.RowConverter(dataTypes);
-//        this.rowTypeInfo = rowTypeInfo;
-//        this.configs = configs;
+        this.rowTypeInfo = rowTypeInfo;
+        this.configs = configs;
     }
 
     @Override
     public void open(Configuration parameters) throws Exception {
-//        schemaObject = JSON.parseObject(configs.get("schema").toString());
-//        isStrictCheck = Boolean.valueOf(configs.getOrDefault("isStrictCheck", "false").toString());
+        schemaObject = JSON.parseObject(configs.get("schema").toString());
+        isStrictCheck = Boolean.valueOf(configs.getOrDefault("isStrictCheck", "false").toString());
         super.open(parameters);
     }
 
@@ -46,10 +47,6 @@ public class RowDataMapper extends RichFlatMapFunction<Row, RowData> {
                 LOG.error(String.format("数据%s: 字段长度校验不通过！", row));
                 return;
             }
-        }
-        if (!MetadataCheck.checkDecimalLength(rowTypeInfo, schemaObject, row)) {
-            LOG.error(String.format("数据%s: 字段长度校验不通过！", row));
-            return;
         }*/
         collector.collect(rowConverter.toInternal(row));
     }

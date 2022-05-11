@@ -1,4 +1,4 @@
-package com.xq.tst;
+package com.xq.tst.sink.custom;
 
 import com.alibaba.fastjson.JSONObject;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
