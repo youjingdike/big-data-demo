@@ -1,7 +1,5 @@
 package com.xq.tst.processors.rewrite;
 
-import com.ksyun.dc.streaming.flink.failure.FailureHandler;
-import com.ksyun.dc.streaming.flink.failure.ThrowIfFail;
 import org.apache.flink.api.java.typeutils.RowTypeInfo;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.core.fs.Path;
@@ -50,7 +48,7 @@ public class StreamingFileWriterRewrite<IN> extends AbstractStreamingWriter<IN, 
     private String logFieldsIfFail;
     private String logPercentIfFail;
 
-    private ThrowIfFail throwIfFail;
+//    private ThrowIfFail throwIfFail;
     private Throwable throwException = null;
 
     private Map<Object,Object> configs;
@@ -122,8 +120,8 @@ public class StreamingFileWriterRewrite<IN> extends AbstractStreamingWriter<IN, 
         shutdownIfFail = configs.getOrDefault("shutdownIfFail", "false").toString();
         shutdownInTimeIfFail = configs.getOrDefault("shutdownInTimeIfFail", "1").toString();
         shutdownWithFailCount = configs.getOrDefault("shutdownWithFailCount", "1").toString();
-        shutdownCondition = configs.getOrDefault("shutdownCondition", FailureHandler.ONE_FAILURE()).toString();
-        throwIfFail = new ThrowIfFail(Integer.valueOf(shutdownWithFailCount), Integer.valueOf(shutdownInTimeIfFail), shutdownCondition);
+//        shutdownCondition = configs.getOrDefault("shutdownCondition", FailureHandler.ONE_FAILURE()).toString();
+//        throwIfFail = new ThrowIfFailCompletableFuture(Integer.valueOf(shutdownWithFailCount), Integer.valueOf(shutdownInTimeIfFail), shutdownCondition);
         logIfFail = configs.getOrDefault("logIfFail", "false").toString();
         logFieldsIfFail = configs.getOrDefault("logFieldsIfFail", "").toString();
         logPercentIfFail = configs.getOrDefault("logPercentIfFail", "100").toString();
@@ -136,18 +134,18 @@ public class StreamingFileWriterRewrite<IN> extends AbstractStreamingWriter<IN, 
             super.processElement(element);
             if (Boolean.valueOf(failureHandlerProxyEnable)) {
                 // 异常策略、记录出错次数, 到达次数则停止
-                FailureHandler.shutdownProxy(Boolean.valueOf(shutdownIfFail), throwIfFail, throwException, "Hive");
+//                FailureHandler.shutdownProxy(Boolean.valueOf(shutdownIfFail), throwIfFail, throwException, "Hive");
             }
         } catch (Exception ioe) {
             LOG.error("buckets.onElement IOException", ioe);
             if (Boolean.valueOf(failureHandlerProxyEnable)) {
                 // 异常打印日志
-                FailureHandler.logProxy(Boolean.valueOf(logIfFail),
-                        Integer.valueOf(logPercentIfFail),
-                        FailureHandler.getHiveLog((RowData) element.getValue(), logFieldsIfFail, rowTypeInfo),
-                        FailureHandler.LOG_RANDOM());
-                // 失败次数计数
-                throwIfFail.linkedListAdd();
+//                FailureHandler.logProxy(Boolean.valueOf(logIfFail),
+//                        Integer.valueOf(logPercentIfFail),
+//                        FailureHandler.getHiveLog((RowData) element.getValue(), logFieldsIfFail, rowTypeInfo),
+//                        FailureHandler.LOG_RANDOM());
+//                // 失败次数计数
+//                throwIfFail.linkedListAdd();
             } else {
                 throw ioe;
             }
