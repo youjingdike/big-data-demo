@@ -27,6 +27,7 @@
         <module>flinkdemo_1.11.3</module>
         <module>tst-project</module>
         <module>CompletableFutureTst</module>
+        <module>VertxTst</module>
     </modules>
 
     <properties>

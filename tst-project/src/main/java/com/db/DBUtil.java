@@ -40,10 +40,14 @@ public class DBUtil {
                 String password=properties.getProperty("password");  
                 conn = DriverManager.getConnection(url,user,password);*/
                 
-                Class.forName(properties.getProperty("driver")).newInstance(); 
+                /*Class.forName(properties.getProperty("driver")).newInstance();
                 String url=properties.getProperty("url");
                 String user=properties.getProperty("user"); 
-                String password=properties.getProperty("password"); 
+                String password=properties.getProperty("password"); */
+                Class.forName("com.mysql.jdbc.Driver").newInstance();
+                String url = "jdbc:mysql://127.0.0.1:3306/tst?useUnicode=true&characterEncoding=utf8&createDatabaseIfNotExist=true&useSSL=false";
+                String user = "root";
+                String password = "123456";
                 conn= DriverManager.getConnection(url,user,password);  
 
             } catch (ClassNotFoundException e) {
