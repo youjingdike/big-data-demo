@@ -26,8 +26,9 @@
         <module>kafka-kerberos</module>
         <module>flinkdemo_1.11.3</module>
         <module>tst-project</module>
-        <module>CompletableFutureTst</module>
-        <module>VertxTst</module>
+        <module>completablefuture-tst</module>
+        <module>vertx-tst</module>
+        <module>redisson-tst</module>
     </modules>
 
     <properties>

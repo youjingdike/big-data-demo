@@ -65,7 +65,6 @@ public class App
                         System.out.println("@@@@@");
                         System.out.println(e);
                         System.out.println("@@@@@");
-                        pool.close();
                         countDownLatch.countDown();
                     })
                     .onSuccess(rows -> {
@@ -79,11 +78,7 @@ public class App
 
         countDownLatch.await();
         System.out.println("用时："+(System.currentTimeMillis() - start) + "ms");
-        /*pool.close(new Handler<AsyncResult<Void>>() {
-            @Override
-            public void handle(AsyncResult<Void> voidAsyncResult) {
-                System.out.println(voidAsyncResult.succeeded());
-            }
-        });*/
+//        pool.close();
+        pool.close(voidAsyncResult -> System.out.println(voidAsyncResult.succeeded()));
     }
 }
