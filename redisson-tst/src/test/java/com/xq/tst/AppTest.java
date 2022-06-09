@@ -19,10 +19,14 @@ import org.redisson.config.TransportMode;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 /**
  * Unit test for simple App.
@@ -111,20 +115,41 @@ public class AppTest {
     }
 
     @Test
-    public void tstZset() throws InterruptedException {
+    public void tstZset() throws InterruptedException, ExecutionException {
 
-        RScoredSortedSet<String> set = redisson.getScoredSortedSet("setKey", new StringCodec(CharsetUtil.UTF_8));
-
+        String key = "setKey";
+        RScoredSortedSet<String> set = redisson.getScoredSortedSet(key, new StringCodec(CharsetUtil.UTF_8));
+        CompletableFuture<Collection<MyPojo>> completableFuture = new CompletableFuture<>();
+        MyPojo myPojo = new MyPojo();
 //        CountDownLatch countDownLatch = new CountDownLatch(1);
-        set.valueRangeAsync(10, true, 40, true).whenCompleteAsync((strings, throwable) -> {
+        /*set.valueRangeAsync(10, true, 40, true).whenCompleteAsync((strings, throwable) -> {
             System.out.println("~~~~~~~~~~~~");
             strings.stream().forEach(System.out::println);
             System.out.println("~~~~~~~~~~~~");
 //            countDownLatch.countDown();
-        });
+        });*/
+        getZset(key,completableFuture,0,myPojo,10D,40D,set);
         System.out.println("wait");
+        completableFuture.get().stream().forEach(myPojo1 -> System.out.println(myPojo1.getName()));
 //        countDownLatch.await();
 
+    }
+
+    private void getZset(String key, CompletableFuture<Collection<MyPojo>> future,int current,MyPojo myPojo,Double start,Double end,RScoredSortedSet<String> set) {
+        set.valueRangeAsync(start,true,end,true).whenCompleteAsync((strings, throwable) -> {
+            if (current <= 5) {
+                System.out.println("current:"+current);
+                getZset(key, future, current+1, myPojo, start, end, set);
+            } else {
+                StringBuffer sb = new StringBuffer();
+                strings.stream().forEach(s -> {
+                    sb.append(s).append(",");
+                });
+                myPojo.setKey(key);
+                myPojo.setName(sb.toString());
+                future.complete(Collections.singletonList(myPojo));
+            }
+        });
     }
 
     @After

@@ -13,16 +13,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * Unit test for simple App.
  */
-public class TstFuture
-{
-    /**
-     * Rigorous Test :-)
-     */
-    @Test
-    public void shouldAnswerWithTrue()
-    {
-        assertTrue( true );
-    }
+public class TstFuture {
 
     /*
     * 1.创建异步线程
@@ -368,13 +359,15 @@ public class TstFuture
     public void tstAssess() {
         CompletableFuture<Integer> future = CompletableFuture
                 .supplyAsync(() -> {
-                    try {
-                        Thread.sleep(1000);
-                    } catch (Exception e) {
+                        try {
+                            Thread.sleep(1000);
+                        } catch (Exception e) {
                     }
                     return "hello world";
                 })
-                .thenApply(data -> 1);
+                .thenApply(data -> {
+                    return 1;
+                });
 
 
         System.out.println("任务完成前:" + future.isDone());
