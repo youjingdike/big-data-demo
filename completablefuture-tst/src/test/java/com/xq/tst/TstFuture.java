@@ -369,8 +369,8 @@ public class TstFuture {
                     return 1;
                 });
 
-
         System.out.println("任务完成前:" + future.isDone());
+        //如果不调用complete()就打印的是1，是thenApply()的返回值，调用了complete(),就重新给future的结果进行了赋值。
         future.complete(10);
         System.out.println("任务完成后:" + future.join());
     }
