@@ -108,7 +108,7 @@ public class AppTest {
         set.add(10,"ddd");
         Map<String, Double> newValues = new HashMap<>();
         newValues.put("4", 40D);
-        newValues.put("5", 50D);
+        newValues.put("5", 50.6D);
         newValues.put("6", 60D);
         int newValuesAmount = set.addAll(newValues);
 
