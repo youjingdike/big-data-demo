@@ -4,11 +4,13 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.BiConsumer;
 
 /**
  * Unit test for simple App.
@@ -38,6 +40,23 @@ public class TstFuture {
         String name = future.join();
         System.out.println("@@@@@:"+name);
         executor.shutdown(); // 线程池需要关闭
+
+        //也可以直接new一个
+        CompletableFuture<String> completableFuture = new CompletableFuture<>();
+        completableFuture.complete("tst");
+//        completableFuture.completeExceptionally(new RuntimeException("error"));
+        completableFuture.whenCompleteAsync(new BiConsumer<String, Throwable>() {
+            @Override
+            public void accept(String s, Throwable throwable) {
+                if (throwable != null) {
+                    System.out.println(throwable.getMessage());
+                } else {
+                    System.out.println(s);
+                }
+            }
+        });
+//        System.out.println(completableFuture.get());
+//        completableFuture.join();
 
         //有时候是需要构建一个常量的CompletableFuture
         CompletableFuture<String> stringCompletableFuture = CompletableFuture.completedFuture("123");
