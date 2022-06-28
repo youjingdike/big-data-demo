@@ -39,8 +39,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.NavigableMap;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TreeMap;
 
 public class TestUseJunit {
     
@@ -55,6 +57,7 @@ public class TestUseJunit {
         System.out.println("nihao:我不是static");
     }*/
     public static void main(String[] args) {
+/*
         System.out.println("sssssssssssssssss" + new Man("x").getClass());
         int i = 0;
         for (;i<5;i++) {
@@ -64,6 +67,20 @@ public class TestUseJunit {
         --i;
         System.out.println(i);
         assert i == 5;
+*/
+
+        TreeMap<Long, String> treeMap = new TreeMap<>();
+        treeMap.put(1L,"1L");
+        treeMap.put(2L,"2L");
+        treeMap.put(3L,"3L");
+        treeMap.put(4L,"4L");
+        treeMap.put(5L,"5L");
+
+        NavigableMap<Long, String> headMap = treeMap.headMap(3L, true);
+        headMap.forEach((aLong, s) -> System.out.println(s));
+        headMap.clear();
+        System.out.println("@@@@@@@@@");
+        treeMap.forEach(((aLong, s) -> System.out.println(s)));
     }
     
     //调用这个方法即可传多个参数，也可传数组

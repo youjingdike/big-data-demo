@@ -9,7 +9,7 @@ public class InterTester {
 	@Test
 	public void test() {
 		/*
-		 * 1.函数式接口就是一个具有一个方法的普通接口。像这样的接口，可以被隐式转换为lambda表达式。
+		 * 1.函数式接口就是一个具有一个抽象方法的普通接口。像这样的接口，可以被隐式转换为lambda表达式。
 		 * 2.需要记住的一件事是：默认方法与静态方法并不影响函数式接口的契约，可以任意使用：
 		 */
 		Defaulable defaulable = DefaulableFactory.create( DefaultableImpl::new );
