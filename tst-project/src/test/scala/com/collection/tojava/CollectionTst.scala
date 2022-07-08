@@ -79,6 +79,6 @@ object CollectionTst {
 
   //变长参数
   def database(databaseList: String*) = {
-      databaseList.foreach(println(_))
-    }
+    databaseList.foreach(println(_))
+  }
 }
