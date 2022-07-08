@@ -3,9 +3,17 @@ package com.collection.tojava
 import java.util
 import scala.collection.{JavaConversions, JavaConverters}
 import scala.collection.JavaConverters._
+import scala.collection.JavaConversions._
 import scala.collection.mutable.ArrayBuffer
 
 object CollectionTst {
+
+  /*
+  * scala的集合 -scala.collection
+  *            -scala.collection.immutable
+  *            -scala.collection.mutable
+  */
+
   def main(args: Array[String]): Unit = {
     val scalaImmutableMap: Map[Any, Any] = Map("1" -> "tst", "2" -> "tst1");
     val scalaMutableMap: scala.collection.mutable.Map[Any, Any] = scala.collection.mutable.Map("1" -> "tst", "2" -> "tst1");
@@ -41,13 +49,12 @@ object CollectionTst {
     tuples.put("3","3")
     tuples.asScala.foreach(println(_))
 
+    println("@@@@@@@@41")
     val databaseList = new ArrayBuffer[String]
-    /*def databaseList(databaseList: String*) = {
-      this.configFactory.databaseList(databaseList)
-      this
-    }*/
-
-    //如果要调用动态参数的方法，要用如下方法传参：databaseList:_*
+    databaseList.add("t1")
+    databaseList.add("t2")
+    //如果要调用变长参数的方法，要用如下方法传参：databaseList:_*
+    database(databaseList:_*)
 
     println("@@@@@@@@5")
     val javaMapTst: java.util.Map[String,String] = new util.HashMap()
@@ -69,4 +76,9 @@ object CollectionTst {
     mutableScalaMap.foreach(println(_))
 
   }
+
+  //变长参数
+  def database(databaseList: String*) = {
+      databaseList.foreach(println(_))
+    }
 }
