@@ -45,6 +45,7 @@ public class AppTest {
         //单机模式：
         Config config = new Config();
         config.setTransportMode(TransportMode.NIO);
+
         config.useSingleServer()
                 .setPassword("123456")
                 //可以用"rediss://"来启用SSL连接
@@ -52,25 +53,26 @@ public class AppTest {
 //                .setAddress("redis://10.91.197.148:6379");
 //                .setAddress("redis://192.168.0.100:6379");
 
-        /*//主从模式：
-        config.useMasterSlaveServers()
+        //主从模式：
+       /* config.useMasterSlaveServers()
                 //可以用"rediss://"来启用SSL连接
                 .setMasterAddress("redis://127.0.0.1:6379")
                 .setReadMode(ReadMode.MASTER_SLAVE)
                 .setTimeout(3000)
                 .setConnectTimeout(10000)
                 .addSlaveAddress("redis://127.0.0.1:6389", "redis://127.0.0.1:6332", "redis://127.0.0.1:6419")
-                .addSlaveAddress("redis://127.0.0.1:6399");
+                .addSlaveAddress("redis://127.0.0.1:6399");*/
 
         //哨兵模式：
-        config.useSentinelServers()
+        /*config.useSentinelServers()
                 .setMasterName("mymaster")
+                .setCheckSentinelsList(false)//如果只配置一台服务器的地址，请设置该参数为false
                 //可以用"rediss://"来启用SSL连接
                 .addSentinelAddress("127.0.0.1:26389", "127.0.0.1:26379")
-                .addSentinelAddress("127.0.0.1:26319");
+                .addSentinelAddress("127.0.0.1:26319");*/
 
         //集群模式：
-        config.useClusterServers()
+        /*config.useClusterServers()
                 .setScanInterval(2000) // 集群状态扫描间隔时间，单位是毫秒
                 //可以用"rediss://"来启用SSL连接
                 .addNodeAddress("redis://127.0.0.1:7000", "redis://127.0.0.1:7001")
