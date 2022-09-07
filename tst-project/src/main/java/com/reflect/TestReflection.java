@@ -4,6 +4,7 @@ import com.vo.Person;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 public class TestReflection {
@@ -143,7 +144,7 @@ public class TestReflection {
 	public static void main(String[] args) {
 //		testGetClassObject();
 //		testField();
-		testMethod();
+//		testMethod();
 //		testConstructor();
 //		testIsInstance();
 		try {
@@ -152,6 +153,27 @@ public class TestReflection {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
+		System.out.println(int.class.getName());
+		/*try {
+			Constructor<Integer> constructor = int.class.getConstructor(Integer.class);
+			Integer integer = constructor.newInstance(null);
+			System.out.println(integer);
+		} catch (NoSuchMethodException e) {
+			throw new RuntimeException(e);
+		} catch (InvocationTargetException e) {
+			throw new RuntimeException(e);
+		} catch (InstantiationException e) {
+			throw new RuntimeException(e);
+		} catch (IllegalAccessException e) {
+			throw new RuntimeException(e);
+		}*/
+
+		for (Constructor<?> constructor : int.class.getConstructors()) {
+			System.out.println("!!!!!");
+			for (Class<?> parameterType : constructor.getParameterTypes()) {
+				System.out.println(parameterType.getName());
+			}
+		}
 	}
 }

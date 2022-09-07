@@ -19,18 +19,18 @@ public class DateTester {
 	public void testDate() {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 		
-		System.out.println(LocalDate.now());
+		System.out.println("1："+LocalDate.now());
 		
-		System.out.println(LocalTime.now());
+		System.out.println("2："+LocalTime.now());
 		
-		System.out.println(LocalDateTime.now());
+		System.out.println("3："+LocalDateTime.now());
 		LocalDateTime parse = LocalDateTime.parse("2017-12-31 12:33:33", formatter);
-		System.out.println(parse);
-		System.out.println(LocalDateTime.now().format(formatter));
+		System.out.println("4："+parse);
+		System.out.println("5："+LocalDateTime.now().format(formatter));
 		
-		System.out.println(ZonedDateTime.now());
-		System.out.println(LocalDateTime.now().format(formatter));
-		System.out.println(ZonedDateTime.now().format(formatter));
+		System.out.println("6："+ZonedDateTime.now());
+		System.out.println("7："+LocalDateTime.now().format(formatter));
+		System.out.println("8："+ZonedDateTime.now().format(formatter));
 
 	}
 	
