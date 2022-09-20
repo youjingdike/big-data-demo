@@ -3,7 +3,9 @@ package com.regex;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -105,6 +107,19 @@ System.out.println(string);
         return list;
     }
 
+    public static Set<String> searchSubStr1(String regex,String decStr) {
+        Pattern p = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+        Matcher m = p.matcher(decStr);
+        Set<String> set = new HashSet<String>();
+        while(m.find()){
+            set.add(m.group());
+        }
+        for (String string : set) {
+            System.out.println(string);
+        }
+        return set;
+    }
+
     /**
      * 替换给定字符串中匹配正则表达式的子字符串
      * @param regex：正则表达式
@@ -151,7 +166,8 @@ System.out.println(newstring);
     
     @Test
     public void testSearchSub() {
-        System.out.println(searchSubStr("(\\d+)([a-z]+)", "334455aaa--3232423aaa-32324bbb")); 
+//        System.out.println(searchSubStr("(\\d+)([a-z]+)", "334455aaa--3232423aaa-32324bbb"));
+        System.out.println(searchSubStr("(\\d+)([a-z]+)", "${dt1}-${dt2}-${dt3}-ddd 00:00:${dt4}"));
     }
     
     @Test
@@ -165,4 +181,24 @@ System.out.println(newstring);
     	String log = "2017-12-21 15:57:06.754 [catalina-exec-5] - [INFO]     com.tzx.cc.service.rest.OrderRest(:81)     [ORDER -\u003e update]总部收到请求数据:{\"code\":0,\"data\":[{\"bill_num\":\"\",\"chanel\":\"WM10\",\"dispatch_time\":null,\"distribution_time\":null,\"finish_time\":null,\"order_code\":\"\",\"order_repayment\":[],\"order_state\":\"\",\"order_type\":\"OUTSIDE_ORDER\",\"receive_time\":\"\",\"receive_time_cancellation\":\"\",\"receive_time_dispatch\":null,\"receive_time_distribution\":null,\"receive_time_finish\":null,\"receive_time_qd\":\"2016-12-28 15:50:57\",\"take_time\":\"2016-12-28 15:50:57\",\"third_order_code\":\" \"}],\"msg\":\"\",\"oper\":\"update\",\"pagination\":{\"asc\":false,\"orderby\":\"\",\"pageno\":0,\"pagesize\":0,\"totalcount\":0},\"secret\":\"\",\"source\":\"SERVER\",\"store_id\":4,\"success\":true,\"t\":1513843172196,\"tenancy_id\":\"yunnby\",\"type\":\"ORDER\"}";
         testSplit(log,"\\s+");
     }
+
+    public static List<String> getSubUtil(String soap,String rgex){
+        List<String> list = new ArrayList<String>();
+        Pattern pattern = Pattern.compile(rgex);// 匹配的模式
+        Matcher m = pattern.matcher(soap);
+        while (m.find()) {
+            int i = 1;
+            list.add(m.group(i));
+            i++;
+        }
+        return list;
+    }
+
+    @Test
+    public void tst(){
+//        System.out.println(getSubUtil("${dt1}-${dt2}-${dt3}-ddd 00:00:${dt4}","(\\$\\{)(.*?)\\}"));
+        searchSubStr1("(?<=(\\$\\{))(.*?)(?=\\})","${dt1}ddddd44444444-${dt2}-${dt3}-ddd 00:00:${dt4}");
+    }
+
+
 }

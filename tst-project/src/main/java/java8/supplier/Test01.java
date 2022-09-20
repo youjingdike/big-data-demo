@@ -15,5 +15,11 @@ public class Test01 {
 				return power;
 			}
 		};
+
+		test(supplier::get);
     }
+
+	public static void test(Supplier<String> t) {
+		System.out.println(t.get());
+	}
 }

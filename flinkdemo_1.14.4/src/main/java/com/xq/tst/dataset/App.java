@@ -2,10 +2,13 @@ package com.xq.tst.dataset;
 
 import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.common.functions.MapPartitionFunction;
+import org.apache.flink.api.common.functions.Partitioner;
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
+import org.apache.flink.api.java.operators.PartitionOperator;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.tuple.Tuple3;
+import org.apache.flink.api.java.utils.DataSetUtils;
 import org.apache.flink.util.Collector;
 
 import java.util.Iterator;
@@ -95,5 +98,19 @@ public class App
                 System.out.println("@@@:"+key+",treadId:"+treadId);
             }
         }).print();
+
+        PartitionOperator<Tuple3<Integer, String, Double>> tuple3PartitionOperator = input.partitionByRange(1).setParallelism(3);
+        DataSet<Tuple2<Long, Tuple3<Integer, String, Double>>> tuple2DataSet = DataSetUtils.zipWithIndex(tuple3PartitionOperator);
+        tuple2DataSet.print();
+        System.out.println("~~~~~~~~~~~~~");
+        DataSet<Tuple2<Long, Tuple3<Integer, String, Double>>> tuple2DataSet1 = DataSetUtils.zipWithUniqueId(tuple3PartitionOperator);
+        tuple2DataSet1.print();
+
+        input.partitionCustom(new Partitioner<String>() {
+            @Override
+            public int partition(String key, int numPartitions) {
+                return 0;
+            }
+        },1);
     }
 }
