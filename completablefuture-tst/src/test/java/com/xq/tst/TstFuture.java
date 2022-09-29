@@ -60,7 +60,9 @@ public class TstFuture {
 
         //有时候是需要构建一个常量的CompletableFuture
         CompletableFuture<String> stringCompletableFuture = CompletableFuture.completedFuture("123");
+        CompletableFuture<String> stringCompletableFuture1 = CompletableFuture.completedFuture(null);
         System.out.println(stringCompletableFuture.get());
+        System.out.println("null:"+stringCompletableFuture1.get());
     }
 
     /*
