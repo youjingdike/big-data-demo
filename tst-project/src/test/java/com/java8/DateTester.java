@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.Month;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.TimeZone;
@@ -43,7 +44,8 @@ public class DateTester {
 		
 		System.out.println( System.currentTimeMillis() );
 		System.out.println( TimeZone.getDefault() );
-		
+		System.out.println(ZoneOffset.systemDefault());
+
 	}
 	
 	@Test
