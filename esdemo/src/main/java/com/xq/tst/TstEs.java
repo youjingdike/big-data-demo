@@ -7,6 +7,7 @@ import org.elasticsearch.action.search.ClearScrollResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchScrollRequest;
+import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -68,7 +69,7 @@ public class TstEs {
         /*Scroll scroll = searchRequest.scroll();
         SearchRequest scroll1 = searchRequest.scroll(scroll);*/
         // 5.执行RestHighLevelClient.search发起请求
-        SearchResponse searchResponse = restHighLevelClint.search(searchRequest);
+        SearchResponse searchResponse = restHighLevelClint.search(searchRequest, RequestOptions.DEFAULT);
         long totalHits = searchResponse.getHits().totalHits;
         if (totalHits==0) {
             return;
@@ -92,7 +93,7 @@ public class TstEs {
 
         ClearScrollRequest request = new ClearScrollRequest();
         request.addScrollId(scrollId);
-        ClearScrollResponse response = restHighLevelClint.clearScroll(request);
+        ClearScrollResponse response = restHighLevelClint.clearScroll(request,RequestOptions.DEFAULT);
         response.isSucceeded();
     }
 
@@ -102,7 +103,7 @@ public class TstEs {
         SearchResponse searchResponse;
         // 使用RestHighLevelClient发送scroll请求
         try {
-            searchResponse = restHighLevelClient.searchScroll(searchScrollRequest);
+            searchResponse = restHighLevelClient.scroll(searchScrollRequest, RequestOptions.DEFAULT);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
