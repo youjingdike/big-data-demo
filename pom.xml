@@ -30,6 +30,7 @@
         <module>vertx-tst</module>
         <module>redisson-tst</module>
         <module>esdemo</module>
+        <module>hudidemo</module>
     </modules>
 
     <properties>
