@@ -1,0 +1,67 @@
+{
+  "functions": [],
+  "flowprops": [
+    {
+      "restartConfigs": {
+        "delay": "",
+        "restartStrategy": "failure-rate",
+        "max-failures-per-interval": "3",
+        "failures-delay": "6",
+        "attempts": "",
+        "failure-rate-interval": "180"
+      },
+      "dataConsistency": "AT_LEAST_ONCE",
+      "allowLateness": "",
+      "useExceptionDataSinkTopic": "false",
+      "eventTimeFieldName": "",
+      "triggerInterval": 10,
+      "optionalParams": {},
+      "exceptionDsName": "",
+      "dataSampling": "false",
+      "samplingRatio": "1",
+      "exceptionTopic": "",
+      "maxRunningFlows": 1,
+      "processingTimeFieldName": "",
+      "flinkUseTime": "processingTime"
+    }
+  ],
+  "packages": [],
+  "flow": {
+    "commonSideprops": [],
+    "edges": [
+      {
+        "source": "KafkaSource_1668587321337",
+        "target": "Sql_20220901190819607"
+      },
+      {
+        "source": "Sql_20220901190819607",
+        "target": "HiveSink_1667546079053"
+      }
+    ],
+    "env": "online",
+    "flow_name": "tst_sql_json",
+    "nodes": [
+      {
+        "id": "2211221442455262@1",
+        "jobType": "HiveSink",
+        "name": "HiveSink_1667546079053",
+        "params": "{\"failureHandlerProxy\":[{\"shutdownWithFailCount\":\"1\",\"shutdownIfFail\":\"false\",\"shutdownCondition\":\"oneFailure\",\"shutdownInTimeIfFail\":\"1\",\"logFieldsIfFail\":\"\",\"logIfFail\":\"false\",\"logPercentIfFail\":\"100\"}],\"smallFileSize\":\"128\",\"dsName\":\"defaultHive\",\"smallFileCompaction\":\"false\",\"processorType\":\"sink\",\"parallelism\":\"\",\"useDataCheck\":\"false\",\"_type\":\"HiveSink\",\"db\":\"hive_db1114\",\"table\":\"hive_tb1114\"}"
+      },
+      {
+        "id": "2211221442455295@1",
+        "jobType": "KafkaSource",
+        "name": "KafkaSource_1668587321337",
+        "params": "{\"kafkaTimestampName\":\"\",\"dsName\":\"dgKafka\",\"removeDuplicateUpdateType\":\"OnCreateAndWrite\",\"processorType\":\"source\",\"createTopicProjectName\":\"kscAutoTest\",\"parallelism\":\"\",\"useDataCheck\":\"false\",\"_type\":\"KafkaSource\",\"consumerLocation\":\"Latest\",\"addKafkaTimestamp\":\"false\",\"watermarkTime\":\"\",\"streaming.timestamps\":\"\",\"maxBytesPerSecond\":\"\",\"removeDuplicateKeepTime\":\"\",\"eventTimeField\":\"\",\"useRemoveDuplicate\":\"false\",\"topic\":\"test1\",\"table\":\"t\"}"
+      },
+      {
+        "id": "2211221442455306@1",
+        "jobType": "Sql",
+        "name": "Sql_20220901190819607",
+        "params": "{\"dataStreams\":[],\"permissionLevel\":\"\",\"selectMode\":\"single\",\"processorType\":\"operator\",\"_type\":\"Sql\",\"isUseTemplate\":\"nouse\",\"templateId\":\"\",\"table\":\"\",\"sql\":\"select\\n  id,\\n  '{\\\"id\\\":1,\\\"name\\\":\\\"tst\\\"}' as json,\\n  \\\"{\\\" id \\\":1,\\\" name \\\":\\\" tst \\\"}\\\" as json1\\nfrom\\n  t;\",\"watermarkerConfig\":[]}"
+      }
+    ],
+    "project": "kscAutoTest",
+    "project_id": 1,
+    "sideprops": []
+  }
+}

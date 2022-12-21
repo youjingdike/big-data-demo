@@ -12,17 +12,16 @@ import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.table.api.Schema;
 import org.apache.flink.table.api.TableResult;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
-import org.apache.flink.table.catalog.Catalog;
-import org.apache.flink.table.catalog.hive.HiveCatalog;
 import org.apache.flink.types.Row;
 
 public class SqlInsertExample {
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setParallelism(1);
         env.setStateBackend(new HashMapStateBackend());
         CheckpointConfig checkpointConfig = env.getCheckpointConfig();
-        checkpointConfig.setCheckpointStorage(new FileSystemCheckpointStorage("file:///Users/xingqian/checkpoint-dir"));
+        checkpointConfig.setCheckpointStorage(new FileSystemCheckpointStorage("hdfs:///user/flink/savepoint-dir"));
+//        checkpointConfig.setCheckpointStorage(new FileSystemCheckpointStorage("file:///Users/xingqian/checkpoint-dir"));
         checkpointConfig.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
         checkpointConfig.setCheckpointInterval(1*1000L);
         checkpointConfig.setCheckpointTimeout(20*1000L);
@@ -38,18 +37,20 @@ public class SqlInsertExample {
         StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env);
 
         // Create a HiveCatalog
-        String name            = "myhive";
-        String defaultDatabase = "mydatabase";
+//        String name            = "myhive";
+//        String defaultDatabase = "flink_hudi";
         String hiveConfDir     = "/etc/hive/2.3.7.0-1/0/";
 //        Catalog catalog = new HiveCatalog(name, defaultDatabase, hiveConfDir);
-
-        // Register the catalog
+//
+//        // Register the catalog
 //        tableEnv.registerCatalog("myhive", catalog);
 //        tableEnv.useCatalog("myhive");
+//        tableEnv.useDatabase();
 
         String targetTable = "t3";
-        String basePath = "file:///tmp/t3";
-        String createTableSql = "CREATE TABLE "+targetTable+"(\n" +
+//        String basePath = "file:///tmp/t3";
+        String basePath = "hdfs:///user/flink/t3";
+    /*    String createTableSql = "CREATE TABLE IF NOT EXISTS "+targetTable+"(\n" +
                 "  uuid VARCHAR(20) PRIMARY KEY NOT ENFORCED,\n" +
                 "  name VARCHAR(10),\n" +
                 "  age INT,\n" +
@@ -61,6 +62,31 @@ public class SqlInsertExample {
                 "  'connector' = 'hudi',\n" +
                 "  'path' = '"+basePath+"',\n" +
                 "  'table.type' = 'COPY_ON_WRITE'\n" +
+                ")";*/
+
+        String createTableSql = "CREATE TABLE IF NOT EXISTS "+targetTable+"(\n" +
+                "  uuid VARCHAR(20) PRIMARY KEY NOT ENFORCED,\n" +
+                "  name VARCHAR(10),\n" +
+                "  age INT,\n" +
+                "  ts TIMESTAMP(3),\n" +
+                "  `partition` VARCHAR(20)\n" +
+                ")\n" +
+                "PARTITIONED BY (`partition`)\n" +
+                "WITH (\n" +
+                "  'connector' = 'hudi',\n" +
+                "  'path' = '"+basePath+"',\n" +
+                "  'table.type' = 'COPY_ON_WRITE',\n" +
+                "'hive_sync.support_timestamp' = 'true',\n" +
+                "'read.streaming.enabled' = 'true',\n" +
+//                "'write.tasks' = '$writeTaskNum',\n" +
+//                "'compaction.tasks' = '$writeTaskNum',\n" +
+//                "'write.operation' = '$writeOperation',\n" +
+                "'hive_sync.enable' = 'true',\n" +
+                "'hive_sync.mode' = 'hms',\n" +
+                "'hive_sync.db' = 'flink_hudi',\n" +
+                "'hive_sync.table' = 't3',\n" +
+                "'hive_sync.metastore.uris' = 'thrift://kde-offline2.sdns.dev.cloud:9083',\n" +
+                "'hive_sync.conf.dir' = '"+hiveConfDir+"'\n" +
                 ")";
         tableEnv.executeSql(createTableSql);
 
@@ -76,6 +102,6 @@ public class SqlInsertExample {
 
         TableResult tableResult = tableEnv.executeSql("insert into " + targetTable + " select uuid,name,age,ts,`partition` from s ");
 
-        env.execute("table test");
+//        env.execute("table test");
     }
 }

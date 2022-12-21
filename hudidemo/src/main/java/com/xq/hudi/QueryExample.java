@@ -16,7 +16,8 @@ public class QueryExample {
         env.setParallelism(1);
 
         String targetTable = "t3";
-        String basePath = "file:///tmp/t3";
+//        String basePath = "file:///tmp/t3";
+        String basePath = "hdfs:///user/flink/t3";
 
         Map<String, String> options = new HashMap<>();
         options.put(FlinkOptions.PATH.key(), basePath);
