@@ -109,6 +109,7 @@ function snapshot() {
 
     ##start 检查目标端是否含有相同的表及相同的备份,有就跳过,不迁移
     ##end
+
     for tb in `cat ${Shell_Path}/log/tabInfo/allTable.txt`
     do
       OLD_IFS="$IFS"
