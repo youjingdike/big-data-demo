@@ -61,7 +61,7 @@ function exportTableInfo() {
     done
     cat ${Shell_Path}/log/tabInfo/allTable.txt
 
-    echo "导出的表信息，请查看文件"${Shell_Path}/log/tabInfo/allTable.txt
+    echo "导出的表信息(不包含namespace为hbase的表)，请查看文件"${Shell_Path}/log/tabInfo/allTable.txt
 }
 # -sn  目标端不能有重复的表与相同的备份
 function snapshot() {
