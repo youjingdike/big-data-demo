@@ -4,7 +4,7 @@ Shell_Path=$(cd "$(dirname "$0")";pwd)
 source /etc/profile
 Date_Path=$(date "+%Y-%m-%d-%H-%M-%S-%3N")
 echo "本次执行结果目录为："${Shell_Path}/log/${Date_Path}
-# -sc
+# -sc/-all
 function statusCheck() {
     echo "环境检查start..."
     mkdir -p ${Shell_Path}/log/${Date_Path}/check
@@ -33,7 +33,7 @@ function statusCheck() {
     fi
     echo "环境检查end..."
 }
-# -ex  不导出hbase命名空间的表
+# -ex/-all 不导出hbase命名空间的表
 function exportTableInfo() {
     echo "导出表信息start..."
     mkdir -p ${Shell_Path}/log/${Date_Path}/tabInfo
@@ -69,7 +69,7 @@ function exportTableInfo() {
     echo "导出的表信息(不包含namespace为hbase的表)，请查看文件"${Shell_Path}/log/${Date_Path}/tabInfo/allTable.txt
     echo "导出表信息end..."
 }
-# -sn  目标端不能有重复的表与相同的备份
+# -all  目标端不能有重复的表与相同的备份
 function snapshot() {
     echo "数据备份start..."
     mkdir -p ${Shell_Path}/log/${Date_Path}/snapshot
@@ -107,6 +107,7 @@ function snapshot() {
          echo $ns":"$tb>>${Shell_Path}/log/${Date_Path}/snapshot/allTable.txt
        done
     done
+
     #与${Shell_Path}/log/${Date_Path}/tabInfo/allTable.txt做对比,判断是否有重复的表名
     for sn in `cat  ${Shell_Path}/log/${Date_Path}/tabInfo/allTable.txt`
       do
@@ -219,7 +220,87 @@ function snapshot() {
     echo "数据备份end..."
 }
 
-# -tr hbase.rootdir：/apps/hbase/data
+# -sn  源端不能重名的备份
+function snapshot1() {
+    echo "数据备份start..."
+    mkdir -p ${Shell_Path}/log/${Date_Path}/snapshot
+    echo -n "" > ${Shell_Path}/log/${Date_Path}/snapshot/log.log
+    echo -n "" > ${Shell_Path}/log/${Date_Path}/snapshot/snapshot_name.txt
+    echo -n "" > ${Shell_Path}/log/${Date_Path}/snapshot/src_snap_exits.txt
+
+    ##构建要做的备份名称
+    for tb in `cat ${table_file}`
+      do
+        OLD_IFS="$IFS"
+        IFS=":"
+        arr=($tb)
+        IFS="$OLD_IFS"
+        echo ${snapshot_prefix}qianyi-snap-${arr[0]}-${arr[1]}>>${Shell_Path}/log/${Date_Path}/snapshot/snapshot_name.txt
+      done
+    echo "要做的备份名称，如下："
+    cat ${Shell_Path}/log/${Date_Path}/snapshot/snapshot_name.txt
+
+    ##start 检查源端是否含有相同的备份,有就报错,打印日志
+    echo "list_snapshots '${snapshot_prefix}qianyi-snap-.*'" | $HBASE_SHELL  --config ${src_hbase_conf} shell -n 1>${Shell_Path}/log/${Date_Path}/snapshot/source_snap_list.log 2>&1
+    local status=$?
+    if [ ${status} != 0 ];then
+      echo "源端hbase:list_snapshots,命令执行失败，请查看日志文件："${Shell_Path}/log/${Date_Path}/snapshot/source_snap_list.log
+      exit 1
+    fi
+
+    for sn in `sed -n '/SNAPSHOT/,/row(s)/p'  ${Shell_Path}/log/${Date_Path}/snapshot/source_snap_list.log | sed -e '1d' | sed -e '$d' | cut -d " " -f 2`
+    do
+      grep -x $sn ${Shell_Path}/log/${Date_Path}/snapshot/snapshot_name.txt >> ${Shell_Path}/log/${Date_Path}/snapshot/src_snap_exits.txt
+    done
+
+    local nu=`cat ${Shell_Path}/log/${Date_Path}/snapshot/src_snap_exits.txt | wc -l`
+    if [ ${nu} != 0 ];then
+      echo "源端已经存在的snapshot,如下："
+      cat ${Shell_Path}/log/${Date_Path}/snapshot/src_snap_exits.txt
+      echo "请删除源端已存在的snapshot 或者 重新设置备份名称前缀"
+      exit 1
+    else
+      echo "源端不存在要创建的snapshot..."
+    fi
+    ##end
+
+    #创建snapshot,使用源端的keytab
+    for tb in `cat ${table_file}`
+    do
+      OLD_IFS="$IFS"
+      IFS=":"
+      local arr=($tb)
+      IFS="$OLD_IFS"
+      ##echo "snapshot '$tb','qianyi-snap-${arr[0]}-${arr[1]}'" | hbase shell -n 1>>${Shell_Path}/log/${Date_Path}/snapshot/log.txt 2>&1
+      echo "表"$tb",创建snapshot："${snapshot_prefix}qianyi-snap-${arr[0]}-${arr[1]}"开始。。。"
+      echo "表"$tb",创建snapshot："${snapshot_prefix}qianyi-snap-${arr[0]}-${arr[1]}"的日志如下：" >> ${Shell_Path}/log/${Date_Path}/snapshot/log.log
+      $HBASE_SHELL --config ${src_hbase_conf} snapshot create -t $tb -n ${snapshot_prefix}qianyi-snap-${arr[0]}-${arr[1]} 1>>${Shell_Path}/log/${Date_Path}/snapshot/log.log 2>&1
+      status=$?
+      if [ ${status} != 0 ];then
+        echo "表"$tb",创建snapshot："${snapshot_prefix}qianyi-snap-${arr[0]}-${arr[1]}"失败，请查看日志文件："${Shell_Path}/log/${Date_Path}/snapshot/log.log
+        exit 1
+      else
+        echo "表"$tb",创建snapshot："${snapshot_prefix}qianyi-snap-${arr[0]}-${arr[1]}"完成。。。"
+      fi
+    done
+
+    echo "list_snapshots '${snapshot_prefix}qianyi-snap-.*'" | $HBASE_SHELL  --config ${src_hbase_conf} shell -n 1>${Shell_Path}/log/${Date_Path}/snapshot/snapInfo.txt 2>&1
+    status=$?
+    if [ ${status} != 0 ];then
+      echo "源端hbase:list_snapshots,命令执行失败，请查看日志文件："${Shell_Path}/log/${Date_Path}/snapshot/snapInfo.txt
+      exit 1
+    fi
+
+    echo "表的备份信息："
+    echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+    sed -n '/SNAPSHOT/,/row(s)/p'  ${Shell_Path}/log/${Date_Path}/snapshot/snapInfo.txt
+    echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+
+    echo "备份名称可查看文件："${Shell_Path}/log/${Date_Path}/snapshot/snapshot_name.txt
+    echo "数据备份end..."
+}
+
+# -all
 function transfer() {
     echo "数据迁移start..."
     mkdir -p ${Shell_Path}/log/${Date_Path}/transfer
@@ -246,19 +327,60 @@ function transfer() {
     ##restore_snapshot
     for sn in `sed -n '/SNAPSHOT/,/row(s)/p'  ${Shell_Path}/log/${Date_Path}/snapshot/snapInfo.txt | sed -e '1d' | sed -e '$d' | cut -d " " -f 2`
     do
-      echo "restore_snapshots:"$sn",开始。。。"
-      echo "restore_snapshots:"$sn",日志如下：" >> ${Shell_Path}/log/${Date_Path}/transfer/restore_sn.log
-      echo "restore_snapshots '${sn}'" | $HBASE_SHELL --config ${dst_hbase_conf}  shell -n 1>>${Shell_Path}/log/${Date_Path}/transfer/restore_sn.log 2>&1
+      echo "restore_snapshot:"$sn",开始。。。"
+      echo "restore_snapshot:"$sn",日志如下：" >> ${Shell_Path}/log/${Date_Path}/transfer/restore_sn.log
+      echo "restore_snapshot '${sn}'" | $HBASE_SHELL --config ${dst_hbase_conf}  shell -n 1>>${Shell_Path}/log/${Date_Path}/transfer/restore_sn.log 2>&1
       status=$?
       if [ ${status} != 0 ];then
-        echo "restore_snapshots:${sn},执行失败，请查看日志文件："${Shell_Path}/log/${Date_Path}/transfer/restore_sn.log
+        echo "restore_snapshot:${sn},执行失败，请查看日志文件："${Shell_Path}/log/${Date_Path}/transfer/restore_sn.log
         exit 1
       fi
-      echo "restore_snapshots:"$sn",结束。。。"
+      echo "restore_snapshot:"$sn",结束。。。"
     done
     echo "数据迁移end..."
 }
-# -dc
+
+# -tr
+function transfer1() {
+    echo "数据迁移start..."
+    mkdir -p ${Shell_Path}/log/${Date_Path}/transfer
+    echo -n "" > ${Shell_Path}/log/${Date_Path}/transfer/export_sn.log
+    echo -n "" > ${Shell_Path}/log/${Date_Path}/transfer/restore_sn.log
+
+    ##从配置文件获取hbase.rootdir的配置
+    hbaseRootDir=`xmllint --xpath '//property[name="hbase.rootdir"]/value/text()' ${dst_hbase_conf}/hbase-site.xml`
+    ##迁移snapshot,用hbase1的认证，用hbase的也行，但是要有提交yarn任务的权限，以及hbase1的对应hadoop的路径的权限
+    local status=0
+    for sn in `cat  ${snapshot_file}`
+    do
+      echo "迁移snapshot:"${sn}",开始。。。"
+      echo "迁移snapshot:"${sn}",日志如下：" >> ${Shell_Path}/log/${Date_Path}/transfer/export_sn.log
+      $HBASE_SHELL --config ${src_hbase_conf} -Dhdp.version=2.3.7.0-1 org.apache.hadoop.hbase.snapshot.ExportSnapshot -snapshot $sn -copy-to ${dst_hadoop_uris}${hbaseRootDir} 1>>${Shell_Path}/log/${Date_Path}/transfer/export_sn.log 2>&1
+      status=$?
+      if [ ${status} != 0 ];then
+        echo "迁移snapshot:${sn},执行失败，请查看日志文件："${Shell_Path}/log/${Date_Path}/transfer/export_sn.log
+        exit 1
+      fi
+      echo "迁移snapshot:"${sn}",完成。。。"
+    done
+
+    ##restore_snapshot
+    for sn in `cat  ${snapshot_file}`
+    do
+      echo "restore_snapshot:"$sn",开始。。。"
+      echo "restore_snapshot:"$sn",日志如下：" >> ${Shell_Path}/log/${Date_Path}/transfer/restore_sn.log
+      echo "restore_snapshot '${sn}'" | $HBASE_SHELL --config ${dst_hbase_conf}  shell -n 1>>${Shell_Path}/log/${Date_Path}/transfer/restore_sn.log 2>&1
+      status=$?
+      if [ ${status} != 0 ];then
+        echo "restore_snapshot:${sn},执行失败，请查看日志文件："${Shell_Path}/log/${Date_Path}/transfer/restore_sn.log
+        exit 1
+      fi
+      echo "restore_snapshot:"$sn",结束。。。"
+    done
+    echo "数据迁移end..."
+}
+
+# -all
 function dataCheck() {
     echo "数据校验start..."
     mkdir -p ${Shell_Path}/log/${Date_Path}/dataCheck
@@ -268,7 +390,7 @@ function dataCheck() {
     do
       echo ${tb}",数据校验开始。。。"
       echo ${tb}",数据校验日志如下:" >> ${Shell_Path}/log/${Date_Path}/dataCheck/data_check.log
-      $HBASE_SHELL --config ${dst_hbase_conf} -Dhdp.version=2.3.7.0-1 org.apache.hadoop.hbase.mapreduce.RowCounter '${tb}' 1>>${Shell_Path}/log/${Date_Path}/dataCheck/data_check.log 2>&1
+      $HBASE_SHELL --config ${dst_hbase_conf} -Dhdp.version=2.3.7.0-1 org.apache.hadoop.hbase.mapreduce.RowCounter ${tb} 1>>${Shell_Path}/log/${Date_Path}/dataCheck/data_check.log 2>&1
       status=$?
       if [ ${status} != 0 ];then
         echo "目标端hbase,RowCounter:${tb},执行失败，请查看日志文件："${Shell_Path}/log/${Date_Path}/dataCheck/data_check.log
@@ -285,32 +407,65 @@ function dataCheck() {
 
     echo "数据校验end..."
 }
+
 # -dc
+function dataCheck1() {
+    echo "数据验证start..."
+    mkdir -p ${Shell_Path}/log/${Date_Path}/dataCheck
+    echo -n "" > ${Shell_Path}/log/${Date_Path}/dataCheck/data_check.log
+    local status=0
+    for tb in `cat ${table_file}`
+    do
+      echo ${tb}",数据验证开始。。。"
+      echo ${tb}",数据验证日志如下:" >> ${Shell_Path}/log/${Date_Path}/dataCheck/data_check.log
+      $HBASE_SHELL --config ${src_hbase_conf} -Dhdp.version=2.3.7.0-1 org.apache.hadoop.hbase.mapreduce.RowCounter ${tb} 1>>${Shell_Path}/log/${Date_Path}/dataCheck/data_check.log 2>&1
+      status=$?
+      if [ ${status} != 0 ];then
+        echo "RowCounter:${tb},执行失败，请查看日志文件："${Shell_Path}/log/${Date_Path}/dataCheck/data_check.log
+        echo ${tb}": 验证失败" >> ${Shell_Path}/log/${Date_Path}/dataCheck/dataCheckResult.txt
+        echo ${tb}",数据验证结束。。。"
+        continue
+      fi
+      local rows=`cat ${Shell_Path}/log/${Date_Path}/dataCheck/data_check.log | grep 'ROWS=' | tail -1 | cut -d '=' -f 2`
+      echo ${tb}": "${rows} >> ${Shell_Path}/log/${Date_Path}/dataCheck/dataCheckResult.txt
+      echo ${tb}",数据验证结束。。。"
+    done
+    echo "数据验证结果，如下：（可查看结果文件："${Shell_Path}/log/${Date_Path}/dataCheck/dataCheckResult.txt"）"
+    cat ${Shell_Path}/log/${Date_Path}/dataCheck/dataCheckResult.txt
+
+    echo "数据验证end..."
+}
+
+# -h
 function printHelp() {
     echo "功能介绍："
     echo "1.输入相应的参数，执行相应的功能："
     echo "  a.状态检查，请输入参数：-sc hbase客户端的根目录 待检测HBASE集群的配置文件目录"
     echo "  b.导出表信息，请输入参数：-ex hbase客户端的根目录 源端hbase的配置文件目录"
     echo "  c.数据备份，请输入参数：-sn  hbase客户端的根目录 源端hbase的配置文件目录 要备份的表名称列表文件(全路径) 备份名称前缀"
-    echo "      说明：要备份的表名称列表文件，内容示例如下(格式：namespaceName:tableName，每一张表一行)："
+    echo "      说明：要备份的表名称列表文件，内容示例如下(格式：namespaceName:tableName，每一张表一行，默认namespace下的表也要加上default)："
     echo "        default:table1"
     echo "        namespace:table1"
     echo "        namespace:table2"
-    echo "        注意：不备份hbase命名空间的表，如果添加了会剔除掉"
     echo "  d.数据迁移，请输入参数：-tr hbase客户端的根目录 源端hbase的配置文件目录 目标端hbase的配置文件目录 目标端hbase对应hadoop集群的访问地址 迁移的snapshot的名称列表文件(全路径)"
     echo "      说明：迁移的snapshot的名称列表文件，内容示例如下(格式：snapshotName，每一个备份名称一行)："
     echo "        qianyi-snap-ns1-test1"
     echo "        qianyi-snap-ns1-test2"
-    echo "  e.数据校验，请输入参数：-dc"
-    echo "  f.执行整个流程，请输入：-all hbase客户端的根目录 源端hbase的配置文件目录 目标端hbase的配置文件目录 目标端hbase对应hadoop集群的访问地址 备份名称前缀"
+    echo "  e.数据验证，请输入参数：-dc hbase客户端的根目录 源端hbase的配置文件目录 要验证的表名称列表文件(全路径)"
+    echo "      说明：要验证的表名称列表文件，内容示例如下(格式：namespaceName:tableName，每一张表一行，默认namespace下的表也要加上default)："
+    echo "        default:table1"
+    echo "        namespace:table1"
+    echo "        namespace:table2"
+    echo "  f.执行整个迁移流程，请输入：-all hbase客户端的根目录 源端hbase的配置文件目录 目标端hbase的配置文件目录 目标端hbase对应hadoop集群的访问地址 备份名称前缀"
+    echo "        注意：全流程迁移,不处理hbase命名空间的表"
     echo "2.参数说明如下："
-    echo "  hbase.root.dir     :  hbase客户端的根目录（可选：如果已经加入到path,可直接执行hbase命令)"
-    echo "  src.hbase.conf     :  源端hbase的配置文件目录/待检测HBASE集群的配置文件目录"
-    echo "  dst.hbase.conf     :  目标端hbase的配置文件目录"
-    echo "  dst.hadoop.uris    :  目标端hbase对应hadoop集群的访问地址"
-    echo "  snapshot.prefix    :  备份名称前缀（可选）"
-    echo "  snapshot.table.file:  要备份的表名称列表文件(全路径)"
-    echo "  snapshot.list.file :  迁移的snapshot的名称列表文件(全路径)"
+    echo "  hbase.root.dir   :  hbase客户端的根目录（可选：如果hbase已经加入到path,可直接执行hbase命令，就不需要配置该参数)"
+    echo "  src.hbase.conf   :  源端hbase的配置文件目录 / 待检测HBASE集群的配置文件目录"
+    echo "  dst.hbase.conf   :  目标端hbase的配置文件目录"
+    echo "  dst.hadoop.uris  :  目标端hbase对应hadoop集群的访问地址"
+    echo "  snapshot.prefix  :  备份名称前缀（可选）"
+    echo "  table.file       :  要备份的表名称列表文件(全路径) / 要校验的表名称列表文件(全路径)"
+    echo "  snapshot.file    :  迁移的snapshot的名称列表文件(全路径)"
     echo "3.示例  :  "
     echo "  sh backup.sh -all hbase.root.dir=/usr/hbase src.hbase.conf=/root/hbase/conf dst.hbase.conf=/root/hbase1/conf dst.hadoop.uris=hdfs://hdfs-ha snapshot.prefix=qianyi-"
 }
@@ -331,9 +486,9 @@ function checkAllParam() {
    echo "请配置源端hbase的配置文件目录参数：src.hbase.conf"
  else
    src_hbase_conf=${paramMap['src.hbase.conf']}
-   if [ ! -e "${src_hbase_conf}" ];then
+   if [ ! -d "${src_hbase_conf}" ];then
      error_nu=error_nu+1
-     echo "src.hbase.conf的配置目录：${src_hbase_conf}不存在，请正确配置"
+     echo "src.hbase.conf的配置目录：${src_hbase_conf}不存在或不是目录，请正确配置"
    fi
  fi
 
@@ -342,9 +497,9 @@ function checkAllParam() {
     echo "请配置目标端hbase的配置文件目录参数：dst.hbase.conf"
   else
     dst_hbase_conf=${paramMap['dst.hbase.conf']}
-    if [ ! -e "${dst_hbase_conf}" ];then
+    if [ ! -d "${dst_hbase_conf}" ];then
       error_nu=error_nu+1
-      echo "dst.hbase.conf的配置目录：${dst_hbase_conf}不存在，请正确配置"
+      echo "dst.hbase.conf的配置目录：${dst_hbase_conf}不存在或不是目录，请正确配置"
     fi
   fi
 
@@ -361,6 +516,133 @@ function checkAllParam() {
      echo "可选参数,备份名称前缀：snapshot.prefix,没有配置"
  else
    snapshot_prefix=${paramMap['snapshot.prefix']}"-"
+ fi
+}
+
+function checkParamSc() {
+ local error_nu=0
+ if [ "x"${paramMap['src.hbase.conf']} = "x" ];then
+   error_nu=error_nu+1
+   echo "请配置源端hbase的配置文件目录参数：src.hbase.conf"
+ else
+   src_hbase_conf=${paramMap['src.hbase.conf']}
+   if [ ! -d "${src_hbase_conf}" ];then
+     error_nu=error_nu+1
+     echo "src.hbase.conf的配置目录：${src_hbase_conf}不存在或不是目录，请正确配置"
+   fi
+ fi
+
+ if [ ${error_nu} != 0 ];then
+   exit 1
+ fi
+}
+
+function checkParamSn() {
+ local error_nu=0
+ if [ "x"${paramMap['src.hbase.conf']} = "x" ];then
+   error_nu=error_nu+1
+   echo "请配置源端hbase的配置文件目录参数：src.hbase.conf"
+ else
+   src_hbase_conf=${paramMap['src.hbase.conf']}
+   if [ ! -d "${src_hbase_conf}" ];then
+     error_nu=error_nu+1
+     echo "src.hbase.conf的配置目录：${src_hbase_conf}不存在或不是目录，请正确配置"
+   fi
+ fi
+
+ if [ "x"${paramMap['table.file']} = "x" ];then
+    error_nu=error_nu+1
+    echo "请配置要校验的表名称列表文件(全路径)：table.file"
+  else
+    table_file=${paramMap['table.file']}
+    if [ ! -f "${table_file}" ];then
+      error_nu=error_nu+1
+      echo "table.file的配置：${table_file}不存在或不是文件，请正确配置"
+    fi
+  fi
+
+ if [ ${error_nu} != 0 ];then
+   exit 1
+ fi
+
+ if [ "x"${paramMap['snapshot.prefix']} = "x" ];then
+     echo "可选参数,备份名称前缀：snapshot.prefix,没有配置"
+ else
+   snapshot_prefix=${paramMap['snapshot.prefix']}"-"
+ fi
+}
+
+function checkParamTr() {
+ local error_nu=0
+ if [ "x"${paramMap['src.hbase.conf']} = "x" ];then
+   error_nu=error_nu+1
+   echo "请配置源端hbase的配置文件目录参数：src.hbase.conf"
+ else
+   src_hbase_conf=${paramMap['src.hbase.conf']}
+   if [ ! -d "${src_hbase_conf}" ];then
+     error_nu=error_nu+1
+     echo "src.hbase.conf的配置目录：${src_hbase_conf}不存在或不是目录，请正确配置"
+   fi
+ fi
+
+ if [ "x"${paramMap['dst.hbase.conf']} = "x" ];then
+    error_nu=error_nu+1
+    echo "请配置目标端hbase的配置文件目录参数：dst.hbase.conf"
+  else
+    dst_hbase_conf=${paramMap['dst.hbase.conf']}
+    if [ ! -d "${dst_hbase_conf}" ];then
+      error_nu=error_nu+1
+      echo "dst.hbase.conf的配置目录：${dst_hbase_conf}不存在或不是目录，请正确配置"
+    fi
+  fi
+
+ if [ "x"${paramMap['dst.hadoop.uris']} = "x" ];then
+    error_nu=error_nu+1
+    echo "目标端hbase对应hadoop集群的访问地址参数：dst.hadoop.uris"
+ fi
+
+ if [ "x"${paramMap['snapshot.file']} = "x" ];then
+    error_nu=error_nu+1
+    echo "请配置要校验的表名称列表文件(全路径)：snapshot.file"
+  else
+    snapshot_file=${paramMap['snapshot.file']}
+    if [ ! -f "${snapshot_file}" ];then
+      error_nu=error_nu+1
+      echo "snapshot.file的配置：${snapshot_file}不存在或不是文件，请正确配置"
+    fi
+  fi
+
+ if [ ${error_nu} != 0 ];then
+   exit 1
+ fi
+}
+
+function checkParamDc() {
+ local error_nu=0
+ if [ "x"${paramMap['src.hbase.conf']} = "x" ];then
+   error_nu=error_nu+1
+   echo "请配置源端hbase的配置文件目录参数：src.hbase.conf"
+ else
+   src_hbase_conf=${paramMap['src.hbase.conf']}
+   if [ ! -d "${src_hbase_conf}" ];then
+     error_nu=error_nu+1
+     echo "src.hbase.conf的配置目录：${src_hbase_conf}不存在或不是目录，请正确配置"
+   fi
+ fi
+
+ if [ "x"${paramMap['table.file']} = "x" ];then
+    error_nu=error_nu+1
+    echo "请配置要校验的表名称列表文件(全路径)：table.file"
+  else
+    table_file=${paramMap['table.file']}
+    if [ ! -f "${table_file}" ];then
+      error_nu=error_nu+1
+      echo "table.file的配置：${table_file}不存在或不是文件，请正确配置"
+    fi
+  fi
+
+ if [ ${error_nu} != 0 ];then
+   exit 1
  fi
 }
 
@@ -412,8 +694,8 @@ src_hbase_conf=""
 dst_hbase_conf=""
 dst_hadoop_uris=""
 snapshot_prefix=""
-snapshot_table_file=""
-snapshot_list_file=""
+table_file=""
+snapshot_file=""
 
 #根据操作类型，选择执行的流程
 if [ $# != 0 ]
@@ -422,19 +704,24 @@ then
   op_type=$1
   if [ "-sc" = ${op_type} ];then
     parseParam "$@"
+    checkParamSc
     statusCheck
   elif [ "-ex" = ${op_type} ];then
     parseParam "$@"
+    checkParamSc
     exportTableInfo
   elif [ "-sn" = ${op_type} ];then
     parseParam "$@"
-    snapshot
+    checkParamSn
+    snapshot1
   elif [ "-tr" = ${op_type} ];then
     parseParam "$@"
-    transfer
+    checkParamTr
+    transfer1
   elif [ "-dc" = ${op_type} ];then
     parseParam "$@"
-    dataCheck
+    checkParamDc
+    dataCheck1
   elif [ "-all" = ${op_type} ];then
     parseParam "$@"
     all
