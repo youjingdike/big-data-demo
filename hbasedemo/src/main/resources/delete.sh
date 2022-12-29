@@ -26,7 +26,7 @@ function delete_namespace() {
     echo "表删除start..."
     mkdir -p ${Shell_Path}/log/${Date_Path}/deleteNamespace
 
-    grep : ${table_file} | cut -d ':' -f 1 | grep -v -x 'hbase' | grep -v  -x 'default' | sort| uniq > ${Shell_Path}/log/${Date_Path}/deleteNamespace/ns.log
+    grep : ${table_file} | cut -d ':' -f 1 | grep -v -x -E 'hbase|default' | sort| uniq > ${Shell_Path}/log/${Date_Path}/deleteNamespace/ns.log
     for sn in `cat ${Shell_Path}/log/${Date_Path}/deleteNamespace/ns.log`
     do
       echo "drop_namespace '${sn}'" | $HBASE_SHELL  --config ${src_hbase_conf} shell -n 1>>${Shell_Path}/log/${Date_Path}/deleteNamespace/log.log 2>&1
