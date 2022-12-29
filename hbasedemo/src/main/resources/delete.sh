@@ -43,32 +43,22 @@ function delete_namespace() {
 function printHelp() {
     echo "功能介绍："
     echo "1.输入相应的参数，执行相应的功能："
-    echo "  a.状态检查，请输入参数：-sc hbase客户端的根目录 待检测HBASE集群的配置文件目录"
-    echo "  b.导出表信息，请输入参数：-ex hbase客户端的根目录 源端hbase的配置文件目录"
-    echo "      说明：不导出hbase命名空间的表"
-    echo "  c.数据备份，请输入参数：-sn  hbase客户端的根目录 源端hbase的配置文件目录 要备份的表名称列表文件(全路径) 备份名称前缀"
-    echo "      说明：要备份的表名称列表文件，内容示例如下(格式：namespaceName:tableName，每一张表一行)："
+    echo "  a.表删除，请输入参数：-dt  hbase客户端的根目录 源端hbase的配置文件目录 要删除的表名称列表文件(全路径)"
+    echo "      说明：要删除的表名称列表文件，内容示例如下(格式：namespaceName:tableName，每一张表一行)："
     echo "        table1"
     echo "        namespace:table1"
     echo "        namespace:table2"
-    echo "  d.数据迁移，请输入参数：-tr hbase客户端的根目录 源端hbase的配置文件目录 目标端hbase的配置文件目录 目标端hbase对应hadoop集群的访问地址 迁移的表及snapshot的名称列表文件(全路径) 是否进行数据校验"
-    echo "      说明：迁移的snapshot的名称列表文件，内容示例如下(格式：snapshotName namespace:tablename，每一个备份名称及表名一行,中间用空格分割)："
-    echo "        qianyi-snap-default-table1 table1"
-    echo "        qianyi-snap-ns1-test1 ns1:test1"
-    echo "        qianyi-snap-ns1-test2 ns1:test2"
-    echo "  e.执行整个迁移流程，请输入：-all hbase客户端的根目录 源端hbase的配置文件目录 目标端hbase的配置文件目录 目标端hbase对应hadoop集群的访问地址 备份名称前缀"
-    echo "        注意：全流程迁移,不处理hbase命名空间的表"
+    echo "  b.namespace删除，请输入参数：-dn hbase客户端的根目录 源端hbase的配置文件目录 要删除的表名称列表文件(全路径)"
+    echo "      说明：要删除的表名称列表文件，内容示例如下(格式：namespaceName:tableName，每一张表一行)："
+    echo "        table1"
+    echo "        namespace:table1"
+    echo "        namespace:table2"
     echo "2.参数说明如下："
     echo "  hbase.root.dir   :  hbase客户端的根目录（可选：如果hbase已经加入到path,可直接执行hbase命令，就不需要配置该参数)"
     echo "  src.hbase.conf   :  源端hbase的配置文件目录 / 待检测HBASE集群的配置文件目录"
-    echo "  dst.hbase.conf   :  目标端hbase的配置文件目录"
-    echo "  dst.hadoop.uris  :  目标端hbase对应hadoop集群的访问地址"
-    echo "  snapshot.prefix  :  备份名称前缀（可选）"
     echo "  table.file       :  要备份的表名称列表文件(全路径)"
-    echo "  snapshot.table.file    :  迁移的snapshot的名称列表文件(全路径)"
-    echo "  is.data.check    :  是否进行数据校验（可选，默认：true）"
     echo "3.示例  :  "
-    echo "  sh backup.sh -all hbase.root.dir=/usr/hbase src.hbase.conf=/root/hbase/conf dst.hbase.conf=/root/hbase1/conf dst.hadoop.uris=hdfs://hdfs-ha snapshot.prefix=qianyi- is.data.check=false"
+    echo "  sh backup.sh -dt hbase.root.dir=/usr/hbase src.hbase.conf=/root/hbase/conf dst.hbase.conf=/root/table_info.txt "
 }
 
 function checkParam() {
@@ -117,8 +107,6 @@ function parseParam() {
      fi
  done
  echo "参数如下："
- #echo "${!paramMap[@]}"
- #echo "${paramMap[@]}"
  for key in "${!paramMap[@]}";do
   echo "key:"$key",value:"${paramMap[$key]}
  done
