@@ -45,7 +45,7 @@ function exportTableInfo() {
       exit 1
     fi
 
-    sed -n '/NAMESPACE/,/row(s)/p'  ${Shell_Path}/log/${Date_Path}/tabInfo/namespace.log | sed -e '1d' | sed -e '$d' > ${Shell_Path}/log/${Date_Path}/tabInfo/all_namespace.txt
+    sed -n '/NAMESPACE/,/row(s)/p'  ${Shell_Path}/log/${Date_Path}/tabInfo/namespace.log | sed -e '1d' -e '$d' > ${Shell_Path}/log/${Date_Path}/tabInfo/all_namespace.txt
 
     echo -n "" > ${Shell_Path}/log/${Date_Path}/tabInfo/allTable.txt
     for ns in `cat ${Shell_Path}/log/${Date_Path}/tabInfo/all_namespace.txt`
@@ -59,7 +59,7 @@ function exportTableInfo() {
          echo "源端hbase:list_namespace_tables '$ns'命令执行失败，请查看日志文件："${Shell_Path}/log/${Date_Path}/tabInfo/tables.log
          exit 1
        fi
-       for tb in `sed -n '/TABLE/,/row(s)/p'  ${Shell_Path}/log/${Date_Path}/tabInfo/tables.log | sed -e '1d' | sed -e '$d'`
+       for tb in `sed -n '/TABLE/,/row(s)/p'  ${Shell_Path}/log/${Date_Path}/tabInfo/tables.log | sed -e '1d' -e '$d'`
        do
          echo $ns":"$tb>>${Shell_Path}/log/${Date_Path}/tabInfo/allTable.txt
        done
@@ -90,7 +90,7 @@ function snapshot() {
       exit 1
     fi
 
-    sed -n '/NAMESPACE/,/row(s)/p'  ${Shell_Path}/log/${Date_Path}/snapshot/namespace.log | sed -e '1d' | sed -e '$d' > ${Shell_Path}/log/${Date_Path}/snapshot/all_namespace.txt
+    sed -n '/NAMESPACE/,/row(s)/p'  ${Shell_Path}/log/${Date_Path}/snapshot/namespace.log | sed -e '1d' -e '$d' > ${Shell_Path}/log/${Date_Path}/snapshot/all_namespace.txt
 
     for ns in `cat ${Shell_Path}/log/${Date_Path}/snapshot/all_namespace.txt`
     do
@@ -103,7 +103,7 @@ function snapshot() {
          echo "目标端hbase:list_namespace_tables '$ns'命令执行失败，请查看日志文件："${Shell_Path}/log/${Date_Path}/snapshot/tables.log
          exit 1
        fi
-       for tb in `sed -n '/TABLE/,/row(s)/p'  ${Shell_Path}/log/${Date_Path}/snapshot/tables.log | sed -e '1d' | sed -e '$d'`
+       for tb in `sed -n '/TABLE/,/row(s)/p'  ${Shell_Path}/log/${Date_Path}/snapshot/tables.log | sed -e '1d' -e '$d'`
        do
          echo $ns":"$tb>>${Shell_Path}/log/${Date_Path}/snapshot/allTable.txt
        done
@@ -147,7 +147,7 @@ function snapshot() {
       exit 1
     fi
 
-    for sn in `sed -n '/SNAPSHOT/,/row(s)/p'  ${Shell_Path}/log/${Date_Path}/snapshot/source_snap_list.log | sed -e '1d' | sed -e '$d' | cut -d " " -f 2`
+    for sn in `sed -n '/SNAPSHOT/,/row(s)/p'  ${Shell_Path}/log/${Date_Path}/snapshot/source_snap_list.log | sed -e '1d' -e '$d' | cut -d " " -f 2`
     do
       grep -x $sn ${Shell_Path}/log/${Date_Path}/snapshot/snapshot_name.txt >> ${Shell_Path}/log/${Date_Path}/snapshot/src_snap_exits.txt
     done
@@ -171,7 +171,7 @@ function snapshot() {
       exit 1
     fi
 
-    for sn in `sed -n '/SNAPSHOT/,/row(s)/p'  ${Shell_Path}/log/${Date_Path}/snapshot/dst_snap_list.log | sed -e '1d' | sed -e '$d' | cut -d " " -f 2`
+    for sn in `sed -n '/SNAPSHOT/,/row(s)/p'  ${Shell_Path}/log/${Date_Path}/snapshot/dst_snap_list.log | sed -e '1d' -e '$d' | cut -d " " -f 2`
     do
       grep -x $sn ${Shell_Path}/log/${Date_Path}/snapshot/snapshot_name.txt >> ${Shell_Path}/log/${Date_Path}/snapshot/dst_snap_exits.txt
     done
@@ -232,7 +232,7 @@ function transfer() {
     hbaseRootDir=`xmllint --xpath '//property[name="hbase.rootdir"]/value/text()' ${dst_hbase_conf}/hbase-site.xml`
     ##迁移snapshot,用hbase1的认证，用hbase的也行，但是要有提交yarn任务的权限，以及hbase1的对应hadoop的路径的权限
     local status=0
-    for sn in `sed -n '/SNAPSHOT/,/row(s)/p'  ${Shell_Path}/log/${Date_Path}/snapshot/snapInfo.txt | sed -e '1d' | sed -e '$d' | cut -d " " -f 2`
+    for sn in `sed -n '/SNAPSHOT/,/row(s)/p'  ${Shell_Path}/log/${Date_Path}/snapshot/snapInfo.txt | sed -e '1d' -e '$d' | cut -d " " -f 2`
     do
       echo "迁移snapshot:"${sn}",开始。。。"
       echo "迁移snapshot:"${sn}",日志如下：" >> ${Shell_Path}/log/${Date_Path}/transfer/export_sn.log
@@ -246,7 +246,7 @@ function transfer() {
     done
 
     ##restore_snapshot
-    for sn in `sed -n '/SNAPSHOT/,/row(s)/p'  ${Shell_Path}/log/${Date_Path}/snapshot/snapInfo.txt | sed -e '1d' | sed -e '$d' | cut -d " " -f 2`
+    for sn in `sed -n '/SNAPSHOT/,/row(s)/p'  ${Shell_Path}/log/${Date_Path}/snapshot/snapInfo.txt | sed -e '1d' -e '$d' | cut -d " " -f 2`
     do
       echo "restore_snapshot:"$sn",开始。。。"
       echo "restore_snapshot:"$sn",日志如下：" >> ${Shell_Path}/log/${Date_Path}/transfer/restore_sn.log
@@ -277,7 +277,7 @@ function exportTableInfo1() {
       exit 1
     fi
 
-    sed -n '/TABLE/,/row(s)/p'  ${Shell_Path}/log/${Date_Path}/tabInfo/tables.log | sed -e '1d' | sed -e '$d' > ${Shell_Path}/log/${Date_Path}/tabInfo/allTable.txt
+    sed -n '/TABLE/,/row(s)/p'  ${Shell_Path}/log/${Date_Path}/tabInfo/tables.log | sed -e '1d' -e '$d' > ${Shell_Path}/log/${Date_Path}/tabInfo/allTable.txt
     cat ${Shell_Path}/log/${Date_Path}/tabInfo/allTable.txt
 
     echo "导出的表信息(不包含namespace为hbase的表)，请查看文件"${Shell_Path}/log/${Date_Path}/tabInfo/allTable.txt
@@ -313,7 +313,7 @@ function snapshot1() {
       exit 1
     fi
 
-    for sn in `sed -n '/SNAPSHOT/,/row(s)/p'  ${Shell_Path}/log/${Date_Path}/snapshot/source_snap_list.log | sed -e '1d' | sed -e '$d' | cut -d " " -f 2`
+    for sn in `sed -n '/SNAPSHOT/,/row(s)/p'  ${Shell_Path}/log/${Date_Path}/snapshot/source_snap_list.log | sed -e '1d' -e '$d' | cut -d " " -f 2`
     do
       grep -x $sn ${Shell_Path}/log/${Date_Path}/snapshot/snapshot_name.txt >> ${Shell_Path}/log/${Date_Path}/snapshot/src_snap_exits.txt
     done
@@ -368,7 +368,7 @@ function snapshot1() {
     echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
     sed -n '/SNAPSHOT/,/row(s)/p'  ${Shell_Path}/log/${Date_Path}/snapshot/snapInfo.txt
     echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-    sed -n '/SNAPSHOT/,/row(s)/p'  ${Shell_Path}/log/${Date_Path}/snapshot/snapInfo.txt | sed -e '1d' | sed -e '$d' | sed 's/^[\t ]*//g' | sed 's/[\t ]*$//g' | cut -d ' ' -f 1,2 > ${Shell_Path}/log/${Date_Path}/snapshot/snapshot_table_info.txt
+    sed -n '/SNAPSHOT/,/row(s)/p'  ${Shell_Path}/log/${Date_Path}/snapshot/snapInfo.txt | sed -e '1d' -e '$d' | sed 's/^[\t ]*//g' | sed 's/[\t ]*$//g' | cut -d ' ' -f 1,2 > ${Shell_Path}/log/${Date_Path}/snapshot/snapshot_table_info.txt
     echo "备份信息可查看文件："${Shell_Path}/log/${Date_Path}/snapshot/snapshot_table_info.txt
     echo "数据备份end..."
 }
@@ -396,7 +396,7 @@ function transfer1() {
       exit 1
     fi
 
-    sed -n '/TABLE/,/row(s)/p'  ${Shell_Path}/log/${Date_Path}/transfer/dst_table.log | sed -e '1d' | sed -e '$d' > ${Shell_Path}/log/${Date_Path}/transfer/dst_all_table.log
+    sed -n '/TABLE/,/row(s)/p'  ${Shell_Path}/log/${Date_Path}/transfer/dst_table.log | sed -e '1d' -e '$d' > ${Shell_Path}/log/${Date_Path}/transfer/dst_all_table.log
 
     grep -f ${Shell_Path}/log/${Date_Path}/transfer/table.log ${Shell_Path}/log/${Date_Path}/transfer/dst_all_table.log > ${Shell_Path}/log/${Date_Path}/transfer/dst_exits_table.log
 
@@ -418,7 +418,7 @@ function transfer1() {
       exit 1
     fi
 
-    sed -n '/SNAPSHOT/,/row(s)/p'  ${Shell_Path}/log/${Date_Path}/transfer/dst_snapshots.log | sed -e '1d' | sed -e '$d' > ${Shell_Path}/log/${Date_Path}/transfer/dst_all_snapshots.log
+    sed -n '/SNAPSHOT/,/row(s)/p'  ${Shell_Path}/log/${Date_Path}/transfer/dst_snapshots.log | sed -e '1d' -e '$d' > ${Shell_Path}/log/${Date_Path}/transfer/dst_all_snapshots.log
     sed 's/^[\t ]*//g' ${snapshot_table_file} | sed 's/[\t ]*$//g' | cut -d ' ' -f 1 > ${Shell_Path}/log/${Date_Path}/transfer/snapshot.log
     grep -f ${Shell_Path}/log/${Date_Path}/transfer/snapshot.log ${Shell_Path}/log/${Date_Path}/transfer/dst_all_snapshots.log > ${Shell_Path}/log/${Date_Path}/transfer/dst_exits_snapshot.log
 
