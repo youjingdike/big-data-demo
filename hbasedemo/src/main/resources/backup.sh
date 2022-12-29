@@ -388,7 +388,7 @@ function transfer1() {
        exit 1
     fi
 
-    ##start 检查目标端是否含有相同的表及相同的备份,有就提示,停止迁移
+    ##start 检查目标端是否含有相同的表,有就提示,停止迁移
     echo "list" | $HBASE_SHELL  --config ${dst_hbase_conf} shell -n 1>${Shell_Path}/log/${Date_Path}/transfer/dst_table.log 2>&1
     local status=$?
     if [ ${status} != 0 ];then
@@ -404,6 +404,7 @@ function transfer1() {
     if [ ${nu} != 0 ];then
       echo "目标端已经存在的表,请处理后再进行数据迁移，表名如下："
       cat ${Shell_Path}/log/${Date_Path}/transfer/dst_exits_table.log
+      exit 1
     else
       echo "目标端不存在要迁移的表，可全部迁移..."
     fi
