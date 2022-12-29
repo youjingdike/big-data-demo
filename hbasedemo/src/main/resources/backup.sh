@@ -484,11 +484,11 @@ function dataCheck() {
       if [ ${status} != 0 ];then
         echo "RowCounter:${tb},源端执行失败，请查看日志文件："${Shell_Path}/log/${Date_Path}/dataCheck/data_check.log
         echo ${tb}"=源端数据查询失败" >> ${Shell_Path}/log/${Date_Path}/dataCheck/srcDataQueryResult.txt
-        echo ${tb}",源端数据查询结束。。。"
         continue
+      else
+        local rows=`cat ${Shell_Path}/log/${Date_Path}/dataCheck/data_check.log | grep 'ROWS=' | tail -1 | cut -d '=' -f 2`
+        echo ${tb}"="${rows} >> ${Shell_Path}/log/${Date_Path}/dataCheck/srcDataQueryResult.txt
       fi
-      local rows=`cat ${Shell_Path}/log/${Date_Path}/dataCheck/data_check.log | grep 'ROWS=' | tail -1 | cut -d '=' -f 2`
-      echo ${tb}"="${rows} >> ${Shell_Path}/log/${Date_Path}/dataCheck/srcDataQueryResult.txt
       echo ${tb}",源端数据查询结束。。。"
     done
     echo "源端数据查询全部结束。。。"
@@ -498,16 +498,16 @@ function dataCheck() {
     do
       echo ${tb}",目标端数据查询开始。。。"
       echo ${tb}",目标端数据查询日志如下:" >> ${Shell_Path}/log/${Date_Path}/dataCheck/data_check.log
-      $HBASE_SHELL --config ${src_hbase_conf} -Dhdp.version=2.3.7.0-1 org.apache.hadoop.hbase.mapreduce.RowCounter ${tb} 1>>${Shell_Path}/log/${Date_Path}/dataCheck/data_check.log 2>&1
+      $HBASE_SHELL --config ${dst_hbase_conf} -Dhdp.version=2.3.7.0-1 org.apache.hadoop.hbase.mapreduce.RowCounter ${tb} 1>>${Shell_Path}/log/${Date_Path}/dataCheck/data_check.log 2>&1
       status=$?
       if [ ${status} != 0 ];then
         echo "RowCounter:${tb},目标端执行失败，请查看日志文件："${Shell_Path}/log/${Date_Path}/dataCheck/data_check.log
         echo ${tb}"=目标端数据查询失败" >> ${Shell_Path}/log/${Date_Path}/dataCheck/dstDataQueryResult.txt
-        echo ${tb}",目标端数据查询结束。。。"
         continue
+      else
+        local rows=`cat ${Shell_Path}/log/${Date_Path}/dataCheck/data_check.log | grep 'ROWS=' | tail -1 | cut -d '=' -f 2`
+        echo ${tb}"="${rows} >> ${Shell_Path}/log/${Date_Path}/dataCheck/dstDataQueryResult.txt
       fi
-      local rows=`cat ${Shell_Path}/log/${Date_Path}/dataCheck/data_check.log | grep 'ROWS=' | tail -1 | cut -d '=' -f 2`
-      echo ${tb}"="${rows} >> ${Shell_Path}/log/${Date_Path}/dataCheck/dstDataQueryResult.txt
       echo ${tb}",目标端数据查询结束。。。"
     done
     echo "目标端数据查询全部结束。。。"
@@ -515,8 +515,8 @@ function dataCheck() {
     echo "表名    源端数据条数    目标端数据条数" >> ${Shell_Path}/log/${Date_Path}/dataCheck/dataCheckResult.txt
     for tb in `cat ${table_file}`
     do
-      s_nu=`grep ^${tb}: ${Shell_Path}/log/${Date_Path}/dataCheck/dstDataQueryResult.txt | cut -d "=" -f 2 `
-      d_nu=`grep ^${tb}: ${Shell_Path}/log/${Date_Path}/dataCheck/dstDataQueryResult.txt | cut -d "=" -f 2 `
+      s_nu=`grep ^${tb}= ${Shell_Path}/log/${Date_Path}/dataCheck/srcDataQueryResult.txt | cut -d "=" -f 2 `
+      d_nu=`grep ^${tb}= ${Shell_Path}/log/${Date_Path}/dataCheck/dstDataQueryResult.txt | cut -d "=" -f 2 `
       echo ${tb}"  "${s_nu}"  "${d_nu} >> ${Shell_Path}/log/${Date_Path}/dataCheck/dataCheckResult.txt
     done
 
