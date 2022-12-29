@@ -368,7 +368,7 @@ function snapshot1() {
     echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
     sed -n '/SNAPSHOT/,/row(s)/p'  ${Shell_Path}/log/${Date_Path}/snapshot/snapInfo.txt
     echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-    sed -n '/SNAPSHOT/,/row(s)/p'  ${Shell_Path}/log/${Date_Path}/snapshot/snapInfo.txt | sed -e '1d' -e '$d' | sed 's/^[\t ]*//g' | sed 's/[\t ]*$//g' | cut -d ' ' -f 1,2 > ${Shell_Path}/log/${Date_Path}/snapshot/snapshot_table_info.txt
+    sed -n '/SNAPSHOT/,/row(s)/p'  ${Shell_Path}/log/${Date_Path}/snapshot/snapInfo.txt | sed -e '1d' -e '$d' -e 's/^[\t ]*//g' -e 's/[\t ]*$//g' | cut -d ' ' -f 1,2 > ${Shell_Path}/log/${Date_Path}/snapshot/snapshot_table_info.txt
     echo "备份信息可查看文件："${Shell_Path}/log/${Date_Path}/snapshot/snapshot_table_info.txt
     echo "数据备份end..."
 }
@@ -379,7 +379,7 @@ function transfer1() {
     mkdir -p ${Shell_Path}/log/${Date_Path}/transfer
 
     ##校验是否含有hbase命名空间的表(去掉default命令空间)
-    sed 's/^[\t ]*//g' ${snapshot_table_file} | sed 's/[\t ]*$//g' | cut -d ' ' -f 2 | sed  "s/^default://g" > ${Shell_Path}/log/${Date_Path}/transfer/table.log
+    sed -e 's/^[\t ]*//g' -e 's/[\t ]*$//g' -e 's/[\t ]\+/ /g' ${snapshot_table_file} | cut -d ' ' -f 2 | sed  "s/^default://g" > ${Shell_Path}/log/${Date_Path}/transfer/table.log
     cat ${Shell_Path}/log/${Date_Path}/transfer/table.log | grep '^hbase:' > ${Shell_Path}/log/${Date_Path}/transfer/hbase_table.log
     local nu=`cat ${Shell_Path}/log/${Date_Path}/transfer/hbase_table.log | wc -l`
     if [ ${nu} != 0 ];then
