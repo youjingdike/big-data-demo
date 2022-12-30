@@ -247,24 +247,24 @@ function transfer() {
       exit 1
     fi
     ##目标端的全部namespace
-    sed -n '/NAMESPACE/,/row(s)/p'  ${Shell_Path}/log/${Date_Path}/snapshot/dst_namespace.log | sed -e '1d' -e '$d' > ${Shell_Path}/log/${Date_Path}/transfer/dst_all_namespace.txt
+    sed -n '/NAMESPACE/,/row(s)/p'  ${Shell_Path}/log/${Date_Path}/transfer/dst_namespace.log | sed -e '1d' -e '$d' > ${Shell_Path}/log/${Date_Path}/transfer/dst_all_namespace.txt
 
     echo -n "" > ${Shell_Path}/log/${Date_Path}/transfer/dst_no_exist_namespace.txt
     for ns in `cat ${Shell_Path}/log/${Date_Path}/transfer/ns.txt`
     do
       local nu=`grep -x ${ns} ${Shell_Path}/log/${Date_Path}/transfer/dst_all_namespace.txt | wc -l`
       if [ ${nu} == 0 ];then
-        echo ${ns} >> {Shell_Path}/log/${Date_Path}/transfer/dst_no_exist_namespace.txt
+        echo ${ns} >> ${Shell_Path}/log/${Date_Path}/transfer/dst_no_exist_namespace.txt
       fi
     done
 
-    local nu=`cat {Shell_Path}/log/${Date_Path}/transfer/dst_no_exist_namespace.txt | wc -l`
+    local nu=`cat ${Shell_Path}/log/${Date_Path}/transfer/dst_no_exist_namespace.txt | wc -l`
     if [ ${nu} != 0 ];then
       echo "目标端hbase不存在namespace,需要创建namespace，如下："
-      cat {Shell_Path}/log/${Date_Path}/transfer/dst_no_exist_namespace.txt
+      cat ${Shell_Path}/log/${Date_Path}/transfer/dst_no_exist_namespace.txt
 
       echo "目标端创建namespace开始。。。"
-      for ns in `cat {Shell_Path}/log/${Date_Path}/transfer/dst_no_exist_namespace.txt`
+      for ns in `cat ${Shell_Path}/log/${Date_Path}/transfer/dst_no_exist_namespace.txt`
       do
         echo "创建snapshot："${ns}",开始"
         echo "创建snapshot："${ns}",的日志如下：">>${Shell_Path}/log/${Date_Path}/transfer/create_namespace.log
@@ -287,7 +287,7 @@ function transfer() {
     do
       echo "迁移snapshot:"${sn}",开始。。。"
       echo "迁移snapshot:"${sn}",日志如下：" >> ${Shell_Path}/log/${Date_Path}/transfer/export_sn.log
-      $HBASE_SHELL --config ${src_hbase_conf} -Dhdp.version=2.3.7.0-1 org.apache.hadoop.hbase.snapshot.ExportSnapshot -snapshot $sn -copy-to ${dst_hadoop_uris}${hbaseRootDir} 1>>${Shell_Path}/log/${Date_Path}/transfer/export_sn.log 2>&1
+      $HBASE_SHELL --config ${src_hbase_conf} -Dhdp.version=2.3.6.0-1 org.apache.hadoop.hbase.snapshot.ExportSnapshot -snapshot $sn -copy-to ${dst_hadoop_uris}${hbaseRootDir} 1>>${Shell_Path}/log/${Date_Path}/transfer/export_sn.log 2>&1
       status=$?
       if [ ${status} != 0 ];then
         echo "迁移snapshot:${sn},执行失败，请查看日志文件："${Shell_Path}/log/${Date_Path}/transfer/export_sn.log
@@ -537,7 +537,7 @@ function transfer1() {
     do
       echo "迁移snapshot:"${sn}",开始。。。"
       echo "迁移snapshot:"${sn}",日志如下：" >> ${Shell_Path}/log/${Date_Path}/transfer/export_sn.log
-      $HBASE_SHELL --config ${src_hbase_conf} -Dhdp.version=2.3.7.0-1 org.apache.hadoop.hbase.snapshot.ExportSnapshot -snapshot $sn -copy-to ${dst_hadoop_uris}${hbaseRootDir} 1>>${Shell_Path}/log/${Date_Path}/transfer/export_sn.log 2>&1
+      $HBASE_SHELL --config ${src_hbase_conf} -Dhdp.version=2.3.6.0-1 org.apache.hadoop.hbase.snapshot.ExportSnapshot -snapshot $sn -copy-to ${dst_hadoop_uris}${hbaseRootDir} 1>>${Shell_Path}/log/${Date_Path}/transfer/export_sn.log 2>&1
       status=$?
       if [ ${status} != 0 ];then
         echo "迁移snapshot:${sn},执行失败，请查看日志文件："${Shell_Path}/log/${Date_Path}/transfer/export_sn.log
@@ -578,7 +578,7 @@ function dataCheck() {
     do
       echo ${tb}",源端数据查询开始。。。"
       echo ${tb}",源端数据查询日志如下:" >> ${Shell_Path}/log/${Date_Path}/dataCheck/data_check.log
-      $HBASE_SHELL --config ${src_hbase_conf} -Dhdp.version=2.3.7.0-1 org.apache.hadoop.hbase.mapreduce.RowCounter ${tb} 1>>${Shell_Path}/log/${Date_Path}/dataCheck/data_check.log 2>&1
+      $HBASE_SHELL --config ${src_hbase_conf} -Dhdp.version=2.3.6.0-1 org.apache.hadoop.hbase.mapreduce.RowCounter ${tb} 1>>${Shell_Path}/log/${Date_Path}/dataCheck/data_check.log 2>&1
       status=$?
       if [ ${status} != 0 ];then
         echo "RowCounter:${tb},源端执行失败，请查看日志文件："${Shell_Path}/log/${Date_Path}/dataCheck/data_check.log
@@ -597,7 +597,7 @@ function dataCheck() {
     do
       echo ${tb}",目标端数据查询开始。。。"
       echo ${tb}",目标端数据查询日志如下:" >> ${Shell_Path}/log/${Date_Path}/dataCheck/data_check.log
-      $HBASE_SHELL --config ${dst_hbase_conf} -Dhdp.version=2.3.7.0-1 org.apache.hadoop.hbase.mapreduce.RowCounter ${tb} 1>>${Shell_Path}/log/${Date_Path}/dataCheck/data_check.log 2>&1
+      $HBASE_SHELL --config ${dst_hbase_conf} -Dhdp.version=2.3.6.0-1 org.apache.hadoop.hbase.mapreduce.RowCounter ${tb} 1>>${Shell_Path}/log/${Date_Path}/dataCheck/data_check.log 2>&1
       status=$?
       if [ ${status} != 0 ];then
         echo "RowCounter:${tb},目标端执行失败，请查看日志文件："${Shell_Path}/log/${Date_Path}/dataCheck/data_check.log
