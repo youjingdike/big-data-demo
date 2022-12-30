@@ -495,7 +495,7 @@ function transfer1() {
       exit 1
     fi
     ##目标端的全部namespace
-    sed -n '/NAMESPACE/,/row(s)/p'  ${Shell_Path}/log/${Date_Path}/snapshot/dst_namespace.log | sed -e '1d' -e '$d' > ${Shell_Path}/log/${Date_Path}/transfer/dst_all_namespace.txt
+    sed -n '/NAMESPACE/,/row(s)/p'  ${Shell_Path}/log/${Date_Path}/transfer/dst_namespace.log | sed -e '1d' -e '$d' > ${Shell_Path}/log/${Date_Path}/transfer/dst_all_namespace.txt
 
     echo -n "" > ${Shell_Path}/log/${Date_Path}/transfer/dst_no_exist_namespace.txt
     for ns in `cat ${Shell_Path}/log/${Date_Path}/transfer/ns.txt`
@@ -693,6 +693,8 @@ function checkAllParam() {
  if [ "x"${paramMap['dst.hadoop.uris']} = "x" ];then
     error_nu=error_nu+1
     echo "目标端hbase对应hadoop集群的访问地址参数：dst.hadoop.uris"
+  else
+    dst_hadoop_uris=${paramMap['dst.hadoop.uris']}
  fi
 
  if [ ${error_nu} != 0 ];then
@@ -791,6 +793,8 @@ function checkParamTr() {
  if [ "x"${paramMap['dst.hadoop.uris']} = "x" ];then
     error_nu=error_nu+1
     echo "目标端hbase对应hadoop集群的访问地址参数：dst.hadoop.uris"
+  else
+    dst_hadoop_uris=${paramMap['dst.hadoop.uris']}
  fi
 
  if [ "x"${paramMap['snapshot.table.file']} = "x" ];then
