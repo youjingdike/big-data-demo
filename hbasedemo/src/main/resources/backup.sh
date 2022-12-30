@@ -502,17 +502,17 @@ function transfer1() {
     do
       local nu=`grep -x ${ns} ${Shell_Path}/log/${Date_Path}/transfer/dst_all_namespace.txt | wc -l`
       if [ ${nu} == 0 ];then
-        echo ${ns} >> {Shell_Path}/log/${Date_Path}/transfer/dst_no_exist_namespace.txt
+        echo ${ns} >> ${Shell_Path}/log/${Date_Path}/transfer/dst_no_exist_namespace.txt
       fi
     done
 
-    local nu=`cat {Shell_Path}/log/${Date_Path}/transfer/dst_no_exist_namespace.txt | wc -l`
+    local nu=`cat ${Shell_Path}/log/${Date_Path}/transfer/dst_no_exist_namespace.txt | wc -l`
     if [ ${nu} != 0 ];then
       echo "目标端hbase不存在namespace,需要创建namespace，如下："
-      cat {Shell_Path}/log/${Date_Path}/transfer/dst_no_exist_namespace.txt
+      cat ${Shell_Path}/log/${Date_Path}/transfer/dst_no_exist_namespace.txt
 
       echo "目标端创建namespace开始。。。"
-      for ns in `cat {Shell_Path}/log/${Date_Path}/transfer/dst_no_exist_namespace.txt`
+      for ns in `cat ${Shell_Path}/log/${Date_Path}/transfer/dst_no_exist_namespace.txt`
       do
         echo "创建snapshot："${ns}",开始"
         echo "创建snapshot："${ns}",的日志如下：">>${Shell_Path}/log/${Date_Path}/transfer/create_namespace.log
