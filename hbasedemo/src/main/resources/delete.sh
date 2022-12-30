@@ -8,7 +8,7 @@ Date_Path=$(date "+%Y-%m-%d-%H-%M-%S-%3N")
 function delete_table() {
     echo "表删除start..."
     mkdir -p ${Shell_Path}/log/${Date_Path}/deleteTable
-    grep : ${table_file} | grep -v '^hbase:' > ${Shell_Path}/log/${Date_Path}/deleteTable/tb.log
+    cat ${table_file} | grep -v '^hbase:' > ${Shell_Path}/log/${Date_Path}/deleteTable/tb.log
     for tb in `cat ${Shell_Path}/log/${Date_Path}/deleteTable/tb.log`
     do
       echo "disable '${tb}'
