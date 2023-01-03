@@ -73,6 +73,7 @@ function exportTableInfo() {
 
 # -all  目标端不能有重复的表与相同的备份
 function snapshot() {
+    local error_nu=0
     echo "数据备份start..."
     mkdir -p ${Shell_Path}/log/${Date_Path}/snapshot
     echo -n "" > ${Shell_Path}/log/${Date_Path}/snapshot/log.log
@@ -120,9 +121,9 @@ function snapshot() {
     local nu=`cat ${Shell_Path}/log/${Date_Path}/snapshot/dst_table_exits.txt | wc -l`
     if [ ${nu} != 0 ];then
       #echo "目标端已经存在的表,将跳过已存在表的数据迁移，表名如下："
-      echo "目标端已经存在的表,请处理后再进行数据迁移，表名如下："
+      echo "！！！目标端已经存在的表,请处理后再进行数据迁移，表名如下："
       cat ${Shell_Path}/log/${Date_Path}/snapshot/dst_table_exits.txt
-      exit 1
+      error_nu=1
     else
       echo "目标端不存在要迁移的表，将全部迁移..."
     fi
@@ -162,8 +163,8 @@ function snapshot() {
     if [ ${nu} != 0 ];then
       echo "源端已经存在的snapshot,如下："
       cat ${Shell_Path}/log/${Date_Path}/snapshot/src_snap_exits.txt
-      echo "请删除源端已存在的snapshot 或者 重新设置备份名称前缀snapshot.prefix"
-      exit 1
+      echo "！！！请删除源端已存在的snapshot 或者 重新设置备份名称前缀snapshot.prefix"
+      error_nu=1
     else
       echo "源端不存在要创建的snapshot..."
     fi
@@ -187,11 +188,17 @@ function snapshot() {
     if [ ${nu} != 0 ];then
       echo "目标端已经存在的snapshot,如下："
       cat ${Shell_Path}/log/${Date_Path}/snapshot/dst_snap_exits.txt
-      echo "请删除目标端已存在的snapshot 或者 重新设置备份名称前缀snapshot.prefix"
-      exit 1
+      echo "！！！请删除目标端已存在的snapshot 或者 重新设置备份名称前缀snapshot.prefix"
+      error_nu=1
     else
       echo "目标端不存在要创建的snapshot..."
     fi
+
+    if [ ${error_nu} != 0 ];then
+      echo "！！！请将上面校验出的问题解决之后,再执行脚本！！！"
+      exit 1
+    fi
+
     ##end
 
     #创建snapshot,使用源端的keytab
