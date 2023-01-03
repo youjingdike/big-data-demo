@@ -294,7 +294,7 @@ function transfer() {
     do
       echo "迁移snapshot:"${sn}",开始。。。"
       echo "迁移snapshot:"${sn}",日志如下：" >> ${Shell_Path}/log/${Date_Path}/transfer/export_sn.log
-      $HBASE_SHELL --config ${src_hbase_conf} -Dhdp.version=2.3.6.0-1 org.apache.hadoop.hbase.snapshot.ExportSnapshot -snapshot $sn -copy-to ${dst_hadoop_uris}${hbaseRootDir} 1>>${Shell_Path}/log/${Date_Path}/transfer/export_sn.log 2>&1
+      $HBASE_SHELL --config ${src_hbase_conf}  org.apache.hadoop.hbase.snapshot.ExportSnapshot -snapshot $sn -copy-to ${dst_hadoop_uris}${hbaseRootDir} 1>>${Shell_Path}/log/${Date_Path}/transfer/export_sn.log 2>&1
       status=$?
       if [ ${status} != 0 ];then
         echo "迁移snapshot:${sn},执行失败，请查看日志文件："${Shell_Path}/log/${Date_Path}/transfer/export_sn.log
@@ -547,7 +547,7 @@ function transfer1() {
     do
       echo "迁移snapshot:"${sn}",开始。。。"
       echo "迁移snapshot:"${sn}",日志如下：" >> ${Shell_Path}/log/${Date_Path}/transfer/export_sn.log
-      $HBASE_SHELL --config ${src_hbase_conf} -Dhdp.version=2.3.6.0-1 org.apache.hadoop.hbase.snapshot.ExportSnapshot -snapshot $sn -copy-to ${dst_hadoop_uris}${hbaseRootDir} 1>>${Shell_Path}/log/${Date_Path}/transfer/export_sn.log 2>&1
+      $HBASE_SHELL --config ${src_hbase_conf}  org.apache.hadoop.hbase.snapshot.ExportSnapshot -snapshot $sn -copy-to ${dst_hadoop_uris}${hbaseRootDir} 1>>${Shell_Path}/log/${Date_Path}/transfer/export_sn.log 2>&1
       status=$?
       if [ ${status} != 0 ];then
         echo "迁移snapshot:${sn},执行失败，请查看日志文件："${Shell_Path}/log/${Date_Path}/transfer/export_sn.log
@@ -590,7 +590,7 @@ function dataCheck() {
     do
       echo ${tb}",源端数据查询开始。。。"
       echo ${tb}",源端数据查询日志如下:" >> ${Shell_Path}/log/${Date_Path}/dataCheck/data_check_all.log
-      $HBASE_SHELL --config ${src_hbase_conf} -Dhdp.version=2.3.6.0-1 org.apache.hadoop.hbase.mapreduce.RowCounter ${tb} 1>${Shell_Path}/log/${Date_Path}/dataCheck/data_check.log 2>&1
+      $HBASE_SHELL --config ${src_hbase_conf}  org.apache.hadoop.hbase.mapreduce.RowCounter ${tb} 1>${Shell_Path}/log/${Date_Path}/dataCheck/data_check.log 2>&1
       status=$?
       cat ${Shell_Path}/log/${Date_Path}/dataCheck/data_check.log >> ${Shell_Path}/log/${Date_Path}/dataCheck/data_check_all.log
       if [ ${status} != 0 ];then
@@ -616,7 +616,7 @@ function dataCheck() {
     do
       echo ${tb}",目标端数据查询开始。。。"
       echo ${tb}",目标端数据查询日志如下:" >> ${Shell_Path}/log/${Date_Path}/dataCheck/data_check_all.log
-      $HBASE_SHELL --config ${dst_hbase_conf} -Dhdp.version=2.3.6.0-1 org.apache.hadoop.hbase.mapreduce.RowCounter ${tb} 1>${Shell_Path}/log/${Date_Path}/dataCheck/data_check.log 2>&1
+      $HBASE_SHELL --config ${dst_hbase_conf}  org.apache.hadoop.hbase.mapreduce.RowCounter ${tb} 1>${Shell_Path}/log/${Date_Path}/dataCheck/data_check.log 2>&1
       status=$?
       cat ${Shell_Path}/log/${Date_Path}/dataCheck/data_check.log >> ${Shell_Path}/log/${Date_Path}/dataCheck/data_check_all.log
       if [ ${status} != 0 ];then
