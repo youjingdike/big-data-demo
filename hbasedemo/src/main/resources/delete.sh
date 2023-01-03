@@ -58,7 +58,7 @@ function printHelp() {
     echo "  src.hbase.conf   :  源端hbase的配置文件目录 / 待检测HBASE集群的配置文件目录"
     echo "  table.file       :  要备份的表名称列表文件(全路径)"
     echo "3.示例  :  "
-    echo "  sh backup.sh -dt hbase.root.dir=/usr/hbase src.hbase.conf=/root/hbase/conf dst.hbase.conf=/root/table_info.txt "
+    echo "  sh de.sh -dt hbase.root.dir=/usr/hbase src.hbase.conf=/root/hbase/conf table.file=/root/table_info.txt "
 }
 
 function checkParam() {

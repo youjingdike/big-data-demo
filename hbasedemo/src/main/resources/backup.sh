@@ -3,7 +3,7 @@
 Shell_Path=$(cd "$(dirname "$0")";pwd)
 source /etc/profile
 Date_Path=$(date "+%Y-%m-%d-%H-%M-%S-%3N")
-
+#echo ${Shell_Path}
 # -sc/-all
 function statusCheck() {
     kinit_src
@@ -162,7 +162,7 @@ function snapshot() {
     if [ ${nu} != 0 ];then
       echo "源端已经存在的snapshot,如下："
       cat ${Shell_Path}/log/${Date_Path}/snapshot/src_snap_exits.txt
-      echo "请删除源端已存在的snapshot 或者 重新设置备份名称前缀"
+      echo "请删除源端已存在的snapshot 或者 重新设置备份名称前缀snapshot.prefix"
       exit 1
     else
       echo "源端不存在要创建的snapshot..."
@@ -187,7 +187,7 @@ function snapshot() {
     if [ ${nu} != 0 ];then
       echo "目标端已经存在的snapshot,如下："
       cat ${Shell_Path}/log/${Date_Path}/snapshot/dst_snap_exits.txt
-      echo "请删除目标端已存在的snapshot 或者 重新设置备份名称前缀"
+      echo "请删除目标端已存在的snapshot 或者 重新设置备份名称前缀snapshot.prefix"
       exit 1
     else
       echo "目标端不存在要创建的snapshot..."
@@ -289,7 +289,7 @@ function transfer() {
     fi
     ##end 判断目标端是否已有namespace,没有就需要创建
 
-    ##迁移snapshot,用hbase1的认证，用hbase的也行，但是要有提交yarn任务的权限，以及hbase1的对应hadoop的路径的权限
+    ##迁移snapshot,用hbase1的认证，要有提交目标端yarn任务的default队列权限，以及hbase的对应hdfs的路径的权限
     for sn in `sed -n '/SNAPSHOT/,/row(s)/p'  ${Shell_Path}/log/${Date_Path}/snapshot/snapInfo.txt | sed -e '1d' -e '$d' | cut -d " " -f 2`
     do
       echo "迁移snapshot:"${sn}",开始。。。"
@@ -391,7 +391,7 @@ function snapshot1() {
       if [ ${nu} != 0 ];then
         echo "源端已经存在的snapshot,如下："
         cat ${Shell_Path}/log/${Date_Path}/snapshot/src_snap_exits.txt
-        echo "请删除源端已存在的snapshot 或者 重新设置备份名称前缀"
+        echo "请删除源端已存在的snapshot 或者 重新设置备份名称前缀snapshot.prefix"
         exit 1
       else
         echo "源端不存在要创建的snapshot..."
@@ -542,7 +542,7 @@ function transfer1() {
 
     ##从配置文件获取hbase.rootdir的配置
     hbaseRootDir=`xmllint --xpath '//property[name="hbase.rootdir"]/value/text()' ${dst_hbase_conf}/hbase-site.xml`
-    ##迁移snapshot,用hbase1的认证，用hbase的也行，但是要有提交yarn任务的权限，以及hbase1的对应hadoop的路径的权限
+    ##迁移snapshot,用hbase1的认证，要有提交目标端yarn任务的default队列权限，以及hbase的对应hdfs的路径的权限
     for sn in `cat  ${Shell_Path}/log/${Date_Path}/transfer/snapshot.log`
     do
       echo "迁移snapshot:"${sn}",开始。。。"
@@ -580,6 +580,7 @@ function transfer1() {
 function dataCheck() {
     echo "数据校验start..."
     mkdir -p ${Shell_Path}/log/${Date_Path}/dataCheck
+    echo -n "" > ${Shell_Path}/log/${Date_Path}/dataCheck/data_check_all.log
     echo -n "" > ${Shell_Path}/log/${Date_Path}/dataCheck/data_check.log
     local status=0
 
@@ -588,16 +589,22 @@ function dataCheck() {
     for tb in `cat ${table_file}`
     do
       echo ${tb}",源端数据查询开始。。。"
-      echo ${tb}",源端数据查询日志如下:" >> ${Shell_Path}/log/${Date_Path}/dataCheck/data_check.log
-      $HBASE_SHELL --config ${src_hbase_conf} -Dhdp.version=2.3.6.0-1 org.apache.hadoop.hbase.mapreduce.RowCounter ${tb} 1>>${Shell_Path}/log/${Date_Path}/dataCheck/data_check.log 2>&1
+      echo ${tb}",源端数据查询日志如下:" >> ${Shell_Path}/log/${Date_Path}/dataCheck/data_check_all.log
+      $HBASE_SHELL --config ${src_hbase_conf} -Dhdp.version=2.3.6.0-1 org.apache.hadoop.hbase.mapreduce.RowCounter ${tb} 1>${Shell_Path}/log/${Date_Path}/dataCheck/data_check.log 2>&1
       status=$?
+      cat ${Shell_Path}/log/${Date_Path}/dataCheck/data_check.log >> ${Shell_Path}/log/${Date_Path}/dataCheck/data_check_all.log
       if [ ${status} != 0 ];then
-        echo "RowCounter:${tb},源端执行失败，请查看日志文件："${Shell_Path}/log/${Date_Path}/dataCheck/data_check.log
+        echo "RowCounter:${tb},源端执行失败，请查看日志文件："${Shell_Path}/log/${Date_Path}/dataCheck/data_check_all.log
         echo ${tb}"=源端数据查询失败" >> ${Shell_Path}/log/${Date_Path}/dataCheck/srcDataQueryResult.txt
         continue
       else
-        local rows=`cat ${Shell_Path}/log/${Date_Path}/dataCheck/data_check.log | grep 'ROWS=' | tail -1 | cut -d '=' -f 2`
-        echo ${tb}"="${rows} >> ${Shell_Path}/log/${Date_Path}/dataCheck/srcDataQueryResult.txt
+        local rows_nu=`cat ${Shell_Path}/log/${Date_Path}/dataCheck/data_check.log | grep 'ROWS=' | tail -1 | wc -l`
+        if [ ${rows_nu} == 0 ];then
+          echo ${tb}"=0" >> ${Shell_Path}/log/${Date_Path}/dataCheck/srcDataQueryResult.txt
+        else
+          local rows=`cat ${Shell_Path}/log/${Date_Path}/dataCheck/data_check.log | grep 'ROWS=' | tail -1 | cut -d '=' -f 2`
+          echo ${tb}"="${rows} >> ${Shell_Path}/log/${Date_Path}/dataCheck/srcDataQueryResult.txt
+        fi
       fi
       echo ${tb}",源端数据查询结束。。。"
     done
@@ -608,16 +615,22 @@ function dataCheck() {
     for tb in `cat ${table_file}`
     do
       echo ${tb}",目标端数据查询开始。。。"
-      echo ${tb}",目标端数据查询日志如下:" >> ${Shell_Path}/log/${Date_Path}/dataCheck/data_check.log
-      $HBASE_SHELL --config ${dst_hbase_conf} -Dhdp.version=2.3.6.0-1 org.apache.hadoop.hbase.mapreduce.RowCounter ${tb} 1>>${Shell_Path}/log/${Date_Path}/dataCheck/data_check.log 2>&1
+      echo ${tb}",目标端数据查询日志如下:" >> ${Shell_Path}/log/${Date_Path}/dataCheck/data_check_all.log
+      $HBASE_SHELL --config ${dst_hbase_conf} -Dhdp.version=2.3.6.0-1 org.apache.hadoop.hbase.mapreduce.RowCounter ${tb} 1>${Shell_Path}/log/${Date_Path}/dataCheck/data_check.log 2>&1
       status=$?
+      cat ${Shell_Path}/log/${Date_Path}/dataCheck/data_check.log >> ${Shell_Path}/log/${Date_Path}/dataCheck/data_check_all.log
       if [ ${status} != 0 ];then
-        echo "RowCounter:${tb},目标端执行失败，请查看日志文件："${Shell_Path}/log/${Date_Path}/dataCheck/data_check.log
+        echo "RowCounter:${tb},目标端执行失败，请查看日志文件："${Shell_Path}/log/${Date_Path}/dataCheck/data_check_all.log
         echo ${tb}"=目标端数据查询失败" >> ${Shell_Path}/log/${Date_Path}/dataCheck/dstDataQueryResult.txt
         continue
       else
-        local rows=`cat ${Shell_Path}/log/${Date_Path}/dataCheck/data_check.log | grep 'ROWS=' | tail -1 | cut -d '=' -f 2`
-        echo ${tb}"="${rows} >> ${Shell_Path}/log/${Date_Path}/dataCheck/dstDataQueryResult.txt
+        local rows_nu=`cat ${Shell_Path}/log/${Date_Path}/dataCheck/data_check.log | grep 'ROWS=' | tail -1 | wc -l`
+        if [ ${rows_nu} == 0 ];then
+          echo ${tb}"=0" >> ${Shell_Path}/log/${Date_Path}/dataCheck/dstDataQueryResult.txt
+        else
+          local rows=`cat ${Shell_Path}/log/${Date_Path}/dataCheck/data_check.log | grep 'ROWS=' | tail -1 | cut -d '=' -f 2`
+          echo ${tb}"="${rows} >> ${Shell_Path}/log/${Date_Path}/dataCheck/dstDataQueryResult.txt
+        fi
       fi
       echo ${tb}",目标端数据查询结束。。。"
     done
@@ -640,7 +653,7 @@ function dataCheck() {
 # -h
 function printHelp() {
     echo "功能介绍："
-    echo "1.输入相应的参数，执行相应的功能："
+    echo "1.输入相应的参数，执行相应的功能：(除第一个参数以外，其他参数可不按照顺序设置)"
     echo "  a.状态检查，请输入参数：-sc hbase客户端的根目录 待检测HBASE集群的配置文件目录 是否开启kerberos 待检测HBASE集群认证keytab文件路径"
     echo "  b.导出表信息，请输入参数：-ex hbase客户端的根目录 源端hbase的配置文件目录  是否开启kerberos 源端HBASE集群认证keytab文件路径"
     echo "      说明：不导出hbase命名空间的表"
@@ -656,8 +669,14 @@ function printHelp() {
     echo "        qianyi-snap-ns1-test1 ns1:test1"
     echo "        qianyi-snap-ns1-test2 ns1:test2"
     echo "        注意：不迁移hbase命名空间的表"
+    echo "        权限：数据迁移时,用目标端的keytab认证，所需权限如下："
+    echo "             1.要有目标端yarn集群default队列提交任务的权限；"
+    echo "             2.要有目标端hbase的对应hdfs的路径\${hbase.rootdir}/data 的可执行的权限"
     echo "  e.执行整个迁移流程，请输入：-all hbase客户端的根目录 源端hbase的配置文件目录 目标端hbase的配置文件目录 目标端hbase对应hadoop集群的访问地址 备份名称前缀 是否开启kerberos 源端HBASE集群认证keytab文件路径 目标端HBASE集群认证keytab文件路径"
     echo "        注意：全流程迁移,不处理hbase命名空间的表"
+    echo "        权限：数据迁移时,用目标端的keytab认证，所需权限如下："
+    echo "             1.要有目标端yarn集群default队列提交任务的权限；"
+    echo "             2.要有目标端hbase的对应hdfs的路径\${hbase.rootdir}/data 的可执行的权限"
     echo "2.参数说明如下："
     echo "  hbase.root.dir   :  hbase客户端的根目录（可选：如果hbase已经加入到path,可直接执行hbase命令，就不需要配置该参数)"
     echo "  src.hbase.conf   :  源端hbase的配置文件目录 / 待检测HBASE集群的配置文件目录"
