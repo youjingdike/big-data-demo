@@ -731,23 +731,23 @@ function checkAllParam() {
 
     if [ "x"${paramMap['src.keytab']} = "x" ];then
       error_nu=error_nu+1
-      echo "请配置目标端hbase的配置文件目录参数：src.keytab"
+      echo "请配置源端hbase的keytab路径：src.keytab"
     else
       keytab_src=${paramMap['src.keytab']}
-      if [ ! -d "${keytab_src}" ];then
+      if [ ! -f "${keytab_src}" ];then
         error_nu=error_nu+1
-        echo "src.keytab的配置目录：${keytab_src}不存在或不是目录，请正确配置"
+        echo "src.keytab的配置：${keytab_src}不存在或不是文件，请正确配置"
       fi
     fi
 
     if [ "x"${paramMap['dst.keytab']} = "x" ];then
       error_nu=error_nu+1
-      echo "请配置目标端hbase的配置文件目录参数：dst.keytab"
+      echo "请配置目标端hbase的keytab路径：dst.keytab"
     else
       keytab_dst=${paramMap['dst.keytab']}
-      if [ ! -d "${keytab_dst}" ];then
+      if [ ! -f "${keytab_dst}" ];then
         error_nu=error_nu+1
-        echo "dst.keytab的配置目录：${keytab_dst}不存在或不是目录，请正确配置"
+        echo "dst.keytab的配置：${keytab_dst}不存在或不是文件，请正确配置"
       fi
     fi
 
@@ -788,12 +788,12 @@ function checkParamSc() {
 
     if [ "x"${paramMap['src.keytab']} = "x" ];then
       error_nu=error_nu+1
-      echo "请配置目标端hbase的配置文件目录参数：src.keytab"
+      echo "请配置源端hbase的keytab路径：src.keytab"
     else
       keytab_src=${paramMap['src.keytab']}
-      if [ ! -d "${keytab_src}" ];then
+      if [ ! -f "${keytab_src}" ];then
         error_nu=error_nu+1
-        echo "src.keytab的配置目录：${keytab_src}不存在或不是目录，请正确配置"
+        echo "src.keytab的配置：${keytab_src}不存在或不是文件，请正确配置"
       fi
     fi
 
@@ -834,12 +834,12 @@ function checkParamSn() {
 
     if [ "x"${paramMap['src.keytab']} = "x" ];then
       error_nu=error_nu+1
-      echo "请配置目标端hbase的配置文件目录参数：src.keytab"
+      echo "请配置源端hbase的keytab路径：src.keytab"
     else
       keytab_src=${paramMap['src.keytab']}
-      if [ ! -d "${keytab_src}" ];then
+      if [ ! -f "${keytab_src}" ];then
         error_nu=error_nu+1
-        echo "src.keytab的配置目录：${keytab_src}不存在或不是目录，请正确配置"
+        echo "src.keytab的配置：${keytab_src}不存在或不是文件，请正确配置"
       fi
     fi
 
@@ -903,23 +903,23 @@ function checkParamTr() {
 
     if [ "x"${paramMap['src.keytab']} = "x" ];then
       error_nu=error_nu+1
-      echo "请配置目标端hbase的配置文件目录参数：src.keytab"
+      echo "请配置源端hbase的keytab路径：src.keytab"
     else
       keytab_src=${paramMap['src.keytab']}
-      if [ ! -d "${keytab_src}" ];then
+      if [ ! -f "${keytab_src}" ];then
         error_nu=error_nu+1
-        echo "src.keytab的配置目录：${keytab_src}不存在或不是目录，请正确配置"
+        echo "src.keytab的配置：${keytab_src}不存在或不是文件，请正确配置"
       fi
     fi
 
     if [ "x"${paramMap['dst.keytab']} = "x" ];then
       error_nu=error_nu+1
-      echo "请配置目标端hbase的配置文件目录参数：dst.keytab"
+      echo "请配置目标端hbase的keytab路径：dst.keytab"
     else
       keytab_dst=${paramMap['dst.keytab']}
-      if [ ! -d "${keytab_dst}" ];then
+      if [ ! -f "${keytab_dst}" ];then
         error_nu=error_nu+1
-        echo "dst.keytab的配置目录：${keytab_dst}不存在或不是目录，请正确配置"
+        echo "dst.keytab的配置：${keytab_dst}不存在或不是文件，请正确配置"
       fi
     fi
 
