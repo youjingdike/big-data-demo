@@ -22,7 +22,7 @@ class AddrBookEntry(object):
         self.phone = phone
         self.__extra = 'xxx'
         self._protect = 'pppp'
-        print 'Created instance for:', self.name
+        # print 'Created instance for:', self.name
 
     # 定义方法
     def updatePhone(self, new_phone):
@@ -38,19 +38,28 @@ class AddrBookEntry(object):
     def __getattribute__(self, item):
         print "__getattribute__ is called() %s" % item
         return object.__getattribute__(self, item)
-
-
+    def tst(self,command_name):
+        print '@@'
+        self_methods = dir(self)
+        for command_name1 in self_methods:
+            print command_name1
+        method = getattr(self, command_name)
+        method("tst1")
 # class Addr(AddrBookEntry):
 #     pass
 #
 #
 # # 创建实例
+print '!!!!'
 john = AddrBookEntry('John', '123')
+print '!!!!'
 # jane = AddrBookEntry('Jane', '456')
 #
-print john
-print john.name
-print john.phone
+john.tst("tst")
+
+# print john
+# print john.name
+# print john.phone
 # print john.name, john.phone
 # print jane.name, jane.phone
 # john.updatePhone("000")
