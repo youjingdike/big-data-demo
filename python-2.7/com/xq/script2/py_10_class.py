@@ -44,7 +44,8 @@ class AddrBookEntry(object):
         for command_name1 in self_methods:
             print command_name1
         method = getattr(self, command_name)
-        method("tst1")
+        print method
+        #method("tst1")
 # class Addr(AddrBookEntry):
 #     pass
 #
