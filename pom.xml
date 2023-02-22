@@ -32,6 +32,7 @@
         <module>esdemo</module>
         <module>hudidemo</module>
         <module>icebergdemo</module>
+        <module>flinkdemo_1.14.14</module>
     </modules>
 
     <properties>
