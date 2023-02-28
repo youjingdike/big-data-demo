@@ -209,8 +209,8 @@ public class AppWin {
             properties.setProperty("security.protocol", "SASL_PLAINTEXT");
             properties.setProperty("sasl.mechanism", "GSSAPI");
             properties.setProperty("sasl.kerberos.service.name", "kafka");
-            properties.setProperty("sasl.jaas.config", saslJaasConfig.replace("{keytabPath}", "/home/flink/kafka.service.keytab")
-                            .replace("{principal}", "kafka/kde-offline1.sdns.dev.cloud@HADOOP.COM"));
+            properties.setProperty("sasl.jaas.config", saslJaasConfig.replace("{keytabPath}", keytabPath)
+                            .replace("{principal}", principal));
             kafkaSinkBuilder.setKafkaProducerConfig(properties);
         }
         if (isUserOp) {
