@@ -3,6 +3,7 @@ package com.xq.tst;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
+import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.connector.base.DeliveryGuarantee;
 import org.apache.flink.connector.kafka.sink.KafkaRecordSerializationSchema;
 import org.apache.flink.connector.kafka.sink.KafkaRecordSerializationSchemaBuilder;
@@ -31,24 +32,24 @@ public class App {
     private static final Logger log = LoggerFactory.getLogger(App.class);
     public static final String saslJaasConfig= "com.sun.security.auth.module.Krb5LoginModule required \n useKeyTab=true \n keyTab=\"{keytabPath}\" \n storeKey=true \n debug=true \n useTicketCache=false \n principal=\"{principal}\";";
     //参数常量
-    private static final String PARALLELISM_ARGS = "-parallelism";
-    private static final String STATE_BACKEND_ARGS = "-state.backend";
-    private static final String SRC_TOPIC_ARGS = "-src.topic";
-    private static final String DST_TOPIC_ARGS = "-dst.topic";
+    private static final String PARALLELISM_ARGS = "parallelism";
+    private static final String STATE_BACKEND_ARGS = "state.backend";
+    private static final String SRC_TOPIC_ARGS = "src.topic";
+    private static final String DST_TOPIC_ARGS = "dst.topic";
 
-    private static final String GROUP_ID_ARGS = "-group.id";
+    private static final String GROUP_ID_ARGS = "group.id";
 
-    private static final String BOOTSTRAP_SERVERS_ARGS = "-bootstrap.servers";
+    private static final String BOOTSTRAP_SERVERS_ARGS = "bootstrap.servers";
 
-    private static final String CHECKPOINT_PATH_ARGS = "-ckp.path";
-    private static final String CHECKPOINT_INTERVAL_ARGS = "-ckp.interval";
-    private static final String CHECKPOINT_TYPE_ARGS = "-ckp.type";
+    private static final String CHECKPOINT_PATH_ARGS = "ckp.path";
+    private static final String CHECKPOINT_INTERVAL_ARGS = "ckp.interval";
+    private static final String CHECKPOINT_TYPE_ARGS = "ckp.type";
 
-    private static final String AUTO_OFFSET_RESET_ARGS = "-auto.offset.reset";
-    private static final String IS_KERBS_ARGS = "-is.kerbs";
-    private static final String KEYTAB_PATH_ARGS = "-keytab.path";
-    private static final String PRINCIPAL_ARGS = "-principal";
-    private static final String IS_USER_OP_ARGS = "-is.user.op";
+    private static final String AUTO_OFFSET_RESET_ARGS = "auto.offset.reset";
+    private static final String IS_KERBS_ARGS = "is.kerbs";
+    private static final String KEYTAB_PATH_ARGS = "keytab.path";
+    private static final String PRINCIPAL_ARGS = "principal";
+    private static final String IS_USER_OP_ARGS = "is.user.op";
 
     //参数值常量
     private static final String ROCKSDB_STATE_BACKEND = "rocksdb";
@@ -78,7 +79,8 @@ public class App {
 
     public static void main(String[] args) throws Exception {
         if (args.length != 0) {
-            Map<String, String> argsMap = fromArgs(args);
+//            Map<String, String> argsMap = fromArgs(args);
+            ParameterTool argsMap = ParameterTool.fromArgs(args);
             if (argsMap.get(PARALLELISM_ARGS) != null)
                 parallelism = Integer.parseInt(argsMap.get(PARALLELISM_ARGS));
             log.info("@@@@@parallelism: {}", parallelism);
@@ -196,12 +198,12 @@ public class App {
         env.execute("test kafka source and sink job");
     }
 
-    public static Map<String, String> fromArgs(String[] args) {
+    /*public static Map<String, String> fromArgs(String[] args) {
         Map<String, String> propMap = new HashMap<>(args.length / 2);
         for (int i = 0; i < args.length; i++) {
             if (args[i].startsWith("-") && i != args.length - 1)
                 propMap.put(args[i], args[i + 1]);
         }
         return propMap;
-    }
+    }*/
 }
