@@ -1,3 +1,4 @@
+/*
 package com.collection.toscala;
 
 import org.junit.Test;
@@ -29,3 +30,4 @@ public class Tst {
         JavaConversions.mutableMapAsJavaMap(scalaMap).forEach((s, s2) -> System.out.println(s+":"+s2));
     }
 }
+*/

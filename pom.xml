@@ -33,6 +33,7 @@
         <module>hudidemo</module>
         <module>icebergdemo</module>
         <module>flinkdemo_1.14.14</module>
+        <module>flinkdemo_1.12.1</module>
     </modules>
 
     <properties>
