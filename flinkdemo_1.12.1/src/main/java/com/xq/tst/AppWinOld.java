@@ -4,8 +4,6 @@ import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.api.java.utils.ParameterTool;
-import org.apache.flink.configuration.ConfigConstants;
-import org.apache.flink.configuration.Configuration;
 import org.apache.flink.contrib.streaming.state.RocksDBStateBackend;
 import org.apache.flink.runtime.state.memory.MemoryStateBackend;
 import org.apache.flink.streaming.api.CheckpointingMode;
@@ -23,12 +21,11 @@ import org.apache.flink.util.Collector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Iterator;
 import java.util.Properties;
 
 
-public class AppWin {
-    private static final Logger log = LoggerFactory.getLogger(AppWin.class);
+public class AppWinOld {
+    private static final Logger log = LoggerFactory.getLogger(AppWinOld.class);
     public static final String saslJaasConfig= "com.sun.security.auth.module.Krb5LoginModule required \n useKeyTab=true \n keyTab=\"{keytabPath}\" \n storeKey=true \n debug=true \n useTicketCache=false \n principal=\"{principal}\";";
     //参数常量
     private static final String PARALLELISM_ARGS = "parallelism";
@@ -80,9 +77,9 @@ public class AppWin {
     private static String autoOffsetReset = "latest";
     private static String keytabPath = "/home/flink/kafka.service.keytab";
     private static String principal = "kafka/XXXX@HADOOP.COM";
-    private static boolean isSlidingWin = true;
+    private static boolean isSlidingWin = false;
     private static long winTime = 60L;
-    private static long winSliding = 5L;
+    private static long winSliding = 30L;
     public static void main(String[] args) throws Exception {
         if (args.length != 0) {
 //            Map<String, String> argsMap = fromArgs(args);
@@ -144,11 +141,10 @@ public class AppWin {
             log.info("@@@@@isSlidingWin: {}", isSlidingWin);
         }
 
-        Configuration conf = new Configuration();
+        /*Configuration conf = new Configuration();
         conf.setBoolean(ConfigConstants.LOCAL_START_WEBSERVER,true);
-        StreamExecutionEnvironment env = StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(conf);
-//        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(conf);*/
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.getCheckpointConfig().setCheckpointInterval(ckpInterval);
         if (AT_LEAST_ONCE.equalsIgnoreCase(chkType)) {
             env.getCheckpointConfig().setCheckpointingMode(CheckpointingMode.AT_LEAST_ONCE);
@@ -161,9 +157,45 @@ public class AppWin {
         } else {
             env.setStateBackend(new MemoryStateBackend());
         }
+//        env.getCheckpointConfig().setCheckpointStorage(new FileSystemCheckpointStorage(checkpointDataUri));
+        Properties srcProperties = new Properties();
+        srcProperties.setProperty("bootstrap.servers", bootstrapServers);
+        srcProperties.setProperty("group.id", groupId);
+//        srcProperties.setProperty("client.id", "11111");
+        if (LATEST_OFFSET_RESET.equalsIgnoreCase(autoOffsetReset)) {
+            srcProperties.setProperty("auto.offset.reset", "latest");
+        } else {
+            srcProperties.setProperty("auto.offset.reset", "earliest");
+        }
+        if (isKerbs) {
+            srcProperties.setProperty("security.protocol", "SASL_PLAINTEXT");
+            srcProperties.setProperty("sasl.mechanism", "GSSAPI");
+            srcProperties.setProperty("sasl.kerberos.service.name", "kafka");
+            srcProperties.setProperty("sasl.jaas.config", saslJaasConfig.replace("{keytabPath}", keytabPath)
+                    .replace("{principal}", principal));
+//            kafkaSinkBuilder.setKafkaProducerConfig(properties);
+        }
 
-        SingleOutputStreamOperator<String> inputStream = env.addSource(new RandomSource())
-                .name("random source");
+        SingleOutputStreamOperator<String> inputStream = env.addSource(new FlinkKafkaConsumer<>(srcTopic, new SimpleStringSchema(), srcProperties))
+                .name("kakfa source");
+
+        Properties properties = new Properties();
+        properties.setProperty("bootstrap.servers", bootstrapServers);
+//        properties.put("transaction.timeout.ms", 15 * 60 * 1000);
+        if (isKerbs) {
+            properties.setProperty("security.protocol", "SASL_PLAINTEXT");
+            properties.setProperty("sasl.mechanism", "GSSAPI");
+            properties.setProperty("sasl.kerberos.service.name", "kafka");
+            properties.setProperty("sasl.jaas.config", saslJaasConfig.replace("{keytabPath}", keytabPath)
+                            .replace("{principal}", principal));
+//            kafkaSinkBuilder.setKafkaProducerConfig(properties);
+        }
+
+        FlinkKafkaProducer<String> myProducer = new FlinkKafkaProducer<>(
+                dstTopic,// 目标 topic
+                new SimpleStringSchema(),     // 序列化 schema
+                properties                  // producer 配置
+                );
 
         if (isUserOp) {
             SingleOutputStreamOperator<String> map = inputStream.map((MapFunction<String, String>) value -> value == null ? null : value + "@kafka2kafka");
@@ -177,6 +209,7 @@ public class AppWin {
                         .process(new MyProcessWindowFunction(TUMBLING_WIN));
             }
             process.print();
+            process.addSink(myProducer).name("kfkSink").uid("kfkSink");
         } else {
             KeyedStream<String, String> keyedStream = inputStream.keyBy((KeySelector<String, String>) value -> value);
             SingleOutputStreamOperator<String> process = null;
@@ -189,8 +222,9 @@ public class AppWin {
             }
 
             process.print();
+            process.addSink(myProducer).name("kfkSink").uid("kfkSink");
         }
-        env.execute("test random source and sink win job");
+        env.execute("test kafka source and sink win job");
     }
 
     /*public static Map<String, String> fromArgs(String[] args) {
