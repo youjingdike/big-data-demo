@@ -31,6 +31,7 @@ public class AppWin {
     //参数常量
     private static final String PARALLELISM_ARGS = "parallelism";
     private static final String STATE_BACKEND_ARGS = "state.backend";
+    private static final String ENABLE_INC_ARGS = "enable.inc";
     private static final String SRC_TOPIC_ARGS = "src.topic";
     private static final String DST_TOPIC_ARGS = "dst.topic";
 
@@ -62,6 +63,7 @@ public class AppWin {
     private static Integer parallelism = 1;
     private static long ckpInterval = 10000L;
     private static String stateBackend = "hash";
+    private static boolean enableInc = false;
     private static String srcTopic = "zx_x_src";
     private static String dstTopic = "zx_x_dst";
 
@@ -96,6 +98,9 @@ public class AppWin {
             if (argsMap.get(STATE_BACKEND_ARGS) != null)
                 stateBackend = argsMap.get(STATE_BACKEND_ARGS);
             log.info("@@@@@topic: {}", srcTopic);
+            if (argsMap.get(ENABLE_INC_ARGS) != null)
+                enableInc = Boolean.parseBoolean(argsMap.get(ENABLE_INC_ARGS));
+            log.info("@@@@@enableInc: {}", enableInc);
             if (argsMap.get(DST_TOPIC_ARGS) != null)
                 dstTopic = argsMap.get(DST_TOPIC_ARGS);
             log.info("@@@@@dst_topic: {}", dstTopic);
@@ -149,7 +154,7 @@ public class AppWin {
         }
         env.setParallelism(parallelism);
         if (ROCKSDB_STATE_BACKEND.equalsIgnoreCase(stateBackend)) {
-            env.setStateBackend(new RocksDBStateBackend(checkpointDataUri));
+            env.setStateBackend(new RocksDBStateBackend(checkpointDataUri,enableInc));
         } else {
             env.setStateBackend(new MemoryStateBackend());
         }
