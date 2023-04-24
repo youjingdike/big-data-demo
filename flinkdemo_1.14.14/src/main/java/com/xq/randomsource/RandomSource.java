@@ -1,4 +1,4 @@
-package com.xq.tst;
+package com.xq.randomsource;
 
 import org.apache.flink.api.common.state.CheckpointListener;
 import org.apache.flink.api.common.state.ListState;
@@ -34,7 +34,7 @@ public class RandomSource extends RichSourceFunction<String> implements Checkpoi
         this.strArr = strArr;
     }
 
-    public RandomSource(String[] strArr,boolean isPrint) {
+    public RandomSource(String[] strArr, boolean isPrint) {
         this(strArr);
         this.isPrint = isPrint;
     }
