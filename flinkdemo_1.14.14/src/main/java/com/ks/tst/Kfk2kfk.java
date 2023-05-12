@@ -77,7 +77,6 @@ public class Kfk2kfk {
 
     public static void main(String[] args) throws Exception {
         if (args.length != 0) {
-//            Map<String, String> argsMap = fromArgs(args);
             ParameterTool argsMap = ParameterTool.fromArgs(args);
             if (argsMap.get(PARALLELISM_ARGS) != null)
                 parallelism = Integer.parseInt(argsMap.get(PARALLELISM_ARGS));
@@ -168,7 +167,6 @@ public class Kfk2kfk {
 //                .setPartitioner(new FlinkFixedPartitioner());
 
         KafkaSinkBuilder<String> kafkaSinkBuilder= KafkaSink.<String>builder()
-//      .setKafkaProducerConfig(properties)
                 .setBootstrapServers(bootstrapServers)
 //                .setDeliverGuarantee(DeliveryGuarantee.EXACTLY_ONCE)
                 .setDeliverGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
@@ -195,13 +193,4 @@ public class Kfk2kfk {
         }
         env.execute("test kafka source and sink job");
     }
-
-    /*public static Map<String, String> fromArgs(String[] args) {
-        Map<String, String> propMap = new HashMap<>(args.length / 2);
-        for (int i = 0; i < args.length; i++) {
-            if (args[i].startsWith("-") && i != args.length - 1)
-                propMap.put(args[i], args[i + 1]);
-        }
-        return propMap;
-    }*/
 }

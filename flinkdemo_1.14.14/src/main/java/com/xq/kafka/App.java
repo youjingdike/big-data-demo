@@ -93,7 +93,7 @@ public class App {
             log.info("@@@@@topic: {}", srcTopic);
             if (argsMap.get(STATE_BACKEND_ARGS) != null)
                 stateBackend = argsMap.get(STATE_BACKEND_ARGS);
-            log.info("@@@@@topic: {}", srcTopic);
+            log.info("@@@@@stateBackend: {}", stateBackend);
             if (argsMap.get(DST_TOPIC_ARGS) != null)
                 dstTopic = argsMap.get(DST_TOPIC_ARGS);
             log.info("@@@@@dst_topic: {}", dstTopic);

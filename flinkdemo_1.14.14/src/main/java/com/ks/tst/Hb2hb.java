@@ -1,83 +1,51 @@
 package com.ks.tst;
 
-import org.apache.flink.api.common.eventtime.WatermarkStrategy;
-import org.apache.flink.api.common.functions.MapFunction;
-import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.api.java.utils.ParameterTool;
-import org.apache.flink.connector.base.DeliveryGuarantee;
-import org.apache.flink.connector.kafka.sink.KafkaRecordSerializationSchema;
-import org.apache.flink.connector.kafka.sink.KafkaRecordSerializationSchemaBuilder;
-import org.apache.flink.connector.kafka.sink.KafkaSink;
-import org.apache.flink.connector.kafka.sink.KafkaSinkBuilder;
-import org.apache.flink.connector.kafka.source.KafkaSource;
-import org.apache.flink.connector.kafka.source.KafkaSourceBuilder;
-import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
-import org.apache.flink.connector.kafka.source.reader.deserializer.KafkaRecordDeserializationSchema;
+import org.apache.flink.configuration.ConfigConstants;
+import org.apache.flink.configuration.Configuration;
 import org.apache.flink.contrib.streaming.state.EmbeddedRocksDBStateBackend;
 import org.apache.flink.runtime.state.hashmap.HashMapStateBackend;
 import org.apache.flink.runtime.state.storage.FileSystemCheckpointStorage;
 import org.apache.flink.streaming.api.CheckpointingMode;
-import org.apache.flink.streaming.api.datastream.DataStreamSource;
-import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.table.api.Table;
+import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Properties;
 
 
 public class Hb2hb {
     private static final Logger log = LoggerFactory.getLogger(Hb2hb.class);
-    public static final String saslJaasConfig= "com.sun.security.auth.module.Krb5LoginModule required \n useKeyTab=true \n keyTab=\"{keytabPath}\" \n storeKey=true \n debug=true \n useTicketCache=false \n principal=\"{principal}\";";
     //参数常量
     private static final String PARALLELISM_ARGS = "parallelism";
     private static final String STATE_BACKEND_ARGS = "state.backend";
-    private static final String SRC_TOPIC_ARGS = "src.topic";
-    private static final String DST_TOPIC_ARGS = "dst.topic";
-
-    private static final String GROUP_ID_ARGS = "group.id";
-
-    private static final String BOOTSTRAP_SERVERS_ARGS = "bootstrap.servers";
-
     private static final String CHECKPOINT_PATH_ARGS = "ckp.path";
     private static final String CHECKPOINT_INTERVAL_ARGS = "ckp.interval";
     private static final String CHECKPOINT_TYPE_ARGS = "ckp.type";
 
-    private static final String AUTO_OFFSET_RESET_ARGS = "auto.offset.reset";
     private static final String IS_KERBS_ARGS = "is.kerbs";
-    private static final String KEYTAB_PATH_ARGS = "keytab.path";
-    private static final String PRINCIPAL_ARGS = "principal";
-    private static final String IS_USER_OP_ARGS = "is.user.op";
+    private static final String HBASE_KEYTAB_PATH_ARGS = "hbase.keytab.path";
+    private static final String HBASE_PRINCIPAL_ARGS = "hbase.principal";
+    private static final String HBASE_ZK = "hbase.zk";
 
     //参数值常量
     private static final String ROCKSDB_STATE_BACKEND = "rocksdb";
     private static final String AT_LEAST_ONCE = "at_least_once";
-    private static String LATEST_OFFSET_RESET = "latest";
-
     //参数变量及默认值
     private static boolean isKerbs = false;
-    private static boolean isUserOp = false;
     private static Integer parallelism = 1;
     private static long ckpInterval = 10000L;
     private static String stateBackend = "hash";
-    private static String srcTopic = "zx_x_src";
-    private static String dstTopic = "zx_x_dst";
-
-    private static String groupId = "flink-x-tst";
 
     private static String chkType = "exactly_once";
 
-    private static String bootstrapServers = "XXXX";
-
     private static String checkpointDataUri = "hdfs://XXXX:8020/tmp/flink/ckp";
 
-    private static String autoOffsetReset = "latest";
-    private static String keytabPath = "/home/flink/kafka.service.keytab";
-    private static String principal = "kafka/XXXX@HADOOP.COM";
-
+    private static String hbaseKeytabPath = "/home/flink/hbase.client.keytab";
+    private static String hbasePrincipal = "hbase/XXXX@HADOOP.COM";
+    private static String hbase_zk = "";
     public static void main(String[] args) throws Exception {
         if (args.length != 0) {
-//            Map<String, String> argsMap = fromArgs(args);
             ParameterTool argsMap = ParameterTool.fromArgs(args);
             if (argsMap.get(PARALLELISM_ARGS) != null)
                 parallelism = Integer.parseInt(argsMap.get(PARALLELISM_ARGS));
@@ -86,48 +54,33 @@ public class Hb2hb {
                 ckpInterval = Long.parseLong(argsMap.get(CHECKPOINT_INTERVAL_ARGS));
             }
             log.info("@@@@@ckpInterval: {}", ckpInterval);
-            if (argsMap.get(SRC_TOPIC_ARGS) != null)
-                srcTopic = argsMap.get(SRC_TOPIC_ARGS);
-            log.info("@@@@@topic: {}", srcTopic);
             if (argsMap.get(STATE_BACKEND_ARGS) != null)
                 stateBackend = argsMap.get(STATE_BACKEND_ARGS);
-            log.info("@@@@@topic: {}", srcTopic);
-            if (argsMap.get(DST_TOPIC_ARGS) != null)
-                dstTopic = argsMap.get(DST_TOPIC_ARGS);
-            log.info("@@@@@dst_topic: {}", dstTopic);
-            if (argsMap.get(GROUP_ID_ARGS) != null)
-                groupId = argsMap.get(GROUP_ID_ARGS);
-            log.info("@@@@@group_id: {}", groupId);
-            if (argsMap.get(BOOTSTRAP_SERVERS_ARGS) != null)
-                bootstrapServers = argsMap.get(BOOTSTRAP_SERVERS_ARGS);
-            log.info("@@@@@bootstrapServers: {}", bootstrapServers);
+            log.info("@@@@@stateBackend: {}", stateBackend);
             if (argsMap.get(CHECKPOINT_PATH_ARGS) != null)
                 checkpointDataUri = argsMap.get(CHECKPOINT_PATH_ARGS);
             log.info("@@@@@checkpointDataUri: {}", checkpointDataUri);
             if (argsMap.get(CHECKPOINT_TYPE_ARGS) != null)
                 chkType = argsMap.get(CHECKPOINT_TYPE_ARGS);
             log.info("@@@@@chkType: {}", chkType);
-            if (argsMap.get(AUTO_OFFSET_RESET_ARGS) != null)
-                autoOffsetReset = argsMap.get(AUTO_OFFSET_RESET_ARGS);
-            log.info("@@@@@autoOffsetReset: {}", autoOffsetReset);
             if (argsMap.get(IS_KERBS_ARGS) != null)
                 isKerbs = Boolean.parseBoolean(argsMap.get(IS_KERBS_ARGS));
             log.info("@@@@@isKerbs: {}", isKerbs);
-            if (argsMap.get(KEYTAB_PATH_ARGS) != null)
-                keytabPath = argsMap.get(KEYTAB_PATH_ARGS);
-            log.info("@@@@@keytabPath: {}", keytabPath);
-            if (argsMap.get(PRINCIPAL_ARGS) != null)
-                principal = argsMap.get(PRINCIPAL_ARGS);
-            log.info("@@@@@principal: {}", principal);
-            if (argsMap.get(IS_USER_OP_ARGS) != null)
-                isUserOp = Boolean.parseBoolean(argsMap.get(IS_USER_OP_ARGS));
-            log.info("@@@@@isUserOp: {}", isUserOp);
+            if (argsMap.get(HBASE_ZK) != null)
+                hbase_zk = argsMap.get(HBASE_ZK);
+            log.info("@@@@@hbase_zk: {}", hbase_zk);
+            if (argsMap.get(HBASE_KEYTAB_PATH_ARGS) != null)
+                hbaseKeytabPath = argsMap.get(HBASE_KEYTAB_PATH_ARGS);
+            log.info("@@@@@hbaseKeytabPath: {}", hbaseKeytabPath);
+            if (argsMap.get(HBASE_PRINCIPAL_ARGS) != null)
+                hbasePrincipal = argsMap.get(HBASE_PRINCIPAL_ARGS);
+            log.info("@@@@@hbasePrincipal: {}", hbasePrincipal);
         }
 
-        /*Configuration conf = new Configuration();
+        Configuration conf = new Configuration();
         conf.setBoolean(ConfigConstants.LOCAL_START_WEBSERVER,true);
-        StreamExecutionEnvironment env = StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(conf);*/
-        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(conf);
+//        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.getCheckpointConfig().setCheckpointInterval(ckpInterval);
         if (AT_LEAST_ONCE.equalsIgnoreCase(chkType)) {
             env.getCheckpointConfig().setCheckpointingMode(CheckpointingMode.AT_LEAST_ONCE);
@@ -141,67 +94,54 @@ public class Hb2hb {
             env.setStateBackend(new HashMapStateBackend());
         }
         env.getCheckpointConfig().setCheckpointStorage(new FileSystemCheckpointStorage(checkpointDataUri));
+        StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env);
 
-        KafkaSourceBuilder<String> kafkaSourceBuilder = KafkaSource.<String>builder()
-                .setBootstrapServers(bootstrapServers)
-                .setTopics(srcTopic)
-                .setGroupId(groupId)
-                .setDeserializer(KafkaRecordDeserializationSchema.valueOnly(new SimpleStringSchema()));
-        if (LATEST_OFFSET_RESET.equalsIgnoreCase(autoOffsetReset)) {
-            kafkaSourceBuilder.setStartingOffsets(OffsetsInitializer.latest());
-        } else {
-            kafkaSourceBuilder.setStartingOffsets(OffsetsInitializer.earliest());
-        }
+        /*start 创建hbase表*/
+        String hbaseSrcDDl = "create table pInfo( \n" +
+                " rowkey STRING,\n" +
+                " f ROW<name STRING,age INT>,\n" +
+                " PRIMARY KEY (rowkey) NOT ENFORCED \n" +
+                ") WITH ( \n" +
+                " 'connector' = 'hbase-2.2',\n" +
+                " 'table-name' = 'xyPoc:pInfo',\n" +
+                " 'zookeeper.quorum' = '"+hbase_zk+"'";
         if (isKerbs) {
-            kafkaSourceBuilder.setProperty("security.protocol", "SASL_PLAINTEXT")
-                    .setProperty("sasl.mechanism", "GSSAPI")
-                    .setProperty("sasl.kerberos.service.name", "kafka")
-                    .setProperty("sasl.jaas.config", saslJaasConfig.replace("{keytabPath}", keytabPath)
-                            .replace("{principal}", principal));
+            hbaseSrcDDl += ", \n" +
+                    " 'hbase.client.keytab.file' = '"+hbaseKeytabPath+"',\n" +
+                    " 'hbase.client.keytab.principal' = '"+hbasePrincipal+"'\n";
+
         }
+        hbaseSrcDDl += ")";
+        System.out.println(hbaseSrcDDl);
+        tableEnv.executeSql(hbaseSrcDDl);
 
-        DataStreamSource<String> inputStream = env.fromSource(kafkaSourceBuilder.build(), WatermarkStrategy.noWatermarks(),"kakfa source");
-
-        KafkaRecordSerializationSchemaBuilder<String> serSchema= KafkaRecordSerializationSchema.builder()
-                .setTopic(dstTopic)
-                .setValueSerializationSchema(new SimpleStringSchema());
-//                .setPartitioner(new FlinkFixedPartitioner());
-
-        KafkaSinkBuilder<String> kafkaSinkBuilder= KafkaSink.<String>builder()
-//      .setKafkaProducerConfig(properties)
-                .setBootstrapServers(bootstrapServers)
-//                .setDeliverGuarantee(DeliveryGuarantee.EXACTLY_ONCE)
-                .setDeliverGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
-                .setRecordSerializer(serSchema.build());
-//                .setTransactionalIdPrefix("flink-tst");
-
-        Properties properties = new Properties();
-//        properties.put("transaction.timeout.ms", 15 * 60 * 1000);
+        String hbaseSinkDDl = "create table pInfoNew( \n" +
+                " rowkey STRING,\n" +
+                " f ROW<name STRING,age INT>,\n" +
+                " PRIMARY KEY (rowkey) NOT ENFORCED \n" +
+                ") WITH ( \n" +
+                " 'connector' = 'hbase-2.2',\n" +
+                " 'table-name' = 'xyPoc:pInfoNew',\n" +
+                " 'zookeeper.quorum' = '"+hbase_zk+"'";
         if (isKerbs) {
-            properties.setProperty("security.protocol", "SASL_PLAINTEXT");
-            properties.setProperty("sasl.mechanism", "GSSAPI");
-            properties.setProperty("sasl.kerberos.service.name", "kafka");
-            properties.setProperty("sasl.jaas.config", saslJaasConfig.replace("{keytabPath}", keytabPath)
-                            .replace("{principal}", principal));
-            kafkaSinkBuilder.setKafkaProducerConfig(properties);
+            hbaseSinkDDl += ",\n" +
+                    " 'hbase.client.keytab.file' = '"+hbaseKeytabPath+"',\n" +
+                    " 'hbase.client.keytab.principal' = '"+hbasePrincipal+"'\n";
         }
-        if (isUserOp) {
-            SingleOutputStreamOperator<String> map = inputStream.map((MapFunction<String, String>) value -> value == null ? null : value + "@kafka2kafka");
-            map.print();
-            map.sinkTo(kafkaSinkBuilder.build()).name("kfkSink").uid("kfkSink");
-        } else {
-            inputStream.print();
-            inputStream.sinkTo(kafkaSinkBuilder.build()).name("kfkSink").uid("kfkSink");
-        }
-        env.execute("test kafka source and sink job");
+        hbaseSinkDDl += ")";
+        tableEnv.executeSql(hbaseSinkDDl);
+        /*end 创建hbase表*/
+
+        //进行维表关联查询
+        String forHbsql = "select rowkey,ROW((f.name || '.ks'),f.age) from pInfo";
+        /*String forHbsql = "select rowkey,ROW(name,age) from \n" +
+                " (select rowkey,(p.f.name || '.ks') as name,p.f.age as age from pInfo p)";*/
+        Table tableHb = tableEnv.sqlQuery(forHbsql);
+
+        tableHb.executeInsert("pInfoNew");
+
+        tableEnv.toDataStream(tableHb).print();
+
+        env.execute("Hb2hbTst");
     }
-
-    /*public static Map<String, String> fromArgs(String[] args) {
-        Map<String, String> propMap = new HashMap<>(args.length / 2);
-        for (int i = 0; i < args.length; i++) {
-            if (args[i].startsWith("-") && i != args.length - 1)
-                propMap.put(args[i], args[i + 1]);
-        }
-        return propMap;
-    }*/
 }

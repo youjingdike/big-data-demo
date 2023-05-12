@@ -109,10 +109,10 @@ public class AppWin {
             log.info("@@@@@ckpInterval: {}", ckpInterval);
             if (argsMap.get(SRC_TOPIC_ARGS) != null)
                 srcTopic = argsMap.get(SRC_TOPIC_ARGS);
-            log.info("@@@@@topic: {}", srcTopic);
+            log.info("@@@@@srcTopic: {}", srcTopic);
             if (argsMap.get(STATE_BACKEND_ARGS) != null)
                 stateBackend = argsMap.get(STATE_BACKEND_ARGS);
-            log.info("@@@@@topic: {}", srcTopic);
+            log.info("@@@@@stateBackend: {}", stateBackend);
             if (argsMap.get(DST_TOPIC_ARGS) != null)
                 dstTopic = argsMap.get(DST_TOPIC_ARGS);
             log.info("@@@@@dst_topic: {}", dstTopic);
