@@ -37,6 +37,7 @@ public class Kfk2more {
     private static final String HBASE_KEYTAB_PATH_ARGS = "hbase.keytab.path";
     private static final String HBASE_PRINCIPAL_ARGS = "hbase.principal";
     private static final String HBASE_ZK = "hbase.zk";
+    private static final String HBASE_ZNODE = "hbase.znode";
     private static final String HIVE_CONF_DIR = "hive.conf";
     private static final String HDFS_PATH = "hdfs.path";
     private static final String IS_USER_OP_ARGS = "is.user.op";
@@ -69,6 +70,7 @@ public class Kfk2more {
     private static String hbaseKeytabPath = "/home/flink/hbase.client.keytab";
     private static String hbasePrincipal = "hbase/XXXX@HADOOP.COM";
     private static String hbase_zk = "";
+    private static String zNode = "/hbase-secure";
     private static String hiveConfDir    = "./hive-conf";
     private static String hdfsPath = "hdfs:///user/flink/p_info";
     public static void main(String[] args) throws Exception {
@@ -132,6 +134,9 @@ public class Kfk2more {
             if (argsMap.get(IS_USER_OP_ARGS) != null)
                 isUserOp = Boolean.parseBoolean(argsMap.get(IS_USER_OP_ARGS));
             log.info("@@@@@isUserOp: {}", isUserOp);
+            if (argsMap.get(HBASE_ZNODE) != null)
+                zNode = argsMap.get(HBASE_ZNODE);
+            log.info("@@@@@znode: {}", zNode);
         }
 
         /*Configuration conf = new Configuration();
@@ -183,6 +188,7 @@ public class Kfk2more {
         /*end 创建kafka源表*/
 
         /*start 创建hbase表*/
+        /*创建hbase维表*/
         String hbaseSrcDDl = "create table dptInfo( \n" +
                 " rowkey STRING,\n" +
                 " f ROW<dptName STRING>,\n" +
@@ -193,31 +199,41 @@ public class Kfk2more {
                 " 'zookeeper.quorum' = '"+hbase_zk+"'";
         if (isKerbs) {
             hbaseSrcDDl += ",\n" +
-                    " 'hbase.client.keytab.file' = '"+hbaseKeytabPath+"',\n" +
-                    " 'hbase.client.keytab.principal' = '"+hbasePrincipal+"'\n";
-
+                    " 'properties.hbase.security.authentication' = 'kerberos',\n" +
+                    " 'properties.hadoop.security.authentication' = 'kerberos',\n" +
+                    " 'properties.kerberos.keytab' = '"+hbaseKeytabPath+"',\n" +
+                    " 'properties.hbase.client.keytab.file' = '"+hbaseKeytabPath+"',\n" +
+                    " 'properties.hbase.master.kerberos.principal' = '"+hbasePrincipal+"',\n" +
+                    " 'properties.hbase.client.keytab.principal' = '"+hbasePrincipal+"',\n" +
+                    " 'properties.hbase.regionserver.kerberos.principal' = '"+hbasePrincipal+"'\n";
         }
         hbaseSrcDDl += ")";
         tableEnv.executeSql(hbaseSrcDDl);
-
+        /*创建hbase sink表*/
         String hbaseSinkDDl = "create table pInfo( \n" +
                 " rowkey STRING,\n" +
                 " f ROW<name STRING,age INT,dptName STRING,addr STRING>,\n" +
                 " PRIMARY KEY (rowkey) NOT ENFORCED \n" +
                 ") WITH ( \n" +
                 " 'connector' = 'hbase-2.2',\n" +
-                " 'table-name' = 'xyPoc:pInfo',\n" +
+                " 'table-name' = 'xyPoc:pInfoSink',\n" +
+                " 'zookeeper.znode.parent' = '" + zNode + "',\n" +
                 " 'zookeeper.quorum' = '"+hbase_zk+"'";
         if (isKerbs) {
             hbaseSinkDDl += ",\n" +
-                    " 'hbase.client.keytab.file' = '"+hbaseKeytabPath+"',\n" +
-                    " 'hbase.client.keytab.principal' = '"+hbasePrincipal+"'\n";
+                    " 'properties.hbase.security.authentication' = 'kerberos',\n" +
+                    " 'properties.hadoop.security.authentication' = 'kerberos',\n" +
+                    " 'properties.kerberos.keytab' = '"+hbaseKeytabPath+"',\n" +
+                    " 'properties.hbase.client.keytab.file' = '"+hbaseKeytabPath+"',\n" +
+                    " 'properties.hbase.master.kerberos.principal' = '"+hbasePrincipal+"',\n" +
+                    " 'properties.hbase.client.keytab.principal' = '"+hbasePrincipal+"',\n" +
+                    " 'properties.hbase.regionserver.kerberos.principal' = '"+hbasePrincipal+"'\n";
         }
         hbaseSinkDDl += ")";
         tableEnv.executeSql(hbaseSinkDDl);
         /*end 创建hbase表*/
 
-        /*start 创建hdfs表*/
+        /*start 创建hdfs sink表*/
         String hdfsDDL = "CREATE TABLE fs_table (\n" +
                 " id BIGINT,\n" +
                 " name STRING\n" +
@@ -233,7 +249,7 @@ public class Kfk2more {
                 "  'sink.partition-commit.policy.kind'='success-file'\n" +
                 ")";
         tableEnv.executeSql(hdfsDDL);
-        /*end 创建hdfs表*/
+        /*end 创建hdfs sink表*/
 
         /*start 创建hive维表*/
         String name            = "myHive";
@@ -245,6 +261,7 @@ public class Kfk2more {
         // to use hive dialect
         tableEnv.getConfig().setSqlDialect(SqlDialect.HIVE);
 
+        /* 创建hive维表*/
         String hiveSrcDDL = "create table addrInfo(\n" +
                 " id BIGINT,\n" +
                 " addr STRING\n" +
@@ -254,6 +271,7 @@ public class Kfk2more {
                 "  'lookup.join.cache.ttl' = '12 h'\n" +
                 ")";
         tableEnv.executeSql(hiveSrcDDL);
+        /* 创建hive sink表*/
         String hiveSinkDDL = "create table pInfo(\n" +
                 " id BIGINT,\n" +
                 " name STRING\n" +
@@ -266,7 +284,7 @@ public class Kfk2more {
                 "  'sink.partition-commit.policy.kind'='metastore'" +
                 ")";
         tableEnv.executeSql(hiveSinkDDL);
-        /*end 创建hive维表*/
+        /*end 创建hive表*/
 
         // to use default dialect
         tableEnv.getConfig().setSqlDialect(SqlDialect.DEFAULT);

@@ -26,6 +26,7 @@ public class Hb2hb {
     private static final String HBASE_PRINCIPAL_ARGS = "hbase.principal";
     private static final String HBASE_ZK = "hbase.zk";
     private static final String HBASE_ZNODE = "hbase.znode";
+    private static final String TYPE = "type";
 
     //参数值常量
     private static final String ROCKSDB_STATE_BACKEND = "rocksdb";
@@ -44,6 +45,7 @@ public class Hb2hb {
     private static String hbasePrincipal = "hbase/XXXX@HADOOP.COM";
     private static String hbaseZk = "";
     private static String zNode = "/hbase-secure";
+    private static String type = "1";
 
     public static void main(String[] args) throws Exception {
         if (args.length != 0) {
@@ -79,6 +81,9 @@ public class Hb2hb {
             if (argsMap.get(HBASE_ZNODE) != null)
                 zNode = argsMap.get(HBASE_ZNODE);
             log.info("@@@@@znode: {}", zNode);
+            if (argsMap.get(TYPE) != null)
+                type = argsMap.get(TYPE);
+            log.info("@@@@@type: {}", type);
         }
 
         /*Configuration conf = new Configuration();
@@ -148,15 +153,25 @@ public class Hb2hb {
         tableEnv.executeSql(hbaseSinkDDl);
         /*end 创建hbase表*/
 
-        //进行维表关联查询
-        String forHbsql = "select rowkey,ROW(cast((f.name || '.ks') as string),f.age) from pInfo";
-        /*String forHbsql = "select rowkey,ROW(name,age) from \n" +
-                " (select rowkey,(p.f.name || '.ks') as name,p.f.age as age from pInfo p)";*/
-        Table tableHb = tableEnv.sqlQuery(forHbsql);
+        //进行查询插入
+        String forHbsql = "";
+        if ("1".equals(type)) {
+            forHbsql = "select rowkey,ROW(f.name,f.age) from pInfo";
+            Table tableHb = tableEnv.sqlQuery(forHbsql);
+            tableHb.executeInsert("pInfoNew");
+            tableEnv.toDataStream(tableHb).print();
+        } else if ("2".equals(type))  {
+            forHbsql = "select rowkey,ROW(name,age) from \n" +
+                    " (select rowkey,f.name as name,f.age as age from pInfo)";
+            Table tableHb = tableEnv.sqlQuery(forHbsql);
+            tableHb.executeInsert("pInfoNew");
+            tableEnv.toDataStream(tableHb).print();
+        } else {
+            forHbsql = "insert into pInfoNew \n" +
+                    "select rowkey,ROW(f.name,f.age) from pInfo";
+            tableEnv.executeSql(forHbsql);
+        }
 
-        tableHb.executeInsert("pInfoNew");
-
-        tableEnv.toDataStream(tableHb).print();
 
         env.execute("Hb2hbTst");
     }
