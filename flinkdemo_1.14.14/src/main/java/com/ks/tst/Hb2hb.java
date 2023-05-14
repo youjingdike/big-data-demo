@@ -1,8 +1,6 @@
 package com.ks.tst;
 
 import org.apache.flink.api.java.utils.ParameterTool;
-import org.apache.flink.configuration.ConfigConstants;
-import org.apache.flink.configuration.Configuration;
 import org.apache.flink.contrib.streaming.state.EmbeddedRocksDBStateBackend;
 import org.apache.flink.runtime.state.hashmap.HashMapStateBackend;
 import org.apache.flink.runtime.state.storage.FileSystemCheckpointStorage;
@@ -27,6 +25,7 @@ public class Hb2hb {
     private static final String HBASE_KEYTAB_PATH_ARGS = "hbase.keytab.path";
     private static final String HBASE_PRINCIPAL_ARGS = "hbase.principal";
     private static final String HBASE_ZK = "hbase.zk";
+    private static final String HBASE_ZNODE = "hbase.znode";
 
     //参数值常量
     private static final String ROCKSDB_STATE_BACKEND = "rocksdb";
@@ -43,7 +42,9 @@ public class Hb2hb {
 
     private static String hbaseKeytabPath = "/home/flink/hbase.client.keytab";
     private static String hbasePrincipal = "hbase/XXXX@HADOOP.COM";
-    private static String hbase_zk = "";
+    private static String hbaseZk = "";
+    private static String zNode = "/hbase-secure";
+
     public static void main(String[] args) throws Exception {
         if (args.length != 0) {
             ParameterTool argsMap = ParameterTool.fromArgs(args);
@@ -67,14 +68,17 @@ public class Hb2hb {
                 isKerbs = Boolean.parseBoolean(argsMap.get(IS_KERBS_ARGS));
             log.info("@@@@@isKerbs: {}", isKerbs);
             if (argsMap.get(HBASE_ZK) != null)
-                hbase_zk = argsMap.get(HBASE_ZK);
-            log.info("@@@@@hbase_zk: {}", hbase_zk);
+                hbaseZk = argsMap.get(HBASE_ZK);
+            log.info("@@@@@hbase_zk: {}", hbaseZk);
             if (argsMap.get(HBASE_KEYTAB_PATH_ARGS) != null)
                 hbaseKeytabPath = argsMap.get(HBASE_KEYTAB_PATH_ARGS);
             log.info("@@@@@hbaseKeytabPath: {}", hbaseKeytabPath);
             if (argsMap.get(HBASE_PRINCIPAL_ARGS) != null)
                 hbasePrincipal = argsMap.get(HBASE_PRINCIPAL_ARGS);
             log.info("@@@@@hbasePrincipal: {}", hbasePrincipal);
+            if (argsMap.get(HBASE_ZNODE) != null)
+                zNode = argsMap.get(HBASE_ZNODE);
+            log.info("@@@@@znode: {}", zNode);
         }
 
         /*Configuration conf = new Configuration();
@@ -104,11 +108,17 @@ public class Hb2hb {
                 ") WITH ( \n" +
                 " 'connector' = 'hbase-2.2',\n" +
                 " 'table-name' = 'xyPoc:pInfo',\n" +
-                " 'zookeeper.quorum' = '"+hbase_zk+"'";
+                " 'zookeeper.znode.parent' = '" + zNode + "',\n" +
+                " 'zookeeper.quorum' = '"+ hbaseZk +"'";
         if (isKerbs) {
             hbaseSrcDDl += ", \n" +
-                    " 'hbase.client.keytab.file' = '"+hbaseKeytabPath+"',\n" +
-                    " 'hbase.client.keytab.principal' = '"+hbasePrincipal+"'\n";
+                    " 'properties.hbase.security.authentication' = 'kerberos',\n" +
+                    " 'properties.hadoop.security.authentication' = 'kerberos',\n" +
+                    " 'properties.kerberos.keytab' = '"+hbaseKeytabPath+"',\n" +
+                    " 'properties.hbase.client.keytab.file' = '"+hbaseKeytabPath+"',\n" +
+                    " 'properties.hbase.master.kerberos.principal' = '"+hbasePrincipal+"',\n" +
+                    " 'properties.hbase.client.keytab.principal' = '"+hbasePrincipal+"',\n" +
+                    " 'properties.hbase.regionserver.kerberos.principal' = '"+hbasePrincipal+"'\n";
 
         }
         hbaseSrcDDl += ")";
@@ -122,18 +132,24 @@ public class Hb2hb {
                 ") WITH ( \n" +
                 " 'connector' = 'hbase-2.2',\n" +
                 " 'table-name' = 'xyPoc:pInfoNew',\n" +
-                " 'zookeeper.quorum' = '"+hbase_zk+"'";
+                " 'zookeeper.znode.parent' = '" + zNode + "',\n" +
+                " 'zookeeper.quorum' = '"+ hbaseZk +"'";
         if (isKerbs) {
             hbaseSinkDDl += ",\n" +
-                    " 'hbase.client.keytab.file' = '"+hbaseKeytabPath+"',\n" +
-                    " 'hbase.client.keytab.principal' = '"+hbasePrincipal+"'\n";
+                    " 'properties.hbase.security.authentication' = 'kerberos',\n" +
+                    " 'properties.hadoop.security.authentication' = 'kerberos',\n" +
+                    " 'properties.kerberos.keytab' = '"+hbaseKeytabPath+"',\n" +
+                    " 'properties.hbase.client.keytab.file' = '"+hbaseKeytabPath+"',\n" +
+                    " 'properties.hbase.master.kerberos.principal' = '"+hbasePrincipal+"',\n" +
+                    " 'properties.hbase.client.keytab.principal' = '"+hbasePrincipal+"',\n" +
+                    " 'properties.hbase.regionserver.kerberos.principal' = '"+hbasePrincipal+"'\n";
         }
         hbaseSinkDDl += ")";
         tableEnv.executeSql(hbaseSinkDDl);
         /*end 创建hbase表*/
 
         //进行维表关联查询
-        String forHbsql = "select rowkey,ROW((f.name || '.ks'),f.age) from pInfo";
+        String forHbsql = "select rowkey,ROW(cast((f.name || '.ks') as string),f.age) from pInfo";
         /*String forHbsql = "select rowkey,ROW(name,age) from \n" +
                 " (select rowkey,(p.f.name || '.ks') as name,p.f.age as age from pInfo p)";*/
         Table tableHb = tableEnv.sqlQuery(forHbsql);

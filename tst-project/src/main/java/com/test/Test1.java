@@ -2,6 +2,7 @@ package com.test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 public class Test1 {
 	public static void change(int i,String s,char[] c) {
@@ -11,7 +12,19 @@ public class Test1 {
 		i = 5;
 	}
 	public static void main(String[] args) {
-		long l = 10000L;
+//		System.setProperty("dddd","vvvvv");
+		System.out.println(System.getProperty("dddd"));
+
+		System.getProperties().forEach(new BiConsumer<Object, Object>() {
+			@Override
+			public void accept(Object o, Object o2) {
+				System.out.println(o.toString()+":"+o2.toString());
+			}
+		});
+
+		System.out.println("######");
+		System.out.println(System.getenv("dddd"));
+		/*long l = 10000L;
 		l++;
 		System.out.println(l);
 		l+=12;
@@ -20,7 +33,7 @@ public class Test1 {
 		System.out.println(Long.MIN_VALUE);
 		System.out.println(Integer.MAX_VALUE);
 		System.out.println(Integer.MIN_VALUE);
-		Integer ig = new Integer(9);
+		Integer ig = new Integer(9);*/
 		/*String s = "11111111";
 		char[] c = {'H','o'};
 		int[] i1 = {1,2,3};
