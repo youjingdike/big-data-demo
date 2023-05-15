@@ -155,11 +155,19 @@ public class Hb2hb {
         tableEnv.executeSql(hbaseSinkDDl);
         /*end 创建hbase表*/
 
-        //进行查询插入
-        String forHbsql = "insert into pInfoNew \n" +
+        if ("1".equals(type)) {
+            //进行查询插入
+            String forHbsql = "insert into pInfoNew \n" +
                     " select rowkey,ROW(name,age) from \n" +
                     " (select rowkey,f.name as name,f.age as age from pInfo)";
             tableEnv.executeSql(forHbsql);
+        } else {
+            String forHbsql = "select rowkey,ROW(name,age) from \n" +
+                    " (select rowkey,f.name as name,f.age as age from pInfo)";
+            Table tableHb = tableEnv.sqlQuery(forHbsql);
+            tableHb.executeInsert("pInfoNew");
+            tableEnv.toDataStream(tableHb).print();
+        }
 
 
         //env.execute("Hb2hbTst");
