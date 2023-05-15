@@ -1,6 +1,8 @@
 package com.ks.tst;
 
 import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.configuration.ConfigConstants;
+import org.apache.flink.configuration.Configuration;
 import org.apache.flink.contrib.streaming.state.EmbeddedRocksDBStateBackend;
 import org.apache.flink.runtime.state.hashmap.HashMapStateBackend;
 import org.apache.flink.runtime.state.storage.FileSystemCheckpointStorage;
@@ -108,7 +110,7 @@ public class Hb2hb {
         /*start 创建hbase表*/
         String hbaseSrcDDl = "create table pInfo( \n" +
                 " rowkey STRING,\n" +
-                " f ROW<name STRING,age INT>,\n" +
+                " f ROW<name STRING,age STRING>,\n" +
                 " PRIMARY KEY (rowkey) NOT ENFORCED \n" +
                 ") WITH ( \n" +
                 " 'connector' = 'hbase-2.2',\n" +
@@ -120,9 +122,9 @@ public class Hb2hb {
                     " 'properties.hbase.security.authentication' = 'kerberos',\n" +
                     " 'properties.hadoop.security.authentication' = 'kerberos',\n" +
                     " 'properties.kerberos.keytab' = '"+hbaseKeytabPath+"',\n" +
-                    " 'properties.hbase.client.keytab.file' = '"+hbaseKeytabPath+"',\n" +
+//                    " 'properties.hbase.client.keytab.file' = '"+hbaseKeytabPath+"',\n" +
                     " 'properties.hbase.master.kerberos.principal' = '"+hbasePrincipal+"',\n" +
-                    " 'properties.hbase.client.keytab.principal' = '"+hbasePrincipal+"',\n" +
+//                    " 'properties.hbase.client.keytab.principal' = '"+hbasePrincipal+"',\n" +
                     " 'properties.hbase.regionserver.kerberos.principal' = '"+hbasePrincipal+"'\n";
 
         }
@@ -132,7 +134,7 @@ public class Hb2hb {
 
         String hbaseSinkDDl = "create table pInfoNew( \n" +
                 " rowkey STRING,\n" +
-                " f ROW<name STRING,age INT>,\n" +
+                " f ROW<name STRING,age STRING>,\n" +
                 " PRIMARY KEY (rowkey) NOT ENFORCED \n" +
                 ") WITH ( \n" +
                 " 'connector' = 'hbase-2.2',\n" +
@@ -144,9 +146,9 @@ public class Hb2hb {
                     " 'properties.hbase.security.authentication' = 'kerberos',\n" +
                     " 'properties.hadoop.security.authentication' = 'kerberos',\n" +
                     " 'properties.kerberos.keytab' = '"+hbaseKeytabPath+"',\n" +
-                    " 'properties.hbase.client.keytab.file' = '"+hbaseKeytabPath+"',\n" +
+//                    " 'properties.hbase.client.keytab.file' = '"+hbaseKeytabPath+"',\n" +
                     " 'properties.hbase.master.kerberos.principal' = '"+hbasePrincipal+"',\n" +
-                    " 'properties.hbase.client.keytab.principal' = '"+hbasePrincipal+"',\n" +
+//                    " 'properties.hbase.client.keytab.principal' = '"+hbasePrincipal+"',\n" +
                     " 'properties.hbase.regionserver.kerberos.principal' = '"+hbasePrincipal+"'\n";
         }
         hbaseSinkDDl += ")";
@@ -154,25 +156,12 @@ public class Hb2hb {
         /*end 创建hbase表*/
 
         //进行查询插入
-        String forHbsql = "";
-        if ("1".equals(type)) {
-            forHbsql = "select rowkey,ROW(f.name,f.age) from pInfo";
-            Table tableHb = tableEnv.sqlQuery(forHbsql);
-            tableHb.executeInsert("pInfoNew");
-            tableEnv.toDataStream(tableHb).print();
-        } else if ("2".equals(type))  {
-            forHbsql = "select rowkey,ROW(name,age) from \n" +
+        String forHbsql = "insert into pInfoNew \n" +
+                    " select rowkey,ROW(name,age) from \n" +
                     " (select rowkey,f.name as name,f.age as age from pInfo)";
-            Table tableHb = tableEnv.sqlQuery(forHbsql);
-            tableHb.executeInsert("pInfoNew");
-            tableEnv.toDataStream(tableHb).print();
-        } else {
-            forHbsql = "insert into pInfoNew \n" +
-                    "select rowkey,ROW(f.name,f.age) from pInfo";
             tableEnv.executeSql(forHbsql);
-        }
 
 
-        env.execute("Hb2hbTst");
+        //env.execute("Hb2hbTst");
     }
 }

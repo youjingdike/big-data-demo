@@ -41,6 +41,7 @@ public class Kfk2more {
     private static final String HIVE_CONF_DIR = "hive.conf";
     private static final String HDFS_PATH = "hdfs.path";
     private static final String IS_USER_OP_ARGS = "is.user.op";
+    private static final String IS_HDFS = "is.hdfs";
 
     //参数值常量
     private static final String ROCKSDB_STATE_BACKEND = "rocksdb";
@@ -73,6 +74,8 @@ public class Kfk2more {
     private static String zNode = "/hbase-secure";
     private static String hiveConfDir    = "./hive-conf";
     private static String hdfsPath = "hdfs:///user/flink/p_info";
+
+    private static boolean isHdfs = false;
     public static void main(String[] args) throws Exception {
         if (args.length != 0) {
             ParameterTool argsMap = ParameterTool.fromArgs(args);
@@ -137,6 +140,9 @@ public class Kfk2more {
             if (argsMap.get(HBASE_ZNODE) != null)
                 zNode = argsMap.get(HBASE_ZNODE);
             log.info("@@@@@znode: {}", zNode);
+            if (argsMap.get(IS_HDFS) != null)
+                isHdfs = Boolean.parseBoolean(argsMap.get(IS_HDFS));
+            log.info("@@@@@isHdfs: {}", isHdfs);
         }
 
         /*Configuration conf = new Configuration();
@@ -161,11 +167,11 @@ public class Kfk2more {
         /*start 创建kafka源表*/
         TableDescriptor.Builder kafkaBuilder = TableDescriptor.forConnector("kafka")
                 .schema(Schema.newBuilder()
-                        .column("id", DataTypes.BIGINT())
+                        .column("id", DataTypes.STRING())
                         .column("name", DataTypes.STRING())
-                        .column("age", DataTypes.INT())
-                        .column("dptId", DataTypes.INT())
-                        .column("addrId", DataTypes.INT())
+                        .column("age", DataTypes.STRING())
+                        .column("dptId", DataTypes.STRING())
+                        .column("addrId", DataTypes.STRING())
                         .build())
                 .option("topic", srcTopic)
                 .option("properties.bootstrap.servers", bootstrapServers)
@@ -212,7 +218,7 @@ public class Kfk2more {
         /*创建hbase sink表*/
         String hbaseSinkDDl = "create table pInfo( \n" +
                 " rowkey STRING,\n" +
-                " f ROW<name STRING,age INT,dptName STRING,addr STRING>,\n" +
+                " f ROW<name STRING,age STRING,dptName STRING,addr STRING>,\n" +
                 " PRIMARY KEY (rowkey) NOT ENFORCED \n" +
                 ") WITH ( \n" +
                 " 'connector' = 'hbase-2.2',\n" +
@@ -234,22 +240,25 @@ public class Kfk2more {
         /*end 创建hbase表*/
 
         /*start 创建hdfs sink表*/
-        String hdfsDDL = "CREATE TABLE fs_table (\n" +
-                " id BIGINT,\n" +
-                " name STRING\n" +
-                " age INT,\n" +
-                " dptName STRING\n" +
-                " addr STRING\n" +
-                ") WITH (\n" +
-                "  'connector'='filesystem',\n" +
-                "  'path'='"+ hdfsPath +"',\n" +
-                "  'format'='csv',\n" +
-                "  'field-delimiter'=',',\n" +
-                "  'sink.partition-commit.delay'='1 m',\n" +
-                "  'sink.partition-commit.policy.kind'='success-file'\n" +
-                ")";
-        tableEnv.executeSql(hdfsDDL);
+        if (isHdfs) {
+            String hdfsDDL = "CREATE TABLE fs_table (\n" +
+                    " id STRING,\n" +
+                    " name STRING,\n" +
+                    " age STRING,\n" +
+                    " dptName STRING,\n" +
+                    " addr STRING\n" +
+                    ") WITH (\n" +
+                    "  'connector'='filesystem',\n" +
+                    "  'path'='"+ hdfsPath +"',\n" +
+                    "  'format'='csv',\n" +
+                    "  'field-delimiter'=',',\n" +
+                    "  'sink.partition-commit.delay'='1 m',\n" +
+                    "  'sink.partition-commit.policy.kind'='success-file'\n" +
+                    ")";
+            tableEnv.executeSql(hdfsDDL);
+        }
         /*end 创建hdfs sink表*/
+
 
         /*start 创建hive维表*/
         String name            = "myHive";
@@ -263,7 +272,7 @@ public class Kfk2more {
 
         /* 创建hive维表*/
         String hiveSrcDDL = "create table addrInfo(\n" +
-                " id BIGINT,\n" +
+                " id STRING,\n" +
                 " addr STRING\n" +
                 ") TBLPROPERTIES ( \n" +
                 "  'streaming-source.enable' = 'false',\n" +
@@ -273,9 +282,9 @@ public class Kfk2more {
         tableEnv.executeSql(hiveSrcDDL);
         /* 创建hive sink表*/
         String hiveSinkDDL = "create table pInfo(\n" +
-                " id BIGINT,\n" +
+                " id STRING,\n" +
                 " name STRING\n" +
-                " age INT,\n" +
+                " age STRING,\n" +
                 " dptName STRING\n" +
                 " addr STRING\n" +
                 ") STORED AS parquet TBLPROPERTIES  ( \n" +
@@ -293,11 +302,11 @@ public class Kfk2more {
 
         //进行维表关联查询
         String sql = "select id,name,age,d.f.dptName as dptName,c.addr from people p \n" +
-                " left join dptInfo d on p.dptId = d.rowkey \n" +
+                " left join dptInfo FOR SYSTEM_TIME AS OF p.proctime AS d on p.dptId = d.rowkey \n" +
                 " left join myHive.xyPoc.addrInfo FOR SYSTEM_TIME AS OF p.proctime AS c on c.id = p.addrId";
         Table table = tableEnv.sqlQuery(sql);
         String forHbsql = "select id as rowkey,ROW(name,age,d.f.dptName as dptName,c.addr) from people p \n" +
-                " left join dptInfo d on p.dptId = d.rowkey \n" +
+                " left join dptInfo FOR SYSTEM_TIME AS OF p.proctime AS d on p.dptId = d.rowkey \n" +
                 " left join myHive.xyPoc.addrInfo FOR SYSTEM_TIME AS OF p.proctime AS c on c.id = p.addrId";
         /*String forHbsql = "select rowkey,ROW(name,age,dptName,addr) from (select id as rowkey,name,age,d.f.dptName as dptName,c.addr from people p \n" +
                 " left join dptInfo d on p.dptId = d.rowkey \n" +
@@ -306,7 +315,9 @@ public class Kfk2more {
 
         //构建sink
         table.executeInsert("myHive.xyPoc.pInfo");
-        table.executeInsert("fs_table");
+        if (isHdfs) {
+            table.executeInsert("fs_table");
+        }
 
         tableHb.executeInsert("pInfo");
 
