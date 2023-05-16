@@ -172,6 +172,7 @@ public class Kfk2more {
                         .column("age", DataTypes.STRING())
                         .column("dptId", DataTypes.STRING())
                         .column("addrId", DataTypes.STRING())
+                        .columnByExpression("proctime","PROCTIME()")
                         .build())
                 .option("topic", srcTopic)
                 .option("properties.bootstrap.servers", bootstrapServers)
@@ -208,9 +209,7 @@ public class Kfk2more {
                     " 'properties.hbase.security.authentication' = 'kerberos',\n" +
                     " 'properties.hadoop.security.authentication' = 'kerberos',\n" +
                     " 'properties.kerberos.keytab' = '"+hbaseKeytabPath+"',\n" +
-                    " 'properties.hbase.client.keytab.file' = '"+hbaseKeytabPath+"',\n" +
                     " 'properties.hbase.master.kerberos.principal' = '"+hbasePrincipal+"',\n" +
-                    " 'properties.hbase.client.keytab.principal' = '"+hbasePrincipal+"',\n" +
                     " 'properties.hbase.regionserver.kerberos.principal' = '"+hbasePrincipal+"'\n";
         }
         hbaseSrcDDl += ")";
@@ -230,9 +229,7 @@ public class Kfk2more {
                     " 'properties.hbase.security.authentication' = 'kerberos',\n" +
                     " 'properties.hadoop.security.authentication' = 'kerberos',\n" +
                     " 'properties.kerberos.keytab' = '"+hbaseKeytabPath+"',\n" +
-                    " 'properties.hbase.client.keytab.file' = '"+hbaseKeytabPath+"',\n" +
                     " 'properties.hbase.master.kerberos.principal' = '"+hbasePrincipal+"',\n" +
-                    " 'properties.hbase.client.keytab.principal' = '"+hbasePrincipal+"',\n" +
                     " 'properties.hbase.regionserver.kerberos.principal' = '"+hbasePrincipal+"'\n";
         }
         hbaseSinkDDl += ")";
@@ -266,12 +263,12 @@ public class Kfk2more {
 
         HiveCatalog hive = new HiveCatalog(name, defaultDatabase, hiveConfDir);
         tableEnv.registerCatalog("myHive", hive);
-        tableEnv.useCatalog("myHive");
+//        tableEnv.useCatalog("myHive");
         // to use hive dialect
-        tableEnv.getConfig().setSqlDialect(SqlDialect.HIVE);
+//        tableEnv.getConfig().setSqlDialect(SqlDialect.HIVE);
 
         /* 创建hive维表*/
-        String hiveSrcDDL = "create table addrInfo(\n" +
+        /*String hiveSrcDDL = "create table if not exists addrInfo(\n" +
                 " id STRING,\n" +
                 " addr STRING\n" +
                 ") TBLPROPERTIES ( \n" +
@@ -279,9 +276,9 @@ public class Kfk2more {
                 "  'streaming-source.partition.include' = 'all',\n" +
                 "  'lookup.join.cache.ttl' = '12 h'\n" +
                 ")";
-        tableEnv.executeSql(hiveSrcDDL);
+        tableEnv.executeSql(hiveSrcDDL);*/
         /* 创建hive sink表*/
-        String hiveSinkDDL = "create table pInfo(\n" +
+        /*String hiveSinkDDL = "create table if not exists pInfo(\n" +
                 " id STRING,\n" +
                 " name STRING\n" +
                 " age STRING,\n" +
@@ -292,29 +289,29 @@ public class Kfk2more {
                 "  'sink.partition-commit.delay'='1 h',\n" +
                 "  'sink.partition-commit.policy.kind'='metastore'" +
                 ")";
-        tableEnv.executeSql(hiveSinkDDL);
+        tableEnv.executeSql(hiveSinkDDL);*/
         /*end 创建hive表*/
 
         // to use default dialect
-        tableEnv.getConfig().setSqlDialect(SqlDialect.DEFAULT);
+//        tableEnv.getConfig().setSqlDialect(SqlDialect.DEFAULT);
 
-        tableEnv.useCatalog("default_catalog");
+//        tableEnv.useCatalog("default_catalog");
 
         //进行维表关联查询
-        String sql = "select id,name,age,d.f.dptName as dptName,c.addr from people p \n" +
+        String sql = "select p.id as id,name,age,d.f.dptName as dptName,c.addr from people p \n" +
                 " left join dptInfo FOR SYSTEM_TIME AS OF p.proctime AS d on p.dptId = d.rowkey \n" +
-                " left join myHive.xyPoc.addrInfo FOR SYSTEM_TIME AS OF p.proctime AS c on c.id = p.addrId";
+                " left join myHive.xyPoc.addrInfo /*+ OPTIONS('streaming-source.enable' = 'false','streaming-source.partition.include' = 'all','lookup.join.cache.ttl' = '12 h') */ FOR SYSTEM_TIME AS OF p.proctime AS c on c.id = p.addrId";
         Table table = tableEnv.sqlQuery(sql);
-        String forHbsql = "select id as rowkey,ROW(name,age,d.f.dptName as dptName,c.addr) from people p \n" +
-                " left join dptInfo FOR SYSTEM_TIME AS OF p.proctime AS d on p.dptId = d.rowkey \n" +
-                " left join myHive.xyPoc.addrInfo FOR SYSTEM_TIME AS OF p.proctime AS c on c.id = p.addrId";
-        /*String forHbsql = "select rowkey,ROW(name,age,dptName,addr) from (select id as rowkey,name,age,d.f.dptName as dptName,c.addr from people p \n" +
-                " left join dptInfo d on p.dptId = d.rowkey \n" +
-                " left join myHive.xyPoc.addrInfo FOR SYSTEM_TIME AS OF p.proctime AS c on c.id = p.addrId)";*/
+        tableEnv.createTemporaryView("allInfo",table);
+
+        String forHbsql = "select id as rowkey,ROW(name,age,dptName,addr) from allInfo";
         Table tableHb = tableEnv.sqlQuery(forHbsql);
 
         //构建sink
-        table.executeInsert("myHive.xyPoc.pInfo");
+//        table.executeInsert("myHive.xyPoc.pInfo");
+        String hiveSinkSql = "insert into myHive.xyPoc.pInfo /*+ OPTIONS('sink.partition-commit.trigger'='partition-time','sink.partition-commit.delay'='1 h','sink.partition-commit.policy.kind'='metastore') */ \n" +
+                " select * from allInfo";
+        tableEnv.executeSql(hiveSinkSql);
         if (isHdfs) {
             table.executeInsert("fs_table");
         }
@@ -324,6 +321,6 @@ public class Kfk2more {
         tableEnv.toDataStream(table).print("table:");
         tableEnv.toDataStream(tableHb).print("tableHb:");
 
-        env.execute("kfk2moreTst");
+//        env.execute("kfk2moreTst");
     }
 }
