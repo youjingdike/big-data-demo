@@ -1,20 +1,26 @@
 package com.ks.tst;
 
+import com.xq.randomsource.RandomSource;
+import org.apache.flink.api.common.typeinfo.BasicTypeInfo;
+import org.apache.flink.api.common.typeinfo.TypeInformation;
+import org.apache.flink.api.java.typeutils.RowTypeInfo;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.contrib.streaming.state.EmbeddedRocksDBStateBackend;
 import org.apache.flink.runtime.state.hashmap.HashMapStateBackend;
 import org.apache.flink.runtime.state.storage.FileSystemCheckpointStorage;
 import org.apache.flink.streaming.api.CheckpointingMode;
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.*;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.table.catalog.hive.HiveCatalog;
+import org.apache.flink.types.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class Kfk2more {
-    private static final Logger log = LoggerFactory.getLogger(Kfk2more.class);
+public class Radom4hive2hive {
+    private static final Logger log = LoggerFactory.getLogger(Radom4hive2hive.class);
     public static final String saslJaasConfig= "com.sun.security.auth.module.Krb5LoginModule required \n useKeyTab=true \n keyTab=\"{keytabPath}\" \n storeKey=true \n debug=true \n useTicketCache=false \n principal=\"{principal}\";";
     //参数常量
     private static final String PARALLELISM_ARGS = "parallelism";
@@ -165,163 +171,54 @@ public class Kfk2more {
         StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env);
 
         /*start 创建kafka源表*/
-        TableDescriptor.Builder kafkaBuilder = TableDescriptor.forConnector("kafka")
-                .schema(Schema.newBuilder()
-                        .column("id", DataTypes.STRING())
-                        .column("name", DataTypes.STRING())
-                        .column("age", DataTypes.STRING())
-                        .column("dptId", DataTypes.STRING())
-                        .column("addrId", DataTypes.STRING())
-                        .columnByExpression("proctime","PROCTIME()")
-                        .build())
-                .option("topic", srcTopic)
-                .option("properties.bootstrap.servers", bootstrapServers)
-                .option("properties.group.id", groupId)
-                .format(FormatDescriptor.forFormat("csv").option("field-delimiter", ",").build());
-        if (LATEST_OFFSET_RESET.equalsIgnoreCase(autoOffsetReset)) {
-            kafkaBuilder.option("scan.startup.mode","latest-offset");
-        } else {
-            kafkaBuilder.option("scan.startup.mode","earliest-offset");
-        }
-        if (isKerbs) {
-            kafkaBuilder.option("properties.security.protocol", "SASL_PLAINTEXT")
-                    .option("properties.sasl.mechanism", "GSSAPI")
-                    .option("properties.sasl.kerberos.service.name", "kafka")
-                    .option("properties.sasl.jaas.config", saslJaasConfig.replace("{keytabPath}", keytabPath)
-                            .replace("{principal}", principal));
-        }
-        final TableDescriptor sourceDescriptor = kafkaBuilder.build();
-        tableEnv.createTemporaryTable("people",sourceDescriptor);
+        Schema schema = Schema.newBuilder()
+                .column("id", DataTypes.STRING())
+                .column("name", DataTypes.STRING())
+                .column("age", DataTypes.STRING())
+                .column("addrId", DataTypes.STRING())
+                .columnByExpression("proctime", "PROCTIME()")
+                .build();
+        SingleOutputStreamOperator<Row> inputStream = env.addSource(new RandomRowSource(),getRowTypeInfo())
+                .name("random source");
+        tableEnv.createTemporaryView("people",inputStream,schema);
         /*end 创建kafka源表*/
-
-        /*start 创建hbase表*/
-        /*创建hbase维表*/
-        String hbaseSrcDDl = "create table dptInfo( \n" +
-                " rowkey STRING,\n" +
-                " f ROW<dptName STRING>,\n" +
-                " PRIMARY KEY (rowkey) NOT ENFORCED \n" +
-                ") WITH ( \n" +
-                " 'connector' = 'hbase-2.2',\n" +
-                " 'table-name' = 'xyPoc:dptInfo',\n" +
-                " 'zookeeper.znode.parent' = '" + zNode + "',\n" +
-                " 'zookeeper.quorum' = '"+hbase_zk+"'";
-        if (isKerbs) {
-            hbaseSrcDDl += ",\n" +
-                    " 'properties.hbase.security.authentication' = 'kerberos',\n" +
-                    " 'properties.hadoop.security.authentication' = 'kerberos',\n" +
-                    " 'properties.kerberos.keytab' = '"+hbaseKeytabPath+"',\n" +
-                    " 'properties.hbase.master.kerberos.principal' = '"+hbasePrincipal+"',\n" +
-                    " 'properties.hbase.regionserver.kerberos.principal' = '"+hbasePrincipal+"'\n";
-        }
-        hbaseSrcDDl += ")";
-        tableEnv.executeSql(hbaseSrcDDl);
-        /*创建hbase sink表*/
-        String hbaseSinkDDl = "create table pInfo( \n" +
-                " rowkey STRING,\n" +
-                " f ROW<name STRING,age STRING,dptName STRING,addr STRING>,\n" +
-                " PRIMARY KEY (rowkey) NOT ENFORCED \n" +
-                ") WITH ( \n" +
-                " 'connector' = 'hbase-2.2',\n" +
-                " 'table-name' = 'xyPoc:pInfoSink',\n" +
-                " 'zookeeper.znode.parent' = '" + zNode + "',\n" +
-                " 'zookeeper.quorum' = '"+hbase_zk+"'";
-        if (isKerbs) {
-            hbaseSinkDDl += ",\n" +
-                    " 'properties.hbase.security.authentication' = 'kerberos',\n" +
-                    " 'properties.hadoop.security.authentication' = 'kerberos',\n" +
-                    " 'properties.kerberos.keytab' = '"+hbaseKeytabPath+"',\n" +
-                    " 'properties.hbase.master.kerberos.principal' = '"+hbasePrincipal+"',\n" +
-                    " 'properties.hbase.regionserver.kerberos.principal' = '"+hbasePrincipal+"'\n";
-        }
-        hbaseSinkDDl += ")";
-        tableEnv.executeSql(hbaseSinkDDl);
-        /*end 创建hbase表*/
-
-        /*start 创建hdfs sink表*/
-        if (isHdfs) {
-            String hdfsDDL = "CREATE TABLE fs_table (\n" +
-                    " id STRING,\n" +
-                    " name STRING,\n" +
-                    " age STRING,\n" +
-                    " dptName STRING,\n" +
-                    " addr STRING\n" +
-                    ") WITH (\n" +
-                    "  'connector'='filesystem',\n" +
-                    "  'path'='"+ hdfsPath +"',\n" +
-                    "  'format'='csv',\n" +
-                    "  'field-delimiter'=',',\n" +
-                    "  'sink.partition-commit.delay'='1 m',\n" +
-                    "  'sink.partition-commit.policy.kind'='success-file'\n" +
-                    ")";
-            tableEnv.executeSql(hdfsDDL);
-        }
-        /*end 创建hdfs sink表*/
-
-
         /*start 创建hive维表*/
         String name            = "myHive";
         String defaultDatabase = "xyPoc";
 
-        HiveCatalog hive = new HiveCatalog(name, defaultDatabase, hiveConfDir);
+        HiveCatalog hive = new HiveCatalog(name, defaultDatabase, hiveConfDir,"3.1.0");
         tableEnv.registerCatalog("myHive", hive);
-//        tableEnv.useCatalog("myHive");
-        // to use hive dialect
-//        tableEnv.getConfig().setSqlDialect(SqlDialect.HIVE);
-
-        /* 创建hive维表*/
-        /*String hiveSrcDDL = "create table if not exists addrInfo(\n" +
-                " id STRING,\n" +
-                " addr STRING\n" +
-                ") TBLPROPERTIES ( \n" +
-                "  'streaming-source.enable' = 'false',\n" +
-                "  'streaming-source.partition.include' = 'all',\n" +
-                "  'lookup.join.cache.ttl' = '12 h'\n" +
-                ")";
-        tableEnv.executeSql(hiveSrcDDL);*/
-        /* 创建hive sink表*/
-        /*String hiveSinkDDL = "create table if not exists pInfo(\n" +
-                " id STRING,\n" +
-                " name STRING\n" +
-                " age STRING,\n" +
-                " dptName STRING\n" +
-                " addr STRING\n" +
-                ") STORED AS parquet TBLPROPERTIES  ( \n" +
-                "  'sink.partition-commit.trigger'='partition-time',\n" +
-                "  'sink.partition-commit.delay'='1 h',\n" +
-                "  'sink.partition-commit.policy.kind'='metastore'" +
-                ")";
-        tableEnv.executeSql(hiveSinkDDL);*/
-        /*end 创建hive表*/
-
-        // to use default dialect
-//        tableEnv.getConfig().setSqlDialect(SqlDialect.DEFAULT);
-
-//        tableEnv.useCatalog("default_catalog");
 
         //进行维表关联查询
-        String sql = "select p.id as id,name,age,d.f.dptName as dptName,c.addr from people p \n" +
-                " left join dptInfo FOR SYSTEM_TIME AS OF p.proctime AS d on p.dptId = d.rowkey \n" +
+        String sql = "select p.id as id,name,age,'' as dptName,c.addr from people p \n" +
                 " left join myHive.xyPoc.addrInfo /*+ OPTIONS('streaming-source.enable' = 'false','streaming-source.partition.include' = 'all','lookup.join.cache.ttl' = '12 h') */ FOR SYSTEM_TIME AS OF p.proctime AS c on c.id = p.addrId";
         Table table = tableEnv.sqlQuery(sql);
         tableEnv.createTemporaryView("allInfo",table);
 
-        String forHbsql = "select id as rowkey,ROW(name,age,dptName,addr) from allInfo";
-        Table tableHb = tableEnv.sqlQuery(forHbsql);
-
         //构建sink
-//        table.executeInsert("myHive.xyPoc.pInfo");
         String hiveSinkSql = "insert into myHive.xyPoc.pInfo /*+ OPTIONS('sink.partition-commit.trigger'='partition-time','sink.partition-commit.delay'='1 h','sink.partition-commit.policy.kind'='metastore') */ \n" +
                 " select * from allInfo";
         tableEnv.executeSql(hiveSinkSql);
-        if (isHdfs) {
-            table.executeInsert("fs_table");
-        }
-
-        tableHb.executeInsert("pInfo");
 
         tableEnv.toDataStream(table).print("table:");
-        tableEnv.toDataStream(tableHb).print("tableHb:");
 
 //        env.execute("kfk2moreTst");
+    }
+
+    private static RowTypeInfo getRowTypeInfo() {
+        TypeInformation[] types = new TypeInformation[4]; // 3个字段
+        String[] fieldNames = new String[4];
+
+        types[0] = BasicTypeInfo.STRING_TYPE_INFO;
+        types[1] = BasicTypeInfo.STRING_TYPE_INFO;
+        types[2] = BasicTypeInfo.STRING_TYPE_INFO;
+        types[3] = BasicTypeInfo.STRING_TYPE_INFO;
+
+        fieldNames[0] = "id";
+        fieldNames[1] = "name";
+        fieldNames[2] = "age";
+        fieldNames[3] = "addrId";
+
+        return new RowTypeInfo(types, fieldNames);
     }
 }

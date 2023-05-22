@@ -2,6 +2,7 @@ package com.test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.function.BiConsumer;
 
 public class Test1 {
@@ -24,6 +25,12 @@ public class Test1 {
 
 		System.out.println("######");
 		System.out.println(System.getenv("dddd"));
+
+		Random random = new Random();
+		System.out.println(random.nextInt(1));
+		System.out.println("!!!!!!!!!!!!!!!!!!!!!!!");
+		System.out.println(random.nextInt(6));
+
 		/*long l = 10000L;
 		l++;
 		System.out.println(l);

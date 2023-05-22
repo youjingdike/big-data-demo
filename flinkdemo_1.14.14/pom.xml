@@ -20,12 +20,36 @@
 
 
     <dependencies>
-        <dependency>
+        <!--<dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-java</artifactId>
             <version>${flink.version}</version>
             <scope>provided</scope>
+        </dependency>-->
+       <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+           <version>1.7.15</version>
         </dependency>
+        <!--<dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-shaded-hadoop-2-uber</artifactId>
+            <version>3.1.1-10.0</version>
+        </dependency>-->
+        <!-- <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>${slf4j.version}</version>
+            <scope>compile</scope>
+        </dependency>-->
+
+        <!--<dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>${log4j.version}</version>
+        </dependency>-->
+
+
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-streaming-java_2.11</artifactId>
@@ -68,46 +92,39 @@
             </exclusions>-->
         </dependency>
         <!--<dependency>
-            <groupId>org.apache.hbase</groupId>
-            <artifactId>hbase-client</artifactId>
-            <version>2.0.0</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>slf4j-log4j12</artifactId>
-                    <groupId>org.slf4j</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>log4j</artifactId>
-                    <groupId>log4j</groupId>
-                </exclusion>
-                <exclusion>
-                    <groupId>io.netty</groupId>
-                    <artifactId>netty</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.hadoop</groupId>
-                    <artifactId>hadoop-common</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.hadoop</groupId>
-                    <artifactId>hadoop-auth</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.hadoop</groupId>
-                    <artifactId>hadoop-mapreduce-client-core</artifactId>
-                </exclusion>
-            </exclusions>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-shaded-hadoop-2-uber</artifactId>
+            <version>3.1.1-10.0</version>
+        </dependency>-->
+
+        <dependency>
+            <groupId>commons-cli</groupId>
+            <artifactId>commons-cli</artifactId>
+            <version>1.3.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-math3</artifactId>
+            <version>3.4.1</version>
+        </dependency>
+
+        <!--<dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-shaded-hadoop-2-uber</artifactId>
+            <version>3.1.1-10.0</version>
         </dependency>-->
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-sql-connector-hive-3.1.2_2.11</artifactId>
             <version>${flink.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-connector-kafka_2.11</artifactId>
             <version>${flink.version}</version>
         </dependency>
+
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -122,7 +139,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-assembly-plugin</artifactId>
-                    <version>2.4.1</version>
+                    <version>2.5.3</version>
                         <configuration>
                             <archive>
                                 <manifest>
@@ -163,6 +180,90 @@
                         </execution>
                     </executions>
                 </plugin>-->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-shade-plugin</artifactId>
+                    <version>3.2.0</version>
+                    <executions>
+                        <execution>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>shade</goal>
+                            </goals>
+                            <configuration>
+                                <minimizeJar>false</minimizeJar>
+                                <shadedArtifactAttached>true</shadedArtifactAttached>
+                                <shadedClassifierName>fat-1.14</shadedClassifierName>
+
+                                <relocations>
+                                    <relocation>
+                                        <pattern>com.fasterxml.jackson</pattern>
+                                        <shadedPattern>ksyun.com.fasterxml.jackson</shadedPattern>
+                                        <includes>
+                                            <include>com.fasterxml.jackson.**</include>
+                                        </includes>
+                                    </relocation>
+                                </relocations>
+
+                                <artifactSet>
+                                    <excludes>
+                                        <exclude>com.google.code.findbugs:jsr305</exclude>
+                                        <exclude>log4j:*</exclude>
+                                        <!--放入 要排除的 flink 相关  -->
+                                        <exclude>org.apache.flink:flink-streaming-scala_2.11:*</exclude>
+                                        <exclude>org.apache.flink:flink-streaming-java_2.11:*</exclude>
+                                        <exclude>org.apache.flink:flink-clients_2.11:*</exclude>
+                                        <exclude>org.apache.flink:flink-runtime_2.11:*</exclude>
+                                        <exclude>org.apache.flink:flink-shaded-hadoop-2-uber:*</exclude>
+                                        <exclude>org.apache.flink:flink-queryable-state-client-java:*</exclude>
+                                        <exclude>org.apache.flink:flink-runtime:*</exclude>
+                                        <exclude>org.apache.flink:flink-shaded-guava:*</exclude>
+                                        <exclude>org.apache.flink:flink-shaded-asm-7:*</exclude>
+                                        <exclude>org.apache.flink:flink-shaded-jackson:*</exclude>
+                                        <exclude>org.apache.flink:flink-core:*</exclude>
+                                        <exclude>org.apache.flink:flink-annotations:*</exclude>
+                                        <exclude>org.apache.flink:flink-metrics-core:*</exclude>
+                                        <exclude>org.apache.flink:flink-java:*</exclude>
+                                        <exclude>org.apache.flink:flink-json:*</exclude>
+                                        <exclude>org.apache.flink:flink-state-backends:*</exclude>
+                                        <exclude>org.apache.flink:flink-shaded-netty:*</exclude>
+                                        <exclude>org.apache.flink:flink-test-utils_2.11:*</exclude>
+                                        <exclude>org.apache.flink:flink-scala_2.11:*</exclude>
+                                        <exclude>org.scala-lang:scala-reflect:*</exclude>
+                                        <exclude>org.scala-lang.modules:scala-xml_2.11:*</exclude>
+                                        <exclude>org.scala-lang.modules:scala-parser-combinators_2.11:*</exclude>
+                                        <exclude>org.scala-lang:scala-library:*</exclude>
+                                        <exclude>org.scala-lang:scala-compiler:*</exclude>
+                                        <exclude>com.twitter.chill:*</exclude>
+                                        <exclude>org.javassist:javassist:*</exclude>
+                                        <exclude>javax.annotation:javax.annotation-api:*</exclude>
+                                        <exclude>com.ververica:frocksdbjni:*</exclude>
+                                        <!--<exclude>org.slf4j:slf4j-api:*</exclude>-->
+                                        <exclude>org.yaml:snakeyaml:*</exclude>
+                                    </excludes>
+                                </artifactSet>
+                                <filters>
+                                    <filter>
+                                        <!-- Do not copy the signatures in the META-INF folder.
+                                        Otherwise, this might cause SecurityExceptions when using the JAR. -->
+                                        <artifact>*:*</artifact>
+                                        <excludes>
+                                            <exclude>META-INF/*.SF</exclude>
+                                            <exclude>META-INF/*.DSA</exclude>
+                                            <exclude>META-INF/*.RSA</exclude>
+                                            <exclude>log4j.properties</exclude>
+                                        </excludes>
+                                    </filter>
+                                </filters>
+                                <!--<transformers>-->
+                                <!--<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">-->
+                                <!--<mainClass>my.prorgams.main.clazz</mainClass>-->
+                                <!--</transformer>-->
+                                <!--</transformers>-->
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
             </plugins>
         <!--</pluginManagement>-->
     </build>

@@ -16,3 +16,6 @@
 org.apache.flink.streaming.connectors.kafka.table.KafkaDynamicTableFactory
 org.apache.flink.streaming.connectors.kafka.table.UpsertKafkaDynamicTableFactory
 org.apache.flink.connector.hbase2.HBase2DynamicTableFactory
+org.apache.flink.table.catalog.hive.factories.HiveCatalogFactory
+org.apache.flink.table.module.hive.HiveModuleFactory
+org.apache.flink.table.planner.delegation.hive.HiveParserFactory
