@@ -1,17 +1,50 @@
 package com.test;
 
+import org.apache.commons.codec.binary.StringUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.function.BiConsumer;
 
 public class Test1 {
+	private static final char[] HEX_CHARS = {
+			'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'
+	};
 	public static void change(int i,String s,char[] c) {
 		System.out.println(s);
 		s = "sdfas";
 		c[0] = 'X';
 		i = 5;
 	}
+
+	private static void longToByteArray(long l, byte[] ba, int offset) {
+		for (int i = 0; i < 8; ++i) {
+			final int shift = i << 3; // i * 8
+			ba[offset + 8 - 1 - i] = (byte) ((l & (0xffL << shift)) >>> shift);
+		}
+	}
+
+	public static String byteToHexString(final byte[] bytes) {
+		return byteToHexString(bytes, 0, bytes.length);
+	}
+
+	public static String byteToHexString(final byte[] bytes, final int start, final int end) {
+		if (bytes == null) {
+			throw new IllegalArgumentException("bytes == null");
+		}
+
+		int length = end - start;
+		char[] out = new char[length * 2];
+
+		for (int i = start, j = 0; i < end; i++) {
+			out[j++] = HEX_CHARS[(0xF0 & bytes[i]) >>> 4];
+			out[j++] = HEX_CHARS[0x0F & bytes[i]];
+		}
+
+		return new String(out);
+	}
+
 	public static void main(String[] args) {
 //		System.setProperty("dddd","vvvvv");
 		System.out.println(System.getProperty("dddd"));
@@ -30,7 +63,15 @@ public class Test1 {
 		System.out.println(random.nextInt(1));
 		System.out.println("!!!!!!!!!!!!!!!!!!!!!!!");
 		System.out.println(random.nextInt(6));
+		System.out.println("!!!!!!!!!!!!!!!!!!!!!!!");
+		System.out.println(random.nextLong());
+		System.out.println("~~~~~~~~~~~~~~~~~~~");
 
+		final byte[] ba = new byte[16];
+		longToByteArray(random.nextLong(), ba, 0);
+		longToByteArray(random.nextLong(), ba, 8);
+
+		System.out.println(byteToHexString(ba));
 		/*long l = 10000L;
 		l++;
 		System.out.println(l);
