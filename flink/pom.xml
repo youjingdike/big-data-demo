@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.xq.tst</groupId>
+        <artifactId>big-data-demo</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>flink</artifactId>
+    <packaging>pom</packaging>
+
+    <properties>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <modules>
+        <module>flink-cdc-mysql</module>
+        <module>flinkdemo_1.9.3</module>
+        <module>flink-cdc-pg</module>
+        <module>flink-upsert-kafka</module>
+        <module>flink-hive-sink</module>
+        <module>flinkdemo_1.14.4</module>
+        <module>flinkdemo_1.11.3</module>
+        <module>flinkdemo_1.14.14</module>
+        <module>flinkdemo_1.12.1</module>
+        <module>flinkdemo-1.17.1</module>
+    </modules>
+</project>

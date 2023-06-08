@@ -16,15 +16,8 @@
         <module>kafkademo</module>
         <!--<module>KafkaService</module>-->
         <module>nio-netty</module>
-        <module>flinkdemo_1.9.3</module>
         <module>netty-demo</module>
-        <module>flink-cdc-mysql</module>
-        <module>flink-cdc-pg</module>
-        <module>flink-upsert-kafka</module>
-        <module>flink-hive-sink</module>
-        <module>flinkdemo_1.14.4</module>
         <module>kafka-kerberos</module>
-        <module>flinkdemo_1.11.3</module>
         <module>tst-project</module>
         <module>completablefuture-tst</module>
         <module>vertx-tst</module>
@@ -32,8 +25,7 @@
         <module>esdemo</module>
         <module>hudidemo</module>
         <module>icebergdemo</module>
-        <module>flinkdemo_1.14.14</module>
-        <module>flinkdemo_1.12.1</module>
+        <module>flink</module>
     </modules>
 
     <properties>
