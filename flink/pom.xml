@@ -28,6 +28,6 @@
         <module>flinkdemo_1.11.3</module>
         <module>flinkdemo_1.14.14</module>
         <module>flinkdemo_1.12.1</module>
-        <module>flinkdemo-1.17.1</module>
+        <module>flinkdemo_1.17.1</module>
     </modules>
 </project>
