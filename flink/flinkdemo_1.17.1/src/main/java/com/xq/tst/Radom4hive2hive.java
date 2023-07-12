@@ -207,7 +207,7 @@ public class Radom4hive2hive {
     }
 
     private static RowTypeInfo getRowTypeInfo() {
-        TypeInformation[] types = new TypeInformation[4]; // 3个字段
+        TypeInformation[] types = new TypeInformation[4]; // 4个字段
         String[] fieldNames = new String[4];
 
         types[0] = BasicTypeInfo.STRING_TYPE_INFO;
