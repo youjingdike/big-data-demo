@@ -18,7 +18,7 @@
         <module>nio-netty</module>
         <module>netty-demo</module>
         <module>kafka-kerberos</module>
-        <module>tst-project</module>
+        <module>java-test-project</module>
         <module>completablefuture-tst</module>
         <module>vertx-tst</module>
         <module>redisson-tst</module>
