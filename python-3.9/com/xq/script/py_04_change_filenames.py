@@ -11,6 +11,6 @@ for i in os.listdir(d):
     new_file = i.replace('3','part-r-0')
     old_full_file = d + '\\' + i
     new_full_file = d + '\\' + new_file
-    print old_full_file.decode('GBK'), new_full_file.decode('GBK')
+    print(old_full_file.decode('GBK'), new_full_file.decode('GBK'))
     shutil.move(old_full_file, new_full_file)
-print 'Done!'
+print('Done!')

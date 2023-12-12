@@ -31,7 +31,9 @@ from pyspark import SparkContext
 
 spark = SparkContext(master="local", appName="helloSpark")
 
-print spark.textFile("../test_test/text.txt").flatMap(lambda line: line.split()).map(lambda word: (word, 1)).reduceByKey(lambda a, b: a+b).collect()
+print(
+    spark.textFile("../test_test/text.txt").flatMap(lambda line: line.split()).map(lambda word: (word, 1)).reduceByKey(
+        lambda a, b: a + b).collect())
 
 
 

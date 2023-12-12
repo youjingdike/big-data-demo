@@ -12,9 +12,9 @@ def work1():
     lock1.acquire()
     time.sleep(1)
     for i in range(5):
-        print "work1"
+        print("work1")
         lock2.acquire()
-        print i
+        print(i)
         lock2.release()
     lock1.release()
 
@@ -23,9 +23,9 @@ def work2():
     lock2.acquire()
     time.sleep(1)
     for i in range(5):
-        print "work2"
+        print("work2")
         lock1.acquire()
-        print i
+        print(i)
         lock1.release()
     lock2.release()
 

@@ -26,6 +26,6 @@ for id in range(2, 10):
 content = db.class2.find({'name': 'owen'})
 # 打印所有数据
 for i in content:
-    print i
+    print(i)
 
 client.close()

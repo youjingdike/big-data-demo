@@ -1,8 +1,9 @@
 # -*- coding:utf-8 -*-
 
-import MySQLdb
+# import MySQLdb
+import pymysql
 
-con = MySQLdb.connect(host='localhost', user='root', passwd='123123', db='test')
+con = pymysql.connect(host='localhost', user='root', passwd='123123', db='test')
 
 cursor = con.cursor()
 
@@ -14,7 +15,7 @@ cursor.execute(sql)
 
 row = cursor.fetchone()
 
-print row
+print(row)
 
 cursor.close()
 

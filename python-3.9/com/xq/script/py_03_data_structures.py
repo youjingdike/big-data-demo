@@ -19,12 +19,11 @@
 # 字典
 aDict = {'host': 'earth'}
 aDict['port'] = 80
-print aDict
-print aDict.keys()
-print aDict.values()
-print aDict['host']
- 
- 
+print(aDict)
+print(aDict.keys())
+print(aDict.values())
+print(aDict['host'])
+
 # 遍历字典
 for key in enumerate(aDict):
-    print key, aDict[key]
+    print(key, aDict[key])

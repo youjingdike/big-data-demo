@@ -68,10 +68,10 @@ num = intNum()
 
 #调用 next() 内置函数
 print(next(num))
-print '！'
+print('！')
 #调用 __next__() 方法
 print(num.next())
-print '！！'
+print('！！')
 #通过for循环遍历生成器
 for i in num:
     print(i)

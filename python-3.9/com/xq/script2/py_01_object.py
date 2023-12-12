@@ -15,7 +15,7 @@ class User:
 
 f = Fish()
 Fish.eat(f, None)
-print f.hungry
+print(f.hungry)
 # 下面两种方法调用等价
 Fish.eat(f, "earthworm")
 f.eat("earthworm")
