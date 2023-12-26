@@ -13,7 +13,7 @@ class CLanguage:
     #删除name属性值的函数
     def delname(self):
         self.__name="del"
-    #为name 属性配置 property() 函数
+    #为name 属性配置 property() 函数，property() 函数也可以少传入几个参数。
     name = property(getname, setname, delname, '指明出处')
 
 # 注意，在此程序中，由于 getname() 方法中需要返回 name 属性，如果使用 self.name 的话，其本身又被调用 getname()，
