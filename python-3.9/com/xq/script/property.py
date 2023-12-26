@@ -15,6 +15,11 @@ class CLanguage:
         self.__name="del"
     #为name 属性配置 property() 函数
     name = property(getname, setname, delname, '指明出处')
+
+# 注意，在此程序中，由于 getname() 方法中需要返回 name 属性，如果使用 self.name 的话，其本身又被调用 getname()，
+# 这将会先入无限死循环。为了避免这种情况的出现，
+# 程序中的 name 属性必须设置为私有属性，即使用 __name（前面有 2 个下划线）。
+
 #调取说明文档的 2 种方式：输出不一样
 print(CLanguage.name.__doc__)
 help(CLanguage.name)
