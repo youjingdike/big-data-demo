@@ -43,8 +43,8 @@
 # ttt = Data_test()
 # ttt.x      #访问成员属性，触发___get__()方法
 
-#问题5：当我们删除描述类中__set__()方法时，当类描述符对象属性名和实例对象属性名重名的时候还会触发__get__()方法吗？
-#答：我们来看一下下边这个例子
+# 问题5：当我们删除描述类中__set__()方法时，当类描述符对象属性名和实例对象属性名重名的时候还会触发__get__()方法吗？
+# 答：我们来看一下下边这个例子
 # class Test1_name:
 #     def __init__(self, name):
 #         self.name = name
@@ -64,14 +64,61 @@ def intNum():
     for i in range(5):
         yield i
         print("继续执行")
+
+
 num = intNum()
 
-#调用 next() 内置函数
+# 调用 next() 内置函数
 print(next(num))
 print('！')
-#调用 __next__() 方法
-print(num.next())
-print('！！')
-#通过for循环遍历生成器
+# 调用 __next__() 方法
+# print(num.next())
+# print('！！')
+# 通过for循环遍历生成器
 for i in num:
     print(i)
+
+
+# 定义一个Car类
+class Car(object):
+
+    @property
+    def price(self):
+        print("调用了：@property修饰的price方法")
+        return self.__price
+
+    @price.setter
+    # def price_tst(self, price):
+    def price(self, price):  # 该方法名必须与@property修饰的方法名相同
+        if price < 0:
+            price = 0
+        print("调用了： @price.setter修饰的price方法")
+        self.__price = price
+
+    @property
+    def tire_count(self):
+        return 4
+
+    @property
+    def _tst(self):
+        print("调用了：@property修饰的price方法")
+        return "tst"
+
+    @property
+    def _tst1(self):  # 没有return 就默认返回None
+        print("调用了：@property修饰的price方法")
+
+# 创建一个Car类型的对象
+c = Car()
+# print("小汽车的价格：price = ", c.price) # 不先设置的话，直接获取会报错：'Car' object has no attribute '_Car__price'
+c.price = -100000  # 故意设置为负值
+print("小汽车的价格：price = ", c.price)
+print(c._tst)
+print(c._tst1)
+
+# 创建一个Car类型的对象c2
+c2 = Car()
+print("轮胎个数：", c2.tire_count)
+
+# c2.tire_count = 5  # 这里会报错
+# print("更改后，轮胎个数：", c2.tire_count)

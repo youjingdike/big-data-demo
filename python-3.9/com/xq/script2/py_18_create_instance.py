@@ -7,6 +7,8 @@ class MyClass:
         self.y = y
         print(self.__class__.__name__, self.x, self.y)
 
+    def tst(self):
+        print(self.__class__)
 
 if __name__ == '__main__':
     my_class = type("MyClass", (), {"x": 1, "y": 2})
