@@ -4,8 +4,9 @@
 def intNum():
     print("开始执行")
     for i in range(5):
+        print("yield 之前")
         yield i
-        print("继续执行")
+        print("yield 之后，继续执行")
 
 
 num = intNum()
@@ -19,4 +20,6 @@ print(num.__next__())
 print('！！!')
 # 通过for循环遍历生成器
 for i in num:
+    print("###")
     print(i)
+    print("@@@")
