@@ -1,5 +1,7 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
+import types
+
 
 # 以下两种装饰器写法不同，效果相同
 # 写法一，适合没有返回值的函数
@@ -183,3 +185,115 @@ decorate_func1(decorate_func2(func8))()
 '''
 print('------------')
 func9()
+
+print("@@@@@@@@@类作为装饰器")
+from functools import wraps
+
+
+class animal:
+    def __init__(self, name):
+        self.name = name
+
+    def __call__(self, func):
+        @wraps(func)
+        def wrap_func(*args, **kwargs):
+            print('working here' + self.name)
+            res = func(*args, **kwargs)
+            return res
+        return wrap_func
+
+@animal("装饰器类")
+def test(name, kind):
+    word = f'{name} belongs to {kind}'
+    return word
+
+
+A = test('cow', 'mammals')
+print(type(test))
+print(A)
+
+
+class animal2:
+
+    def __call__(self, func):
+        @wraps(func)
+        def wrap_func(*args, **kwargs):
+            print('working here animal2')
+            res = func(*args, **kwargs)
+            return res
+
+        return wrap_func
+
+
+@animal2()
+def test2(name, kind):
+    word = f'{name} belongs to {kind}'
+    return word
+
+
+B = test2('cow2', 'mammals2')
+print(type(test2))
+print(B)
+
+
+class animal3:
+    def __init__(self, func):
+        self.func = func
+
+    # @wraps
+    def __call__(self, *args, **kwargs):
+        print('working here animal3')
+        res = self.func(*args, **kwargs)
+        return res
+
+@animal3
+def test3(name, kind):
+    word = f'{name} belongs to {kind}'
+    return word
+
+C = test3('cow3','mammals3')
+print(type(test3))
+print(C)
+
+class logit(object):
+    def __init__(self, logfile='out.log'):
+        self.logfile = logfile
+
+    def __call__(self, func):
+        @wraps(func)
+        def wrapped_function(*args, **kwargs):
+            log_string = func.__name__ + " was called"
+            print(log_string)
+            # 打开logfile并写入
+            with open(self.logfile, 'a') as opened_file:
+                # 现在将日志打到指定的文件
+                opened_file.write(log_string + '\n')
+            # 现在，发送一个通知
+            self.notify()
+            return func(*args, **kwargs)
+        return wrapped_function
+
+    def notify(self):
+        # logit只打日志，不做别的
+        pass
+
+class email_logit(logit):
+    '''
+    一个logit的实现版本，可以在函数调用时发送email给管理员
+    '''
+    def __init__(self, email='admin@myproject.com', *args, **kwargs):
+        self.email = email
+        super().__init__(*args, **kwargs)
+
+    def notify(self):
+        # 发送一封email到self.email
+        # 这里就不做实现了
+        print("发送一封email到"+self.email)
+
+# @logit()
+@email_logit()
+def myfunc1(name, kind):
+    word = f'{name} belongs to {kind}'
+    return word
+
+print(myfunc1("a","b"))
