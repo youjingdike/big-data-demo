@@ -299,6 +299,7 @@ class email_logit(logit):
         print("发送一封email到" + self.email)
 
 
+# @email_logit 将会和 @logit 产生同样的效果，但是在打日志的基础上，还会多发送一封邮件给管理员。
 # @logit()
 @email_logit()
 def myfunc1(name, kind):
@@ -307,3 +308,25 @@ def myfunc1(name, kind):
 
 
 print(myfunc1("a", "b"))
+
+print("为类加装饰器@@@@@@@@@")
+
+
+def decorater(cls):  # 传入一个类即cls
+    cls.num_of_animals = 10  # 设置一个类属性
+    return cls  # 返回这个被装饰过的类
+
+
+@decorater
+class animal:
+    pass
+
+
+# 这就完成了对类的装饰啦
+
+A = animal()
+# 上面这行代码相当于在运行A = decorater(animal) 运行的结果
+# 就是返回了一个被装饰过的新的cls，因此新的cls有了新的属性，我们就可以调用
+# 这个num_of_animals的属性啦。
+
+print(A.num_of_animals)
