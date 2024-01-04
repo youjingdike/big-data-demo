@@ -200,7 +200,9 @@ class animal:
             print('working here' + self.name)
             res = func(*args, **kwargs)
             return res
+
         return wrap_func
+
 
 @animal("装饰器类")
 def test(name, kind):
@@ -246,14 +248,17 @@ class animal3:
         res = self.func(*args, **kwargs)
         return res
 
+
 @animal3
 def test3(name, kind):
     word = f'{name} belongs to {kind}'
     return word
 
-C = test3('cow3','mammals3')
+
+C = test3('cow3', 'mammals3')
 print(type(test3))
 print(C)
+
 
 class logit(object):
     def __init__(self, logfile='out.log'):
@@ -271,16 +276,19 @@ class logit(object):
             # 现在，发送一个通知
             self.notify()
             return func(*args, **kwargs)
+
         return wrapped_function
 
     def notify(self):
         # logit只打日志，不做别的
         pass
 
+
 class email_logit(logit):
     '''
     一个logit的实现版本，可以在函数调用时发送email给管理员
     '''
+
     def __init__(self, email='admin@myproject.com', *args, **kwargs):
         self.email = email
         super().__init__(*args, **kwargs)
@@ -288,7 +296,8 @@ class email_logit(logit):
     def notify(self):
         # 发送一封email到self.email
         # 这里就不做实现了
-        print("发送一封email到"+self.email)
+        print("发送一封email到" + self.email)
+
 
 # @logit()
 @email_logit()
@@ -296,4 +305,5 @@ def myfunc1(name, kind):
     word = f'{name} belongs to {kind}'
     return word
 
-print(myfunc1("a","b"))
+
+print(myfunc1("a", "b"))
