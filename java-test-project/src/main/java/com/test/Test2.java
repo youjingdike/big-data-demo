@@ -71,8 +71,13 @@ public class Test2 {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}*/
-		System.out.println(testReturn());
-		System.out.println(testReturn1());
+		/*System.out.println(testReturn());
+		System.out.println(testReturn1());*/
+
+		String s = "123{K8S_TEST}456";
+		String replace = s.replace("{K8S_TEST1}", null);
+		System.out.println(replace);
+
 	}
 
 	private static int testReturn() {

@@ -3,6 +3,8 @@
 from traitlets import HasTraits, TraitError, Int, Bool, validate, Dict, Unicode, default
 
 print("Custom Cross-Validation...")
+
+
 # Basic Example: Validating the Parity of a Trait
 
 class Parity(HasTraits):
@@ -34,6 +36,8 @@ with parity_check.hold_trait_notifications():
 
 # Advanced Example: Validating the Schema
 print("#######")
+
+
 class Nested(HasTraits):
     value = Dict(
         per_key_traits={"configuration": Dict(value_trait=Unicode()), "flag": Bool()}
@@ -56,6 +60,7 @@ value_schema = {
     },
 }
 
+
 class Schema(HasTraits):
     value = Dict()
 
@@ -66,6 +71,7 @@ class Schema(HasTraits):
     @validate("value")
     def _validate_value(self, proposal):
         try:
+            print(proposal)
             jsonschema.validate(proposal["value"], value_schema)
         except jsonschema.ValidationError as e:
             raise TraitError(e)
@@ -75,3 +81,13 @@ class Schema(HasTraits):
 s = Schema()
 # s.value = dict(name="", price="1")  # raises a TraitError
 s.value = dict(name="", price=2)
+
+
+class MyClass(HasTraits):
+    i = Int()
+
+
+mc = MyClass()
+# assert not mc.trait_has_value("i")
+mc.i  # generates a default value
+assert mc.trait_has_value("i")
