@@ -1,21 +1,24 @@
 package com.jsch;
 
 import com.jcraft.jsch.*;
+import org.apache.commons.compress.utils.Lists;
 
 import java.io.*;
 import java.util.Properties;
 
 public class JschExecuteCommands {
+
+    private static String username = "root";
+    private static String host = "XXXX";
+    private static int port = 22; // SSH default port
+    private static String password = "XXXX";
+
     public static void main(String[] args) throws Exception {
         tst();
 //        tst2();
     }
 
     private static void tst() throws JSchException, IOException, InterruptedException {
-        String username = "root";
-        String host = "xxx.xxx.xxx.xxx";
-        int port = 22; // SSH default port
-        String password = "xxx";
 
         JSch jsch = new JSch();
 
@@ -35,13 +38,13 @@ public class JschExecuteCommands {
         String name = "auto-tst-pi-"+System.currentTimeMillis();
         // 设置执行的命令
 //        String command = "source ~/.bashrc;export JAVA_HOME=/usr/local/java; export HADOOP_CONF_DIR=/opt/hadoop-3.2.0/etc/hadoop; ";
-        String command = "export JAVA_HOME=/usr/local/java\n";
-        String command1 = "export HADOOP_CONF_DIR=/opt/hadoop-3.2.0/etc/hadoop\n";
+//        String command = "export JAVA_HOME=/usr/local/java\n";
+//        String command1 = "export HADOOP_CONF_DIR=/opt/hadoop-3.2.0/etc/hadoop\n";
 
-        String command2 = "/opt/spark/bin/spark-submit  --master yarn --deploy-mode cluster     --queue yarn-queue-spark  --name="+name+"  --class org.apache.spark.examples.SparkPi     --driver-memory 1g     --num-executors 2     --executor-memory 1g     --executor-cores 1     --conf spark.yarn.stagingDir=\"alluxio:///kdl/kcde/spark/staging\"  /opt/spark/examples/jars/spark-examples_2.12-3.1.2.jar 10\n";
-        String command3 = "echo '@@@@@@@@@@@@tst@@@@@@@@@@@@'\n";
+        String command = "/opt/spark/bin/spark-submit  --master yarn --deploy-mode client     --queue yarn-queue-spark  --name="+name+"  --class org.apache.spark.examples.SparkTC     --driver-memory 1g     --num-executors 2     --executor-memory 1g     --executor-cores 1 --conf spark.driver.host=\"10.0.64.143\"    --conf spark.yarn.stagingDir=\"alluxio:///kdl/kcde/spark/staging\"  /opt/spark/examples/jars/spark-examples_2.12-3.1.2.jar \n";
+//        String command3 = "echo '@@@@@@@@@@@@tst@@@@@@@@@@@@'\n";
 //        command += "kubectl exec -it yarnify-yarnify-yarnify-0 -n default-yarnify -- echo \"tst\"";
-        System.out.println(command);
+//        System.out.println(command);
         // 在SSH通道中执行命令
         ((ChannelExec) channel).setCommand("/bin/bash");
 
@@ -57,13 +60,14 @@ public class JschExecuteCommands {
         channel.connect();
 
         out.write("sudo su - yarn\n".getBytes());
-//        out.write(command.getBytes());
+        out.write(command.getBytes());
 //        out.write(command1.getBytes());
-        out.write(command3.getBytes());
-        out.write(command2.getBytes());
-        out.write(command3.getBytes());
+//        out.write(command3.getBytes());
+//        out.write(command2.getBytes());
+//        out.write(command3.getBytes());
         // Flush the output stream to ensure that all data is sent
         out.flush();
+        //注意：必须关掉否则BufferedReader会一直阻塞
         out.close();
 
         System.out.println("命令发送完毕。。。");
@@ -80,6 +84,10 @@ public class JschExecuteCommands {
                 }
                 errStringBuilder.append(line1 + "\n");
 //                System.out.println(line1 + "\n");
+                if (line1.contains("Submitted application application_")) {
+                    String[] arr = line1.split(" ");
+                    System.out.println(("***task_app_id:" + arr[arr.length - 1]));
+                }
             }
             System.out.println("error:" + errStringBuilder);
         });
@@ -109,13 +117,9 @@ public class JschExecuteCommands {
     }
 
     private static void tst2() throws JSchException, IOException, InterruptedException {
-        String user = "root";
-        String host = "xxx.xxx.xxx.xxx";
-        int port = 22; // SSH default port
-        String password = "xxx";
 
         JSch jsch = new JSch();
-        Session session = jsch.getSession(user, host, port);
+        Session session = jsch.getSession(username, host, port);
         session.setPassword(password);
 
         // Avoid asking for key confirmation
@@ -169,13 +173,9 @@ public class JschExecuteCommands {
     }
 
     private static void tst1() throws JSchException, IOException, InterruptedException {
-        String user = "root";
-        String host = "xxx.xxx.xxx.xxx";
-        int port = 22; // SSH default port
-        String password = "xxx";
 
         JSch jsch = new JSch();
-        Session session = jsch.getSession(user, host, port);
+        Session session = jsch.getSession(username, host, port);
         session.setPassword(password);
 
         // Avoid asking for key confirmation
