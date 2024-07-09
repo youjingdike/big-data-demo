@@ -1,3 +1,4 @@
+import java.util.Random;
 import java.util.UUID;
 
 public class Tst {
@@ -18,5 +19,10 @@ public class Tst {
         String st = "Completed";
         System.out.println(st.toLowerCase());
 
+
+        while (true) {
+            int i = new Random().nextInt(2);
+            System.out.println(i);
+        }
     }
 }

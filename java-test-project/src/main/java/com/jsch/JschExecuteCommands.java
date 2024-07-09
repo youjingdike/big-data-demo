@@ -1,7 +1,6 @@
 package com.jsch;
 
 import com.jcraft.jsch.*;
-import org.apache.commons.compress.utils.Lists;
 
 import java.io.*;
 import java.util.Properties;
@@ -9,111 +8,227 @@ import java.util.Properties;
 public class JschExecuteCommands {
 
     private static String username = "root";
-    private static String host = "XXXX";
+    private static String host = "10.69.75.206";
     private static int port = 22; // SSH default port
-    private static String password = "XXXX";
+    private static String password = "Bigdata@KCDE922";
 
     public static void main(String[] args) throws Exception {
         tst();
 //        tst2();
     }
 
-    private static void tst() throws JSchException, IOException, InterruptedException {
+    private static void tst()  {
+        try {
+            JSch jsch = new JSch();
 
-        JSch jsch = new JSch();
+            // 设置SSH连接的用户名、主机和端口
+            // 创建SSH会话
+            Session session = jsch.getSession(username, host, port);
+            // 设置SSH会话的密码
+            session.setPassword(password);
+            System.out.println(host+":"+username+":"+password);
+            // 禁用SSH主机密钥检查
+            session.setConfig("StrictHostKeyChecking", "no");
+            // 建立SSH连接
+            session.connect();
 
-        // 设置SSH连接的用户名、主机和端口
-        // 创建SSH会话
-        Session session = jsch.getSession(username, host, port);
-        // 设置SSH会话的密码
-        session.setPassword(password);
-        System.out.println(host+":"+username+":"+password);
-        // 禁用SSH主机密钥检查
-        session.setConfig("StrictHostKeyChecking", "no");
-        // 建立SSH连接
-        session.connect();
+            // 打开SSH通道
+            Channel channel = session.openChannel("exec");
+            String name = "auto-tst-pi-"+System.currentTimeMillis();
+            // 设置执行的命令
+            String command = "kubectl exec -it yarnify-yarnify-yarnify-0 -n default-yarnify -- ";
 
-        // 打开SSH通道
-        Channel channel = session.openChannel("exec");
-        String name = "auto-tst-pi-"+System.currentTimeMillis();
-        // 设置执行的命令
-//        String command = "source ~/.bashrc;export JAVA_HOME=/usr/local/java; export HADOOP_CONF_DIR=/opt/hadoop-3.2.0/etc/hadoop; ";
-//        String command = "export JAVA_HOME=/usr/local/java\n";
-//        String command1 = "export HADOOP_CONF_DIR=/opt/hadoop-3.2.0/etc/hadoop\n";
+            command += "spark-submit     --master yarn   --deploy-mode cluster     --queue yarn-queue-spark     --name="+name+"      --class org.apache.spark.examples.SparkPi     --driver-memory 1g     --num-executors 2     --executor-memory 1g     --executor-cores 1     --conf spark.yarn.stagingDir=\"alluxio:///kdl/kcde/spark/staging\"  --conf spark.driver.host=\"10.1.1.40\"    /opt/spark/examples/jars/spark-examples_2.12-3.1.2.jar 100";
 
-        String command = "/opt/spark/bin/spark-submit  --master yarn --deploy-mode client     --queue yarn-queue-spark  --name="+name+"  --class org.apache.spark.examples.SparkTC     --driver-memory 1g     --num-executors 2     --executor-memory 1g     --executor-cores 1 --conf spark.driver.host=\"10.0.64.143\"    --conf spark.yarn.stagingDir=\"alluxio:///kdl/kcde/spark/staging\"  /opt/spark/examples/jars/spark-examples_2.12-3.1.2.jar \n";
-//        String command3 = "echo '@@@@@@@@@@@@tst@@@@@@@@@@@@'\n";
-//        command += "kubectl exec -it yarnify-yarnify-yarnify-0 -n default-yarnify -- echo \"tst\"";
-//        System.out.println(command);
-        // 在SSH通道中执行命令
-        ((ChannelExec) channel).setCommand("/bin/bash");
+            System.out.println(command);
+            // 在SSH通道中执行命令
+            ((ChannelExec) channel).setCommand(command);
 
-        // 获取命令执行的输出流
-//        channel.setInputStream(null);
-//        ((ChannelExec) channel).setErrStream(System.out);
-        //channel.setPty(true);
-        // 读取命令执行的输出
-        InputStream in = channel.getInputStream();
-        OutputStream out = channel.getOutputStream();
-        InputStream errStream = ((ChannelExec) channel).getErrStream();
-        // 连接SSH通道
-        channel.connect();
+            // 获取命令执行的输出流
+    //        channel.setInputStream(null);
+    //        ((ChannelExec) channel).setErrStream(System.out);
+            // 读取命令执行的输出
+            InputStream in = channel.getInputStream();
+            InputStream errStream = ((ChannelExec) channel).getErrStream();
+            // 连接SSH通道
+            channel.connect();
 
-        out.write("sudo su - yarn\n".getBytes());
-        out.write(command.getBytes());
-//        out.write(command1.getBytes());
-//        out.write(command3.getBytes());
-//        out.write(command2.getBytes());
-//        out.write(command3.getBytes());
-        // Flush the output stream to ensure that all data is sent
-        out.flush();
-        //注意：必须关掉否则BufferedReader会一直阻塞
-        out.close();
-
-        System.out.println("命令发送完毕。。。");
-
-        Thread thread = new Thread(() -> {
-            String line1;
-            StringBuilder errStringBuilder = new StringBuilder();
-            BufferedReader errBufferedReader = new BufferedReader(new InputStreamReader(errStream));
-            while (true) {
-                try {
-                    if (!((line1 = errBufferedReader.readLine()) != null)) break;
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
+            /*Thread thread = new Thread(){
+                @Override
+                public void run() {
+                    String line1;
+                    StringBuilder errStringBuilder = new StringBuilder();
+                    BufferedReader errBufferedReader = new BufferedReader(new InputStreamReader(errStream));
+                    while (true) {
+                        try {
+                            if (!((line1 = errBufferedReader.readLine()) != null)) break;
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                        errStringBuilder.append(line1 + "\n");
+                        if (line1.contains("Submitted application application_")) {
+                            String[] arr = line1.split(" ");
+                            log.info(("***task_app_id:" + arr[arr.length - 1]));
+                        }
+                    }
+                    log.info("error:" + errStringBuilder);
                 }
-                errStringBuilder.append(line1 + "\n");
-//                System.out.println(line1 + "\n");
-                if (line1.contains("Submitted application application_")) {
-                    String[] arr = line1.split(" ");
-                    System.out.println(("***task_app_id:" + arr[arr.length - 1]));
+            };
+            thread.start();*/
+
+            Thread thread = new Thread(() -> {
+                String line1;
+                StringBuilder errStringBuilder = new StringBuilder();
+                BufferedReader errBufferedReader = new BufferedReader(new InputStreamReader(errStream));
+                while (true) {
+                    try {
+                        if (!((line1 = errBufferedReader.readLine()) != null)) break;
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                    errStringBuilder.append(line1 + "\n");
+                    System.out.println(line1 + "\n");
+                    if (line1.contains("Submitted application application_")) {
+                        String[] arr = line1.split(" ");
+                        System.out.println(("***task_app_id:" + arr[arr.length - 1]));
+                    }
                 }
+    //            System.out.println("error:" + errStringBuilder);
+            });
+            thread.start();
+
+            StringBuilder stringBuilder = new StringBuilder();
+            String line;
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in));
+            while ((line = bufferedReader.readLine()) != null) {
+                stringBuilder.append(line+"\n");
+                System.out.println(line+"\n");
             }
-            System.out.println("error:" + errStringBuilder);
-        });
-        thread.start();
-
-        StringBuilder stringBuilder = new StringBuilder();
-        String line;
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in));
-        while ((line = bufferedReader.readLine()) != null) {
-            stringBuilder.append(line+"\n");
-            System.out.println(line+"\n");
+            System.out.println("info:"+stringBuilder);
+            thread.join();
+            // 关闭SSH通道和会话
+            channel.disconnect();
+            session.disconnect();
+        } catch (Exception e) {
+            e.printStackTrace();
+            // 在metersphere执行控制台直接打印
+            System.out.println(("失败"));
         }
-        System.out.println("info:"+stringBuilder);
-//        thread.join();
+    }
 
-        //vars.put("pi", stringBuilder.toString());
+    private static void tst3()  {
+        try {
+            JSch jsch = new JSch();
 
-        /*StringBuilder errStringBuilder = new StringBuilder();
-        BufferedReader errBufferedReader = new BufferedReader(new InputStreamReader(errStream));
-        while ((line = errBufferedReader.readLine()) != null) {
-            errStringBuilder.append(line+"\n");
+            // 设置SSH连接的用户名、主机和端口
+            // 创建SSH会话
+            Session session = jsch.getSession(username, host, port);
+            // 设置SSH会话的密码
+            session.setPassword(password);
+            System.out.println(host+":"+username+":"+password);
+            // 禁用SSH主机密钥检查
+            session.setConfig("StrictHostKeyChecking", "no");
+            // 建立SSH连接
+            session.connect();
+
+            // 打开SSH通道
+            Channel channel = session.openChannel("exec");
+            String name = "auto-tst-pi-"+System.currentTimeMillis();
+            // 设置执行的命令
+    //        String command = "source ~/.bashrc;export JAVA_HOME=/usr/local/java; export HADOOP_CONF_DIR=/opt/hadoop-3.2.0/etc/hadoop; ";
+    //        String command = "export JAVA_HOME=/usr/local/java\n";
+    //        String command1 = "export HADOOP_CONF_DIR=/opt/hadoop-3.2.0/etc/hadoop\n";
+
+            String command = "/opt/spark/bin/spark-submit  --master yarn --deploy-mode client     --queue yarn-queue-spark  --name="+name+"  --class org.apache.spark.examples.SparkTC     --driver-memory 1g     --num-executors 2     --executor-memory 1g     --executor-cores 1 --conf spark.driver.host=\"10.0.64.143\"    --conf spark.yarn.stagingDir=\"alluxio:///kdl/kcde/spark/staging\"  /opt/spark/examples/jars/spark-examples_2.12-3.1.2.jar\n";
+    //        command += "kubectl exec -it yarnify-yarnify-yarnify-0 -n default-yarnify -- echo \"tst\"";
+    //        System.out.println(command);
+            // 在SSH通道中执行命令
+            ((ChannelExec) channel).setCommand("/bin/bash");
+
+            // 获取命令执行的输出流
+    //        channel.setInputStream(null);
+    //        ((ChannelExec) channel).setErrStream(System.out);
+            // 读取命令执行的输出
+            InputStream in = channel.getInputStream();
+            OutputStream out = channel.getOutputStream();
+            InputStream errStream = ((ChannelExec) channel).getErrStream();
+            // 连接SSH通道
+            channel.connect();
+
+            out.write("sudo su - yarn\n".getBytes());
+            out.write(command.getBytes());
+    //        out.write(command1.getBytes());
+    //        out.write(command3.getBytes());
+    //        out.write(command2.getBytes());
+    //        out.write(command3.getBytes());
+            // Flush the output stream to ensure that all data is sent
+            out.flush();
+            //注意：必须关掉否则BufferedReader会一直阻塞
+            out.close();
+
+            System.out.println("命令发送完毕。。。");
+
+            /*Thread thread = new Thread(){
+                @Override
+                public void run() {
+                    String line1;
+                    StringBuilder errStringBuilder = new StringBuilder();
+                    BufferedReader errBufferedReader = new BufferedReader(new InputStreamReader(errStream));
+                    while (true) {
+                        try {
+                            if (!((line1 = errBufferedReader.readLine()) != null)) break;
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                        errStringBuilder.append(line1 + "\n");
+                        if (line1.contains("Submitted application application_")) {
+                            String[] arr = line1.split(" ");
+                            log.info(("***task_app_id:" + arr[arr.length - 1]));
+                        }
+                    }
+                    log.info("error:" + errStringBuilder);
+                }
+            };
+            thread.start();*/
+
+            Thread thread = new Thread(() -> {
+                String line1;
+                StringBuilder errStringBuilder = new StringBuilder();
+                BufferedReader errBufferedReader = new BufferedReader(new InputStreamReader(errStream));
+                while (true) {
+                    try {
+                        if (!((line1 = errBufferedReader.readLine()) != null)) break;
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                    errStringBuilder.append(line1 + "\n");
+                    System.out.println(line1 + "\n");
+                    if (line1.contains("Submitted application application_")) {
+                        String[] arr = line1.split(" ");
+                        System.out.println(("***task_app_id:" + arr[arr.length - 1]));
+                    }
+                }
+    //            System.out.println("error:" + errStringBuilder);
+            });
+            thread.start();
+
+            StringBuilder stringBuilder = new StringBuilder();
+            String line;
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in));
+            while ((line = bufferedReader.readLine()) != null) {
+                stringBuilder.append(line+"\n");
+                System.out.println(line+"\n");
+            }
+            System.out.println("info:"+stringBuilder);
+            thread.join();
+            // 关闭SSH通道和会话
+            channel.disconnect();
+            session.disconnect();
+        } catch (Exception e) {
+            e.printStackTrace();
+            // 在metersphere执行控制台直接打印
+            System.out.println(("失败"));
         }
-        System.out.println("error:"+ errStringBuilder);*/
-        // 关闭SSH通道和会话
-        channel.disconnect();
-        session.disconnect();
     }
 
     private static void tst2() throws JSchException, IOException, InterruptedException {
