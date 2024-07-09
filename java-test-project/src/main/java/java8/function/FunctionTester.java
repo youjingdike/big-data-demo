@@ -16,7 +16,9 @@ public class FunctionTester {
         System.out.println();
         System.out.println(function1.andThen(function2).apply("100"));//先执行function1 然后将其结果作为参数传递到function2中  
         System.out.println();
-        System.out.println(function2.compose(function1).apply("102"));//先执行function1 再执行function2  
+        System.out.println(function1.compose(function2).apply("102"));//先执行function2 再执行function1
+        System.out.println();
+        System.out.println(function2.compose(function1).apply("102"));//先执行function1 再执行function2
         System.out.println();
         System.out.println(Function.identity());  
     }  
