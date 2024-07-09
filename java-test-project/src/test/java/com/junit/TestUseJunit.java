@@ -899,9 +899,9 @@ public class TestUseJunit {
         DataInputStream dis = null;
         try {
             dos = new DataOutputStream(new BufferedOutputStream(
-                    (new FileOutputStream("D:\\aa.txt"))));
+                    (new FileOutputStream("./aa.txt"))));
             dis = new DataInputStream(new BufferedInputStream(
-                    new FileInputStream("D:\\aa.txt")));
+                    new FileInputStream("./aa.txt")));
                     
             dos.writeDouble(Math.random());
             dos.writeBoolean(true);
