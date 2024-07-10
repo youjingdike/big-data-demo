@@ -43,8 +43,8 @@ public class TstFuture {
 
         //也可以直接new一个
         CompletableFuture<String> completableFuture = new CompletableFuture<>();
-        completableFuture.complete("tst");
 //        completableFuture.completeExceptionally(new RuntimeException("error"));
+        completableFuture.complete("tst");
         completableFuture.whenCompleteAsync(new BiConsumer<String, Throwable>() {
             @Override
             public void accept(String s, Throwable throwable) {
@@ -193,8 +193,8 @@ public class TstFuture {
     }
 
     /*
-     * 4.线程并行执行，谁先执行完则谁触发下一任务（二者选其最快）:
-     * 4.1 上一个任务或者other任务完成, 运行action，不依赖前一任务的结果，无返回值
+     * 4.线程并行执行，谁先执行完则谁触发下一个任务（二者选其最快）:
+     * 4.1 上一个任务或者other任务完成, 运行action，不依赖前一个任务的结果，无返回值
      */
     @Test
     public void tstEither1() {
@@ -218,8 +218,8 @@ public class TstFuture {
     }
 
     /*
-     * 4.线程并行执行，谁先执行完则谁触发下一任务（二者选其最快）:
-     * 4.2 上一个任务或者other任务完成, 运行action，依赖前一任务的结果，无返回值
+     * 4.线程并行执行，谁先执行完则谁触发下一个任务（二者选其最快）:
+     * 4.2 上一个任务或者other任务完成, 运行action，依赖前一个任务的结果，无返回值
      */
     @Test
     public void tstEither2() {
@@ -239,12 +239,12 @@ public class TstFuture {
     }
 
     /*
-     * 4.线程并行执行，谁先执行完则谁触发下一任务（二者选其最快）:
+     * 4.线程并行执行，谁先执行完则谁触发下一个任务（二者选其最快）:
      * 4.3 上一个任务或者other任务完成, 运行fn，依赖最先完成任务的结果，有返回值
      */
     @Test
     public void tstEither3() throws ExecutionException, InterruptedException {
-        //第一个异步任务，休眠1秒，保证最晚执行晚
+        //第一个异步任务，休眠1秒，保证最晚执行完
         CompletableFuture<String> first = CompletableFuture.supplyAsync(()->{
             try{
                 Thread.sleep(1000);
