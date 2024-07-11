@@ -363,7 +363,7 @@ public class TstFuture {
 
 
         System.out.println("任务取消前:" + future.isCancelled());
-        // 如果任务未完成,则返回异常,需要对使用exceptionally，handle 对结果处理
+        // 如果任务未完成,则返回异常,需要使用exceptionally，handle 对结果处理
         future.cancel(true);
         System.out.println("任务取消后:" + future.isCancelled());
         future = future.exceptionally(e -> {
