@@ -24,6 +24,12 @@ public class TestProxy {
         ChildA childAProxy = (ChildA) Proxy.newProxyInstance(TestProxy.class.getClassLoader(), new Class[]{Child.class, Parent.class, ChildA.class}, invokedProxy);
         childAProxy.haha();
         System.out.println(Child.class.isInstance(childAProxy));
+
+        System.out.println("@@@@@@@@@@@@@@");
+        for (Class<?> anInterface : Impl.class.getInterfaces()) {
+            System.out.println("@:"+anInterface);
+            System.out.println(Parent.class.isAssignableFrom(anInterface));
+        }
     }
 
 }
@@ -75,4 +81,25 @@ interface ChildA extends Parent {
     void start();
     void stop();
     void haha();
+}
+
+interface A {}
+interface B {}
+
+class Impl implements ChildA,Child,A,B {
+
+    @Override
+    public void start() {
+
+    }
+
+    @Override
+    public void stop() {
+
+    }
+
+    @Override
+    public void haha() {
+
+    }
 }
