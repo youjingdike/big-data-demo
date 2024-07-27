@@ -22,7 +22,7 @@ public class HttpTst1 {
         int num = 50;
         while (true) {
             if (i == 0) {
-                Thread.sleep(1000*65);
+//                Thread.sleep(1000*65);
             }
 //            int i = new Random().nextInt(number.length);
             System.out.println(i);
