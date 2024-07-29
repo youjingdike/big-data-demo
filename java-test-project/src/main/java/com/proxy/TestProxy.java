@@ -11,6 +11,8 @@ public class TestProxy {
         // TODO 在创建代理类时，传入Proxy.newProxyInstance的第二个参数Class<?>[] interfaces时，
         //  传入的接口会影响isInstance的判断，如果传入的接口中包含Child1.class，
         //  那么下面的Child1.class.isInstance(childProxy)返回true(即使childProxy是Child的引用)，否则返回false
+        //  为什么会这样呢？
+        //  因为创建的代理对象会实现所有传入的interfaces接口，也就是说通过Proxy.newProxyInstance创建的代理对象，可以类型转换成interfaces中的任何一种。
         Child childProxy = (Child) Proxy.newProxyInstance(TestProxy.class.getClassLoader(), new Class[]{Child.class, Parent.class, ChildA.class}, invokedProxy);
         childProxy.start();
         childProxy.stop();
