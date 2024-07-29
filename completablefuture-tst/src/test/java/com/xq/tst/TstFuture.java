@@ -182,7 +182,11 @@ public class TstFuture {
         CompletableFuture<String> future = CompletableFuture
                 //第二个异步任务
                 .supplyAsync(() -> "hello siting", executor)
-                // (w, s) -> System.out.println(s) 是第三个任务
+                // (s, w) -> {
+                //     System.out.println(s);
+                //     return "OK";
+                //    }
+                // 是第三个任务
                 .thenCombineAsync(first, (s, w) -> {
                     System.out.println(s);
                     return "OK";
