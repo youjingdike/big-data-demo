@@ -17,7 +17,7 @@ public class HttpTst {
     public static void main(String[] args) throws Exception {
         String[] number = {"18406555989","19834317742"};
         int i = 0;
-        int num = 50;
+        int num = 12;
         while (true) {
 //            if (i == 0) {
 //                Thread.sleep(1000*65*20);
