@@ -16,17 +16,21 @@ public class HttpTst {
 //    application/json;charset=UTF-8
     public static void main(String[] args) throws Exception {
         String[] number = {"18406555989","19834317742"};
+//        String[] number = {"13754895597"};
         int i = 0;
         int num = 13;
         while (true) {
-//            if (i == 0) {
-//                Thread.sleep(1000*65*20);
-//            }
+            if (i == 0) {
+//                Thread.sleep(1000*65*5);
+            }
 //            int i = new Random().nextInt(number.length);
             System.out.println(i);
-            sendHttp(number[0]);
-            Thread.sleep(1000*60*5);
-            sendHttp(number[1]);
+            for (String s : number) {
+                sendHttp(s);
+//            Thread.sleep(1000*60*5);
+//            sendHttp(number[1]);
+            }
+
             i++;
             if (i == num) {
                 break;
