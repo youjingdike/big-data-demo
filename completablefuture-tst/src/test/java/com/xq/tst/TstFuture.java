@@ -25,12 +25,12 @@ public class TstFuture {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         //runAsync的使用
         CompletableFuture<Void> rFuture = CompletableFuture
-                .runAsync(() -> System.out.println("hello siting"), executor);
+                .runAsync(() -> System.out.println("。。。hello siting"), executor);
         //supplyAsync的使用
         CompletableFuture<String> future = CompletableFuture
                 .supplyAsync(() -> {
-                    System.out.println("hello ");
-                    return "siting";
+                    System.out.print("...hello ");
+                    return "siting1";
                 }, executor);
 
 
@@ -40,6 +40,7 @@ public class TstFuture {
         String name = future.join();
         System.out.println("@@@@@:"+name);
         executor.shutdown(); // 线程池需要关闭
+        System.out.println("#######################");
 
         //也可以直接new一个
         CompletableFuture<String> completableFuture = new CompletableFuture<>();
@@ -51,12 +52,13 @@ public class TstFuture {
                 if (throwable != null) {
                     System.out.println(throwable.getMessage());
                 } else {
-                    System.out.println(s);
+                    System.out.println("。whenCompleteAsync:"+s);
                 }
             }
         });
-//        System.out.println(completableFuture.get());
+        System.out.println(".whenCompleteAsync:"+completableFuture.get());
 //        completableFuture.join();
+        System.out.println("#######################");
 
         //有时候是需要构建一个常量的CompletableFuture
         CompletableFuture<String> stringCompletableFuture = CompletableFuture.completedFuture("123");
@@ -271,8 +273,10 @@ public class TstFuture {
     }
 
     /*
-     * 5.exceptionally-处理异常:
-     * 5.1 如果之前的处理环节有异常问题，则会触发exceptionally的调用相当于 try...catch
+     * 5.处理任务结果或者异常:
+     * 5.1 exceptionally: 如果之前的处理环节有异常问题，则会触发exceptionally的调用相当于 try...catch{}
+     *   *  即异常发生时运行fn，返回值为fn的返回，如果不发生异常，不会触发调用，正常返回
+     *   *  传入的fn，是用来在异常发生时计算返回值的，如果正常完成，返回的还是前面正常计算的值
      */
     @Test
     public void tstExcp1() {
@@ -288,12 +292,20 @@ public class TstFuture {
                     e.printStackTrace(); // 异常捕捉处理，前面两个处理环节的异常都能捕获
                     return 0;
                 });
+        System.out.println("result:"+first.join());
+        /*try {
+            System.out.println("result:"+first.get());
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        }*/
     }
 
     /*
-     * 5.exceptionally-处理异常:
-     *  5.2 handle-任务完成或者异常时运行fn，返回值为fn的返回
-     *   :相比exceptionally而言，即可处理上一环节的异常也可以处理其正常返回值
+     * 5.处理任务结果或者异常:
+     *  5.2 handle: 任务完成或者异常时都会运行fn，返回值为fn的返回
+     *   * 相比exceptionally而言，即可处理上一环节的异常也可以处理其正常返回值
      */
     @Test
     public void tstExcp2() {
@@ -304,16 +316,22 @@ public class TstFuture {
                 })
                 .thenApply(data -> 1)
                 .handleAsync((data,e) -> {
-                    e.printStackTrace(); // 异常捕捉处理
+                    if (e != null) {
+                        e.printStackTrace(); // 异常捕捉处理
+                    }
+                    if (data==null) {
+                        return 0;
+                    }
                     return data;
                 });
-        System.out.println(first.join());
+        System.out.println("result:"+first.join());
     }
 
     /*
-     * 5.exceptionally-处理异常:
-     *  5.3 whenComplete-任务完成或者异常时运行action，有返回值
-     *   * whenComplete与handle的区别在于，它不参与返回结果的处理，把它当成监听器即可
+     * 5.处理任务结果或者异常:
+     *  5.3 whenComplete: 任务完成或者异常时都会运行action，有返回值
+     *   * 注意：这里返回值是先前任务计算的返回值,该函数只是传入了一个无返回值的BiConsumer,只接收返回值和异常
+     *   * whenComplete与handle的区别在于，它不参与返回结果的处理，把它当成监听器即可，意思就是外层仍然能接收到返回值和异常(这也是下面提到多线程的原因)
      *   * 即使异常被处理，在CompletableFuture外层，异常也会再次复现
      *   * 使用whenCompleteAsync时，返回结果则需要考虑多线程操作问题，毕竟会出现两个线程同时操作一个结果
      */
@@ -326,10 +344,22 @@ public class TstFuture {
                 })
                 .thenApply(data -> new AtomicBoolean(false))
                 .whenCompleteAsync((data,e) -> {
-                    //异常捕捉处理, 但是异常还是会在外层复现
+                    //异常捕捉处理, 但是异常还是会在外层复现，这里就是一个监听的作用，注意多线程操作返回值的问题，因为这里和外层都可以操作返回值
                     System.out.println(e.getMessage());
+                    System.out.println(data);
                 });
         first.join();
+
+        /*System.out.println("######");
+        CompletableFuture<AtomicBoolean> first1 = CompletableFuture
+                .supplyAsync(() -> "hello world")
+                .thenApply(data -> new AtomicBoolean(false))
+                .whenComplete((data,e) -> {
+                    System.out.println(data);
+                    data.set(true);
+                    System.out.println(data);
+                });
+        System.out.println(first1.join());*/
     }
 
     /*
