@@ -364,10 +364,8 @@ public class TstFuture {
 
     /*
      * 6.多个任务的简单组合:
-     *  whenComplete-任务完成或者异常时运行action，有返回值
-     *   * whenComplete与handle的区别在于，它不参与返回结果的处理，把它当成监听器即可
-     *   * 即使异常被处理，在CompletableFuture外层，异常也会再次复现
-     *   * 使用whenCompleteAsync时，返回结果则需要考虑多线程操作问题，毕竟会出现两个线程同时操作一个结果
+     *  allOf-所有任务需要执行完毕，才会触发next Task的执行，无返回值
+     *  anyOf-任意一任务执行完毕，都会触发next Task的执行,返回先执行完任务的返回值
      */
     @Test
     public void tstOf() {
@@ -375,12 +373,39 @@ public class TstFuture {
                 .allOf(CompletableFuture.completedFuture("A"),
                         CompletableFuture.completedFuture("B"));
         //全部任务都需要执行完
-        future.join();
+        System.out.println("future:"+future.join());
+
+        CompletableFuture<Void> future4 = CompletableFuture
+                .allOf(CompletableFuture.supplyAsync(()->{
+                            try {
+                                Thread.sleep(2000);
+                            } catch (InterruptedException e) {
+                                throw new RuntimeException(e);
+                            }
+                            return "hello world";
+                        }),
+                        CompletableFuture.completedFuture("B"));
+        //全部任务都需要执行完
+        System.out.println("future4:"+future4.join());
+
         CompletableFuture<Object> future2 = CompletableFuture
                 .anyOf(CompletableFuture.completedFuture("C"),
                         CompletableFuture.completedFuture("D"));
         //其中一个任务行完即可
-        future2.join();
+        System.out.println("future2:"+future2.join());
+
+        CompletableFuture<Object> future3 = CompletableFuture
+                .anyOf(CompletableFuture.supplyAsync(()->{
+                            try {
+                                Thread.sleep(1000);
+                            } catch (InterruptedException e) {
+                                throw new RuntimeException(e);
+                            }
+                            return "E";
+                        }),
+                        CompletableFuture.completedFuture("F"));
+        //其中一个任务行完即可
+        System.out.println("future3:"+future3.join());
     }
 
     /*
@@ -397,18 +422,20 @@ public class TstFuture {
 
 
         System.out.println("任务取消前:" + future.isCancelled());
-        // 如果任务未完成,则返回异常,需要使用exceptionally，handle 对结果处理
+        // 如果任务未完成,则返回异常,需要对其使用exceptionally/handle 对结果处理
         future.cancel(true);
         System.out.println("任务取消后:" + future.isCancelled());
         future = future.exceptionally(e -> {
             e.printStackTrace();
             return 0;
         });
-        System.out.println(future.join());
+        System.out.println("result:"+future.join());
     }
 
     /*
      * 8.任务的获取和完成与否判断:
+     * complete(T value):任务如果尚未完成，则将get()和相关方法返回的值设置为给定值。
+     *  如果调用导致这个CompletableFuture转换为完成状态，则为true，否则为false
      */
     @Test
     public void tstAssess() {
@@ -420,13 +447,23 @@ public class TstFuture {
                     }
                     return "hello world";
                 })
-                .thenApply(data -> {
-                    return 1;
-                });
+                .thenApply(data -> 1);
 
         System.out.println("任务完成前:" + future.isDone());
-        //如果不调用complete()就打印的是1，是thenApply()的返回值，调用了complete(),就重新给future的结果进行了赋值。
+        //如果不调用complete()就打印的是1，是thenApply()的返回值，调用了complete(),如果任务未完成,就重新给future的结果进行了赋值。
         future.complete(10);
+        System.out.println("任务完成:" + future.isDone());
         System.out.println("任务完成后:" + future.join());
+
+        System.out.println("***************");
+
+        CompletableFuture<Integer> future1 = CompletableFuture
+                .supplyAsync(() -> "hello world")
+                .thenApply(data -> 1);
+        System.out.println("任务完成前:" + future1.isDone());
+        //如果不调用complete()就打印的是1，是thenApply()的返回值，调用了complete(),如果任务未完成,就重新给future的结果进行了赋值。
+        future1.complete(10);
+        System.out.println("任务完成:" + future1.isDone());
+        System.out.println("任务完成后:" + future1.join());
     }
 }
